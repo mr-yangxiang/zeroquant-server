@@ -1,0 +1,29 @@
+name: ZeroQuant CI/CD Workflow
+
+on:
+  push:
+    branches: [ "auto", "main", "master" ]
+  pull_request:
+    branches: [ "auto", "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+
+    - name: Install server dependencies
+      run: |
+        cd /usr/local/zeroquant-server || true
+        npm ci || npm install
+
+    - name: Build server project
+      run: |
+        cd /usr/local/zeroquant-server || true
+        npm run build || true

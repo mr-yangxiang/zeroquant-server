@@ -143,9 +143,9 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
-    // B. 开盘前全天预判线 (Base Version 1 与所有重重预测 Version 线)
+    // B. 开盘前全天预判线 (Base Version 1 与所有重预测 Version 线，包含看涨/看跌方向与目标幅度)
     const { rows: predictions } = await pool.query(
-      `SELECT version, is_base as "isBase", time_points as "timePoints", created_at as "createdAt"
+      `SELECT version, is_base as "isBase", time_points as "timePoints", direction, target_pct as "targetPct", created_at as "createdAt"
        FROM stock_day_predictions
        WHERE stock_code = $1
          AND predict_date = $2::date
@@ -163,6 +163,35 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
+    // D. Level-2 逐笔大单 (>=1000手) 与冰山压单/托盘买单
+    const { rows: l2Orders } = await pool.query(
+      `SELECT time_str as "timeStr", type, price, volume_lots as "volumeLots", note
+       FROM stock_l2_orders
+       WHERE stock_code = $1
+         AND trade_date = $2::date
+       ORDER BY time_str ASC`,
+      [code, targetDate]
+    )
+
+    // E. 30天与100天做T历史回测累积收益率看板
+    const { rows: backtestStats } = await pool.query(
+      `SELECT period, win_rate as "winRate", cum_roi as "cumRoi", daily_roi_points as "dailyRoiPoints"
+       FROM stock_backtest_stats
+       WHERE stock_code = $1`,
+      [code]
+    )
+
+    // F. 每日龙虎榜/大宗交易与机构持仓复盘
+    const { rows: dailyReviews } = await pool.query(
+      `SELECT block_trades as "blockTrades", holding_ratio as "holdingRatio",
+              institution_style as "institutionStyle", tomorrow_advice as "tomorrowAdvice"
+       FROM stock_daily_reviews
+       WHERE stock_code = $1
+       ORDER BY review_date DESC
+       LIMIT 1`,
+      [code]
+    )
+
     return res.json({
       code: 0,
       message: 'ok',
@@ -171,7 +200,10 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
         date: targetDate,
         realHistories,
         predictions,
-        rollingPredictions
+        rollingPredictions,
+        l2Orders,
+        backtestStats,
+        dailyReview: dailyReviews[0] || null
       }
     })
   } catch (err: any) {
