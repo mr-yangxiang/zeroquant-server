@@ -68,7 +68,6 @@ app.get('/api/v1/stocks', async (_req, res) => {
   try {
     const { rows: stocks } = await pool.query('SELECT * FROM stocks ORDER BY code ASC')
     
-    // 附加最新的做 T 分析
     for (const stock of stocks) {
       const { rows: analyses } = await pool.query(
         'SELECT * FROM stock_t_analyses WHERE stock_code = $1 ORDER BY updated_at DESC LIMIT 1',
@@ -100,41 +99,74 @@ app.get('/api/v1/stocks', async (_req, res) => {
   }
 })
 
-// 4. 获取单支股票真实 vs 预测双线历史数据 (ECharts 专供)
-app.get('/api/v1/stocks/:code/history', async (req, res) => {
+// 4. 高级维度分时轨迹 API：开盘前预判线、版本对比线、5分钟动态修正线、真实轨迹线及历史日期区间查询
+app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
   try {
     const { code } = req.params
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100
+    const { startDate, endDate, date } = req.query
 
-    const { rows: histories } = await pool.query(
-      `SELECT id, stock_code as "stockCode", timestamp, real_price as "realPrice",
-              predicted_price as "predictedPrice", deviation_pct as "deviationPct"
+    const targetDate = (date as string) || (startDate as string) || '2026-08-10' // 默认下一个开盘日
+
+    // A. 真实实盘轨迹线 (只取选定日期的真实分钟交易数据)
+    const { rows: realHistories } = await pool.query(
+      `SELECT timestamp, real_price as "realPrice"
        FROM stock_price_histories
        WHERE stock_code = $1
-       ORDER BY timestamp ASC
-       LIMIT $2`,
-      [code, limit]
+         AND timestamp::date = $2::date
+       ORDER BY timestamp ASC`,
+      [code, targetDate]
     )
 
-    return res.json({ code: 0, message: 'ok', data: histories })
+    // B. 开盘前全天预判线 (Base Version 1 与所有重重预测 Version 线)
+    const { rows: predictions } = await pool.query(
+      `SELECT version, is_base as "isBase", time_points as "timePoints", created_at as "createdAt"
+       FROM stock_day_predictions
+       WHERE stock_code = $1
+         AND predict_date = $2::date
+       ORDER BY version ASC`,
+      [code, targetDate]
+    )
+
+    // C. 盘中提前 5 分钟动态修正线
+    const { rows: rollingPredictions } = await pool.query(
+      `SELECT target_time as "targetTime", predicted_price as "predictedPrice"
+       FROM stock_rolling_predictions
+       WHERE stock_code = $1
+         AND predict_date = $2::date
+       ORDER BY id ASC`,
+      [code, targetDate]
+    )
+
+    return res.json({
+      code: 0,
+      message: 'ok',
+      data: {
+        stockCode: code,
+        date: targetDate,
+        realHistories,
+        predictions,
+        rollingPredictions
+      }
+    })
   } catch (err: any) {
-    console.error('Fetch history error:', err)
-    return res.status(500).json({ code: 500, message: '历史点位获取失败', data: null })
+    console.error('Fetch advanced history error:', err)
+    return res.status(500).json({ code: 500, message: '高级轨迹获取失败', data: null })
   }
 })
 
-// 5. 1分钟轮询脚本实时写入 (把真实价与预测价写入数据库)
+// 5. 1分钟轮询脚本实时写入 (包含实盘价、提前5分钟动态预测线、版本重预测判断)
 app.post('/api/v1/stocks/sync-point', async (req, res) => {
   try {
-    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice } = req.body
+    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate } = req.body
 
-    if (!stockCode || realPrice === undefined || predictedPrice === undefined) {
+    if (!stockCode || realPrice === undefined) {
       return res.status(400).json({ code: 400, message: '参数缺失', data: null })
     }
 
-    const deviationPct = Number(((Math.abs(realPrice - predictedPrice) / realPrice) * 100).toFixed(2))
+    const tDate = tradeDate || new Date().toISOString().split('T')[0]
+    const deviationPct = predictedPrice ? Number(((Math.abs(realPrice - predictedPrice) / realPrice) * 100).toFixed(2)) : 0
 
-    // 更新 Stocks 表最新价
+    // 1. 更新 Stocks 表最新价
     await pool.query(
       `UPDATE stocks
        SET current_price = $1, pct = COALESCE($2, pct), high_price = GREATEST(high_price, $3), low_price = LEAST(low_price, $4), updated_at = NOW()
@@ -142,18 +174,57 @@ app.post('/api/v1/stocks/sync-point', async (req, res) => {
       [currentPrice || realPrice, pct, highPrice || realPrice, lowPrice || realPrice, stockCode]
     )
 
-    // 插入 StockPriceHistory
+    // 2. 插入真实轨迹点 (仅盘中记录)
     const { rows } = await pool.query(
-      `INSERT INTO stock_price_histories (stock_code, timestamp, real_price, predicted_price, deviation_pct)
-       VALUES ($1, NOW(), $2, $3, $4)
+      `INSERT INTO stock_price_histories (stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date)
+       VALUES ($1, NOW(), $2, $3, $4, $5::date)
        RETURNING id, stock_code as "stockCode", timestamp, real_price as "realPrice", predicted_price as "predictedPrice", deviation_pct as "deviationPct"`,
-      [stockCode, realPrice, predictedPrice, deviationPct]
+      [stockCode, realPrice, predictedPrice || realPrice, deviationPct, tDate]
     )
+
+    // 3. 记录提前 5 分钟动态修正线
+    if (targetTime && predictedPrice !== undefined) {
+      await pool.query(
+        `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
+         VALUES ($1, $2::date, $3, $4)`,
+        [stockCode, tDate, targetTime, predictedPrice]
+      )
+    }
 
     return res.json({ code: 0, message: '数据点同步成功', data: rows[0] })
   } catch (err: any) {
     console.error('Sync point error:', err)
     return res.status(500).json({ code: 500, message: '同步失败', data: null })
+  }
+})
+
+// 6. 重新模拟/生成版本对比预测线 (当偏差过大时)
+app.post('/api/v1/stocks/re-predict', async (req, res) => {
+  try {
+    const { stockCode, date, newTimePoints } = req.body
+    if (!stockCode || !newTimePoints) {
+      return res.status(400).json({ code: 400, message: '参数缺失', data: null })
+    }
+
+    const tDate = date || '2026-08-10'
+
+    // 获取当前最大 version
+    const { rows: verRows } = await pool.query(
+      `SELECT COALESCE(MAX(version), 0) as max_ver FROM stock_day_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
+      [stockCode, tDate]
+    )
+    const nextVer = verRows[0].max_ver + 1
+
+    await pool.query(
+      `INSERT INTO stock_day_predictions (stock_code, predict_date, version, is_base, time_points)
+       VALUES ($1, $2::date, $3, FALSE, $4)`,
+      [stockCode, tDate, nextVer, JSON.stringify(newTimePoints)]
+    )
+
+    return res.json({ code: 0, message: `成功重新模拟生成第 ${nextVer} 版预测对比折线`, data: { version: nextVer } })
+  } catch (err: any) {
+    console.error('Re-predict error:', err)
+    return res.status(500).json({ code: 500, message: '重新模拟失败', data: null })
   }
 })
 
