@@ -54,8 +54,8 @@ async function seed() {
     );
   `)
 
-  // 2. 初始化管理员 (15079393100 / admin@15079393100)
-  const hashedPassword = await bcrypt.hash('admin@15079393100', 10)
+  // 2. 初始化管理员 (15079393100 / admin@3100)
+  const hashedPassword = await bcrypt.hash('admin@3100', 10)
   await pool.query(
     `INSERT INTO users (username, phone, password)
      VALUES ($1, $2, $3)
