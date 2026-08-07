@@ -99,7 +99,30 @@ app.get('/api/v1/stocks', async (_req, res) => {
   }
 })
 
-// 4. 高级维度分时轨迹 API：开盘前预判线、版本对比线、5分钟动态修正线、真实轨迹线及历史日期区间查询
+// 4. 获取单支股票真实 vs 预测双线历史数据 (向后兼容 API)
+app.get('/api/v1/stocks/:code/history', async (req, res) => {
+  try {
+    const { code } = req.params
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100
+
+    const { rows: histories } = await pool.query(
+      `SELECT id, stock_code as "stockCode", timestamp, real_price as "realPrice",
+              predicted_price as "predictedPrice", deviation_pct as "deviationPct"
+       FROM stock_price_histories
+       WHERE stock_code = $1
+       ORDER BY timestamp ASC
+       LIMIT $2`,
+      [code, limit]
+    )
+
+    return res.json({ code: 0, message: 'ok', data: histories })
+  } catch (err: any) {
+    console.error('Fetch history error:', err)
+    return res.status(500).json({ code: 500, message: '历史点位获取失败', data: null })
+  }
+})
+
+// 5. 高级维度分时轨迹 API：开盘前预判线、版本对比线、5分钟动态修正线、真实轨迹线及历史日期区间查询
 app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
   try {
     const { code } = req.params
