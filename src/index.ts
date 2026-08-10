@@ -3,7 +3,13 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
 import { pool } from './db.js'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 dotenv.config()
 
@@ -133,12 +139,12 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
 
     const targetDate = (date as string) || (startDate as string) || '2026-08-10' // 默认下一个开盘日
 
-    // A. 真实实盘轨迹线 (只取选定日期的真实分钟交易数据)
+    // A. 真实实盘轨迹线 (只取选定日期的真实分钟交易数据，结合北京时间 timezone 对齐)
     const { rows: realHistories } = await pool.query(
-      `SELECT timestamp, real_price as "realPrice"
+      `SELECT TO_CHAR(timestamp AT TIME ZONE 'Asia/Shanghai', 'YYYY-MM-DD"T"HH24:MI:SS+08:00') as "timestamp", real_price as "realPrice"
        FROM stock_price_histories
        WHERE stock_code = $1
-         AND timestamp::date = $2::date
+         AND (timestamp AT TIME ZONE 'Asia/Shanghai')::date = $2::date
        ORDER BY timestamp ASC`,
       [code, targetDate]
     )
@@ -181,10 +187,12 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code]
     )
 
-    // F. 每日龙虎榜/大宗交易与机构持仓复盘
+    // F. 每日龙虎榜/大宗交易与机构持仓复盘 (包含偏差原因剖析、总结道理与后续算法改进)
     const { rows: dailyReviews } = await pool.query(
       `SELECT block_trades as "blockTrades", holding_ratio as "holdingRatio",
-              institution_style as "institutionStyle", tomorrow_advice as "tomorrowAdvice"
+              institution_style as "institutionStyle", tomorrow_advice as "tomorrowAdvice",
+              deviation_reason as "deviationReason", key_lesson as "keyLesson",
+              future_action as "futureAction"
        FROM stock_daily_reviews
        WHERE stock_code = $1
        ORDER BY review_date DESC
@@ -215,13 +223,14 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
 // 5. 1分钟轮询脚本实时写入 (包含实盘价、提前5分钟动态预测线、版本重预测判断)
 app.post('/api/v1/stocks/sync-point', async (req, res) => {
   try {
-    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate } = req.body
+    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr } = req.body
 
     if (!stockCode || realPrice === undefined) {
       return res.status(400).json({ code: 400, message: '参数缺失', data: null })
     }
 
-    const tDate = tradeDate || new Date().toISOString().split('T')[0]
+    const tDate = tradeDate || dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD')
+    const tStamp = timestampStr ? dayjs(timestampStr).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss+08:00') : dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss+08:00')
     const deviationPct = predictedPrice ? Number(((Math.abs(realPrice - predictedPrice) / realPrice) * 100).toFixed(2)) : 0
 
     // 1. 更新 Stocks 表最新价
@@ -232,12 +241,12 @@ app.post('/api/v1/stocks/sync-point', async (req, res) => {
       [currentPrice || realPrice, pct, highPrice || realPrice, lowPrice || realPrice, stockCode]
     )
 
-    // 2. 插入真实轨迹点 (仅盘中记录)
+    // 2. 插入真实轨迹点 (使用 ID 自动生成与北京时间 timestamptz)
     const { rows } = await pool.query(
-      `INSERT INTO stock_price_histories (stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date)
-       VALUES ($1, NOW(), $2, $3, $4, $5::date)
+      `INSERT INTO stock_price_histories (id, stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date)
+       VALUES (gen_random_uuid()::text, $1, $2::timestamptz, $3, $4, $5, $6::date)
        RETURNING id, stock_code as "stockCode", timestamp, real_price as "realPrice", predicted_price as "predictedPrice", deviation_pct as "deviationPct"`,
-      [stockCode, realPrice, predictedPrice || realPrice, deviationPct, tDate]
+      [stockCode, tStamp, realPrice, predictedPrice || realPrice, deviationPct, tDate]
     )
 
     // 3. 记录提前 5 分钟动态修正线
