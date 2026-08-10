@@ -137,7 +137,7 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
     const { code } = req.params
     const { startDate, endDate, date } = req.query
 
-    const targetDate = (date as string) || (startDate as string) || '2026-08-10' // 默认下一个开盘日
+    const targetDate = (date as string) || (startDate as string) || dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD')
 
     // A. 真实实盘轨迹线 (只取选定日期的真实分钟交易数据，结合北京时间 timezone 对齐)
     const { rows: realHistories } = await pool.query(
@@ -148,6 +148,17 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
        ORDER BY timestamp ASC`,
       [code, targetDate]
     )
+
+    // 防漏：若 11:30 存在但 13:00 缺失，自动补充 13:00 确保轨迹线在午盘接缝处平滑闭合
+    const has1300 = realHistories.some((r: any) => r.timestamp && r.timestamp.includes('T13:00:00'))
+    if (!has1300 && realHistories.length > 0) {
+      const point1130 = realHistories.find((r: any) => r.timestamp && r.timestamp.includes('T11:30:00'))
+      if (point1130) {
+        const fill1300Ts = `${targetDate}T13:00:00+08:00`
+        realHistories.push({ timestamp: fill1300Ts, realPrice: point1130.realPrice })
+        realHistories.sort((a: any, b: any) => a.timestamp.localeCompare(b.timestamp))
+      }
+    }
 
     // B. 开盘前全天预判线 (Base Version 1 与所有重预测 Version 线，包含看涨/看跌方向与目标幅度)
     const { rows: predictions } = await pool.query(
@@ -200,6 +211,21 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code]
     )
 
+    // G. 用户实时持仓与个人实盘操作记录 (针对个人仓位和买卖动作)
+    const { rows: positionRows } = await pool.query(
+      `SELECT holding_shares as "holdingShares", cost_price as "costPrice", t_shares as "tShares"
+       FROM user_positions WHERE stock_code = $1 AND user_id = 1`,
+      [code]
+    )
+
+    const { rows: tradeRows } = await pool.query(
+      `SELECT id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", 
+              TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime", note
+       FROM user_trade_actions WHERE stock_code = $1 AND user_id = 1 AND (trade_time AT TIME ZONE 'Asia/Shanghai')::date = $2::date
+       ORDER BY trade_time DESC`,
+      [code, targetDate]
+    )
+
     return res.json({
       code: 0,
       message: 'ok',
@@ -211,12 +237,78 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
         rollingPredictions,
         l2Orders,
         backtestStats,
-        dailyReview: dailyReviews[0] || null
+        dailyReview: dailyReviews[0] || null,
+        position: positionRows[0] || { holdingShares: 0, costPrice: 0.0, tShares: 0 },
+        userTrades: tradeRows
       }
     })
   } catch (err: any) {
     console.error('Fetch advanced history error:', err)
     return res.status(500).json({ code: 500, message: '高级轨迹获取失败', data: null })
+  }
+})
+
+// 7. 用户个人仓位设置 API
+app.post('/api/v1/user/position', async (req, res) => {
+  try {
+    const { stockCode, holdingShares, costPrice } = req.body
+    if (!stockCode) return res.status(400).json({ code: 400, message: '股票代码缺失' })
+
+    await pool.query(
+      `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
+       VALUES (1, $1, $2, $3)
+       ON CONFLICT (user_id, stock_code) DO UPDATE SET
+         holding_shares = EXCLUDED.holding_shares,
+         cost_price = EXCLUDED.cost_price,
+         updated_at = NOW()`,
+      [stockCode, parseInt(holdingShares) || 0, parseFloat(costPrice) || 0.0]
+    )
+    return res.json({ code: 0, message: '个人持仓保存成功' })
+  } catch (err: any) {
+    console.error('User position error:', err)
+    return res.status(500).json({ code: 500, message: '持仓保存失败' })
+  }
+})
+
+// 8. 用户实盘买卖操作录入与战术对策指导 API
+app.post('/api/v1/user/trade-action', async (req, res) => {
+  try {
+    const { stockCode, actionType, tradePrice, tradeShares } = req.body
+    if (!stockCode || !actionType || !tradePrice || !tradeShares) {
+      return res.status(400).json({ code: 400, message: '操作参数不完整' })
+    }
+
+    const { rows } = await pool.query(
+      `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
+       VALUES (1, $1, $2, $3, $4, NOW())
+       RETURNING id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime"`,
+      [stockCode, actionType.toUpperCase(), parseFloat(tradePrice), parseInt(tradeShares)]
+    )
+
+    return res.json({ code: 0, message: '实盘操作录入成功', data: rows[0] })
+  } catch (err: any) {
+    console.error('Trade action error:', err)
+    return res.status(500).json({ code: 500, message: '实盘操作录入失败' })
+  }
+})
+
+// 9. 删除/撤销某笔用户实盘操作 API
+app.delete('/api/v1/user/trade-action/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    if (!id) {
+      return res.status(400).json({ code: 400, message: '参数缺失' })
+    }
+
+    await pool.query(
+      `DELETE FROM user_trade_actions WHERE id = $1 AND user_id = 1`,
+      [parseInt(id)]
+    )
+
+    return res.json({ code: 0, message: '成功撤销该笔实盘操作' })
+  } catch (err: any) {
+    console.error('Delete trade action error:', err)
+    return res.status(500).json({ code: 500, message: '删除失败' })
   }
 })
 
