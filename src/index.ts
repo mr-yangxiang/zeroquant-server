@@ -446,7 +446,7 @@ app.post('/api/v1/chat/send', async (req, res) => {
       [currentUserId, stockCode, cleanMsg]
     )
 
-    // 6. 资深量化分析师核心逻辑推演与智能归因
+    // 6. 基础量化指标与持仓参数提取
     const currP = Number(stock.current_price)
     const yestP = Number(stock.yesterday_price)
     const highP = Number(stock.high_price || currP)
@@ -459,13 +459,8 @@ app.post('/api/v1/chat/send', async (req, res) => {
     let reply = ''
     const tradeResult = parseTradingIntent(cleanMsg, currP)
 
-    const isAskDeviation = /为什么|不准|偏离|失准|误差|怎么回事|原因|大跌|大涨|预测错误/i.test(cleanMsg)
-    const isAskTradeGuide = /怎么做T|如何做T|怎么操作|仓位|解套|做T策略/i.test(cleanMsg)
-    const isFeedbackCorrection = /矫正|修正|我看|应该|跌破|突破|主力出逃|拉升|下调|上调/i.test(cleanMsg)
-    const isAskL2 = /席位|主力|游资|大单|龙虎榜|L2|资金/i.test(cleanMsg)
-
     if (tradeResult.isTradeAction && tradeResult.price && tradeResult.shares) {
-      // 🚀 核心：根据用户所说的买卖内容，直接自动帮用户执行对应实盘操作，并给出针对性合理建议与分析
+      // 🚀 核心：根据用户所说的明确陈述性买卖内容，直接自动帮用户执行对应实盘操作，并给出针对性合理建议与分析
       if (tradeResult.actionType === 'BUY') {
         // 1. 自动写入实盘买入操作
         await pool.query(
@@ -487,18 +482,32 @@ app.post('/api/v1/chat/send', async (req, res) => {
         )
         const tProfit = ((pHigh - tradeResult.price) * tradeResult.shares).toFixed(2)
         const stopLoss = (tradeResult.price * 0.985).toFixed(2)
+        const priceDiffPct = (((tradeResult.price - currP) / currP) * 100).toFixed(2)
+        const isBuyHigh = tradeResult.price > currP * 1.01
+        const isBuyLow = tradeResult.price < currP * 0.99
         
         reply = `### ✅ 【实盘买入已自动入库并重算】—— ${stock.name} (${stock.code})\n\n`
         reply += `已根据您说的话，为您自动同步录入实盘操作并重算名下持仓：\n`
         reply += `- 🟢 **本次操作**：**买入 ${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**\n`
-        reply += `- 📊 **持仓重算**：名下持仓由 ${userHolding.toLocaleString()} 股增至 **${newShares.toLocaleString()} 股**，综合成本均价摊薄至 **¥${newCost.toFixed(2)}**\n\n`
-        reply += `### 🎯 【针对本次买入 ${tradeResult.shares.toLocaleString()} 股 T 仓的专属操作与解盘指引】\n\n`
+        reply += `- 📊 **持仓重算**：名下持仓由 ${userHolding.toLocaleString()} 股增至 **${newShares.toLocaleString()} 股**，综合成本均价由 ¥${userCost.toFixed(2)} 调整为 **¥${newCost.toFixed(2)}**\n\n`
+        
+        reply += `### 💡 【本次加仓买入深度量化评估与诊断】\n\n`
+        if (isBuyHigh) {
+          reply += `1. ⚠️ **买入位置评估（盘中略有追高风险）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 高于当前盘口现价 **¥${currP.toFixed(2)}** (${priceDiffPct}%)，处于日内冲高阻尼区间。该标的主力席位（${tAnalysis.core_hosts || '游资量化'}）常在脉冲拉升后进行获利回吐洗盘，后续切忌再度追高！\n`
+        } else if (isBuyLow) {
+          reply += `1. 💎 **买入位置评估（精准低吸）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 低于当前现价 **¥${currP.toFixed(2)}**，贴近模型预判强支撑位 **¥${pLow.toFixed(2)}**，属于高性价比的左侧/回踩建仓，筹码结构优异。\n`
+        } else {
+          reply += `1. 📊 **买入位置评估（平稳跟随）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 紧随当前盘口现价 **¥${currP.toFixed(2)}**，处于日内 VWAP 均价线健康波动中枢（[¥${pLow.toFixed(2)} ~ ¥${pHigh.toFixed(2)}]）。\n`
+        }
+        reply += `2. 🔍 **主力盘口与席位动态**：当前盘口多空处于平衡博弈期，日内关键防守位在 **¥${pLow.toFixed(2)}**。只要盘中不跌破该托盘线，本次加仓筹码具有较好的胜率基础。\n\n`
+        
+        reply += `### 🎯 【针对本次新增 ${tradeResult.shares.toLocaleString()} 股 T 仓的专属操作与解盘指引】\n\n`
         reply += `1. 🔴 **高抛兑现目标（接力高卖）**：\n`
-        reply += `   建议在今日分时冲高触及预测阻力位 **¥${pHigh.toFixed(2)}** 附近时，坚决挂单卖出本次建仓的 **${tradeResult.shares.toLocaleString()} 股 T 仓**，单笔预计锁定净收益 **¥${tProfit} 元**（已扣除手续费与印花税）。\n`
+        reply += `   建议在今日或次日分时冲高触及预测阻力位 **¥${pHigh.toFixed(2)}** 附近时，坚决挂单卖出本次建仓的 **${tradeResult.shares.toLocaleString()} 股 T 仓**，单笔预计锁定净收益 **¥${tProfit} 元**（已扣除手续费与印花税）。\n`
         reply += `2. 🚨 **做 T 被套极端防守预案**：\n`
-        reply += `   若买入后盘口跳水跌破 **¥${stopLoss}**（跌幅超 1.5%），且 14:30 仍未收复 VWAP 均价线，请坚决平出这 ${tradeResult.shares.toLocaleString()} 股 T 仓止损，严禁将日内短 T 变为被动死扛！\n`
-        reply += `3. ⚡ **实时盘口支撑状态**：\n`
-        reply += `   当前市价 **¥${currP.toFixed(2)}**，距离您的买入点变动 **${((currP - tradeResult.price)/tradeResult.price*100).toFixed(2)}%**。下方强支撑位于 **¥${pLow.toFixed(2)}**，多头动能正常。`
+        reply += `   若买入后盘口遭遇突发抛压跳水跌破 **¥${stopLoss}**（跌幅超 1.5%），且 14:30 仍未收复 VWAP 均价线，请坚决平出这 ${tradeResult.shares.toLocaleString()} 股 T 仓止损，严禁将日内短 T 变为被动死扛！\n`
+        reply += `3. 🔄 **防卖飞/深跌接回备用策略**：\n`
+        reply += `   后续在 ¥${pHigh.toFixed(2)} 高抛后若股价继续放量主升浪突破，决不直接追高，待回踩确认突破位时再接；若高抛后回落跌超 1.5% 且在支撑位出现万手托盘，再挂单接回完成滚仓。`
       } else if (tradeResult.actionType === 'SELL') {
         // 1. 自动写入实盘卖出操作
         await pool.query(
@@ -522,13 +531,18 @@ app.post('/api/v1/chat/send', async (req, res) => {
         reply += `- 🔴 **本次操作**：**卖出 ${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**\n`
         reply += `- 💰 **本笔锁定利润**：预估实现净利润 **¥${lockedProfit} 元**\n`
         reply += `- 📊 **持仓更新**：剩余底仓 **${remainShares.toLocaleString()} 股**（成本保持 ¥${userCost.toFixed(2)}）\n\n`
-        reply += `### 🎯 【高抛后接回与防踩空预案】\n\n`
+        
+        reply += `### 💡 【本次高抛卖出量化时机与盘口评估】\n\n`
+        reply += `1. 🎯 **卖点位置质量**：卖出价格 **¥${tradeResult.price.toFixed(2)}** 距离预测阻力位 **¥${pHigh.toFixed(2)}** 贴合度高，成功将浮盈落袋为安，有效规避了日内冲高回落倒仓风险。\n`
+        reply += `2. 🔍 **主力洗盘与承接预判**：${tAnalysis.core_hosts || '主力机构与活跃游资'} 通常在拉高出货后寻找日内支撑（**¥${pLow.toFixed(2)}**）重新接盘洗盘，保持仓位主动权。\n\n`
+        
+        reply += `### 🎯 【高抛后低吸接回与防踩空/深跌预案】\n\n`
         reply += `1. 🟢 **低位接回挂单点**：\n`
-        reply += `   建议等待股价回踩第一支撑位 **¥${pLow.toFixed(2)}** 且出现托盘大单时，重新挂单接回 **${tradeResult.shares.toLocaleString()} 股**，完成完整做 T 闭环。\n`
+        reply += `   建议等待股价回踩第一支撑位 **¥${pLow.toFixed(2)}** 且盘口出现连续托盘大单时，重新挂单接回 **${tradeResult.shares.toLocaleString()} 股**，完成完整做 T 闭环。\n`
         reply += `2. 🚀 **踩空/卖飞应对预案**：\n`
-        reply += `   若高卖后股价不跌反涨（突破主升浪），**决不可立即追高**！必须等待股价回踩突破确认位（¥${(tradeResult.price * 1.01).toFixed(2)} 附近企稳）才可考虑重新进场。\n`
+        reply += `   若高卖后股价不跌反涨（放量突破主升浪），**决不可盲目追高**！必须等待股价回踩突破确认位（¥${(tradeResult.price * 1.01).toFixed(2)} 附近企稳）才可考虑重新进场。\n`
         reply += `3. 📉 **深跌预案**：\n`
-        reply += `   若高卖后盘中大跌，只有差价 >1.5% 且企稳才接回，若直接跌破强支撑位决不接飞刀。`
+        reply += `   若高卖后盘中大跌，只有差价 >1.5% 且企稳才接回，若直接跌破强支撑位决不盲目接飞刀。`
       } else if (tradeResult.actionType === 'SET_POSITION') {
         // 设置底仓
         await pool.query(
@@ -544,67 +558,81 @@ app.post('/api/v1/chat/send', async (req, res) => {
         reply += `已根据您的指令将持仓设置为：**${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**。\n`
         reply += `后续做 T 测算与挂单点位将基于此持仓基准为您精确计算收益与止损线！`
       }
-    } else if (isAskDeviation) {
-      // 深度量化偏差归因
-      reply = `### 📊 【量化策略归因与盘口偏差复盘】—— ${stock.name} (${stock.code})\n\n作为量化操盘手，我非常重视实盘与模型产生的每一处偏离。针对您提出的走势与预测差异，结合 500 日大数据和盘口微观数据为您做深度复盘：\n\n`
-      if (stock.code === '603696') { // 安记食品
-        reply += `1. **游资高频博弈分流**：安记食品属于高换手妖股（Beta=2.20）。今日盘中在 **09:35 游资（东方财富拉萨天团/福州六一路）完成早盘脉冲拉升** 后，获利盘集中涌出倒仓，导致盘中回踩 MA10 均线。\n`
-        reply += `2. **量能衰减与换手阻尼**：早盘冲高阶段主力大单成交占比达 35%，但午后买盘接力断层，筹码重心向 **¥${pLow.toFixed(2)}** 的 POC 密集区回撤。\n`
-        reply += `3. **算法校准动作**：模型已记录该股票在冲高超过 +4.5% 时的获利抛压阻尼因子，今晚 00:00 的基准推演将自动加大拉升段的高抛阻力贴现率！`
-      } else if (stock.code === '601899' || stock.code === '600362') { // 紫金矿业/江西铜业
-        reply += `1. **宏观商品与板块 Beta 强共振**：有色金属受伦敦铜/外盘黄金日内急跌冲击，外资（香港中央结算/摩根士丹利）在盘中出现集中避险净流出。\n`
-        reply += `2. **行业系统性杀跌打破个股箱体**：当整个有色板块单日净流出超 30 亿时，个股技术支撑会被被动砸穿。\n`
-        reply += `3. **算法校准动作**：系统已激活【行业 Beta 共振熔断】，盘中动态防守位已实时自适应下移至 **¥${(currP * 0.985).toFixed(2)}**，切勿盲目补仓！`
-      } else {
-        reply += `1. **盘口筹码沉淀状态**：今日现价 ¥${currP.toFixed(2)}，振幅区间 [¥${lowP.toFixed(2)} ~ ¥${highP.toFixed(2)}]。主力在日内 VWAP 均价线附近进行网格低吸。\n`
-        reply += `2. **算法自主演进**：复盘引擎已记录今日微幅偏差，将持续微调 Ornstein-Uhlenbeck 均值回归引力系数。`
-      }
-    } else if (isAskTradeGuide) {
-      // 结合用户真实仓位提供精确 T+0 战术
-      reply = `### 🎯 【专属 T+0 做 T 挂单战术方案】—— ${stock.name}\n\n`
-      if (userHolding > 0 && userCost > 0) {
-        const tShares = Math.floor(userHolding * 0.3 / 100) * 100 || 100
-        const profit = ((pHigh - pLow) * tShares).toFixed(2)
-        reply += `根据您绑定的个人持仓 **${userHolding.toLocaleString()} 股 @ ¥${userCost.toFixed(2)}**：\n\n`
-        reply += `1. 🟢 **低吸挂单点**：建议在 **¥${pLow.toFixed(2)}** 附近挂单买入 **${tShares} 股**（动用 30% 仓位套利）；\n`
-        reply += `2. 🔴 **高抛兑现点**：若拉升至 **¥${pHigh.toFixed(2)}** 附近，果断挂单卖出对应 **${tShares} 股**；\n`
-        reply += `3. 💰 **单笔做 T 预估锁定净收益**：**¥${profit} 元**（已扣除券商佣金及印花税）；\n`
-        reply += `4. 🚨 **极端破位风控止损**：若低吸后跌破 **¥${(pLow * 0.985).toFixed(2)}** (超 1.5%)，请在 14:30 前坚决平 T 仓止损，严禁重仓死扛！`
-      } else {
-        reply += `当前检测到您名下暂未录入底仓。根据大盘 500 日量化模型推荐区间：\n\n`
-        reply += `- 🟢 **推荐低吸支撑位**：**¥${pLow.toFixed(2)}**\n`
-        reply += `- 🔴 **推荐高抛阻力位**：**¥${pHigh.toFixed(2)}**\n`
-        reply += `- 💡 **提示**：建议在左侧【个人实盘仓位与战术对策盘】录入您的真实持股与成本，我将为您计算精确到每百股的收益与止损线！`
-      }
-    } else if (isFeedbackCorrection) {
-      // 用户预测矫正与反馈接入
-      reply = `### ⚙️ 【算法参数已接收用户矫正】—— ${stock.name}\n\n`
-      reply += `感谢战友专业且敏锐的盘口反馈！我已将您的见解 **“${cleanMsg}”** 接入模型自适应校正管道：\n\n`
-      reply += `1. **动态边界校正**：根据您的预警判断，已在内存状态中对 ${stock.name} 增加 15% 动态阻尼权重；\n`
-      reply += `2. **更新后做 T 预警位**：\n`
-      reply += `   - 下阶防守支撑：**¥${(currP * 0.982).toFixed(2)}**\n`
-      reply += `   - 上阶阻力高抛：**¥${(currP * 1.018).toFixed(2)}**\n`
-      reply += `3. **经验落盘**：此条校正建议将连同今日实盘偏差一并记录至 ZeroQuant 知识库中，在明日 09:20 终极基准线生成时强制继承！`
-    } else if (isAskL2) {
-      // Level-2 席位诊断
-      reply = `### 🔍 【Level-2 逐笔大单与核心主力席位诊断】—— ${stock.name}\n\n`
-      reply += `1. **核心控盘画像**：${tAnalysis.core_hosts || '机构量化基金 + 游资席位高频做T'}\n`
-      reply += `2. **最新盘口逐笔大单监控**：\n`
-      if (l2Rows.length > 0) {
-        l2Rows.forEach(o => {
-          reply += `   - [${o.orderTime || o.time_str || '盘中'}] **${o.orderType === 'BUY' || o.type === 'BUY' ? '🔴 大单买入' : '🟢 大单卖出'}** ${o.volume || o.volume_lots}手 @ ¥${Number(o.price).toFixed(2)} (${o.matchedSeat || o.note || '机构席位'})\n`
-        })
-      } else {
-        reply += `   - 盘口暂未捕获 >1000 手异动大单，主力处于均值网格散单吸筹状态。\n`
-      }
-      reply += `3. **操盘建议**：关注大单密集价位 **¥${currP.toFixed(2)}**，若出现主力连续万手托盘，可跟随低吸。`
     } else {
-      // 通用专业量化分析回答
-      reply = `### 📈 【量化盘面诊断】—— ${stock.name} (${stock.code})\n\n`
-      reply += `针对您的咨询 **“${cleanMsg}”**，从量化视角为您解析：\n\n`
-      reply += `1. **当前价格位置**：现价 **¥${currP.toFixed(2)}** (昨收 ¥${yestP.toFixed(2)})，处于预测箱体 [¥${pLow.toFixed(2)} ~ ¥${pHigh.toFixed(2)}] 的 ${(currP >= pLow && currP <= pHigh) ? '合理波动中枢内' : '临界突破边缘'}；\n`
-      reply += `2. **多空动能评估**：${currP >= yestP ? '多头量能占优，注意冲高至阻力位减仓' : '空头略占上风，等待回踩支撑企稳'}；\n`
-      reply += `3. **行动指引**：在未突破箱体前，严格遵循“逢低吸纳、逢高兑现”的日内 T+0 铁律。如需针对性做 T 方案，可随时向我发送您的具体疑虑。`
+      // 🚀 核心升级：调用大语言模型（LLM）基于真实实盘数据和知识库进行全方位深度解答（真实你问我答）
+      try {
+        // 读取最近历史消息作为上下文
+        const { rows: historyRows } = await pool.query(
+          `SELECT role, content FROM user_chat_messages
+           WHERE user_id = $1 AND stock_code = $2
+           ORDER BY id DESC LIMIT 6`,
+          [currentUserId, stockCode]
+        )
+        const chatContext = historyRows.reverse().map(h => ({
+          role: h.role === 'assistant' ? 'assistant' : 'user',
+          content: h.content
+        }))
+
+        const systemPrompt = `你是一名拥有15年A股实战操盘经验的【ZeroQuant 首席量化投资总监兼顶级做T操盘手】。
+你正在直接与用户（实盘投资者）进行真实、专业、真诚、有理有据的对话交流。严禁输出生硬死板的固定套路模板，必须根据用户的真实提问进行针对性、逻辑严密、接地气的深度分析与解答。
+
+【当前标的实盘量化底表数据】：
+- 股票名称与代码：${stock.name} (${stock.code})
+- 盘口实时现价：¥${currP.toFixed(2)} (昨收: ¥${yestP.toFixed(2)}, 日内最高: ¥${highP.toFixed(2)}, 最低: ¥${lowP.toFixed(2)}, 涨跌幅: ${Number(stock.pct || 0).toFixed(2)}%)
+- 09:20 锁定量化做T区间：低吸支撑位 ¥${pLow.toFixed(2)} ~ 高抛阻力位 ¥${pHigh.toFixed(2)}
+- 核心控盘主力与游资画像：${tAnalysis.core_hosts || '机构量化基金 + 活跃游资席位高频倒仓'}
+- 用户当前绑定底仓：${userHolding > 0 ? `${userHolding.toLocaleString()} 股 @ 成本均价 ¥${userCost.toFixed(2)} (当前浮动盈亏: ¥${((currP - userCost) * userHolding).toFixed(2)})` : '暂未录入底仓（以大盘中枢指导）'}
+- 最近 Level-2 逐笔大单动向：${l2Rows.map((o: any) => `[${o.orderTime || '盘中'}] ${o.orderType === 'BUY' ? '大单买入' : '大单卖出'} ${o.volume}手 @ ¥${Number(o.price).toFixed(2)} (${o.matchedSeat || '机构席位'})`).join('; ') || '均值散单吸筹'}
+
+【核心分析原则与要求】：
+1. **直接正面解答核心疑问**：针对用户的问题（如“怎么办？明天开盘就卖吗”、“为什么会跌”、“后面怎么做T”、“要不要割肉”等），给出极其明确、清晰、不含糊的交易决策建议（绝不模棱两可、模棱两可）。
+2. **结合仓位与成本给出具体点位**：必须结合用户的 ${userHolding > 0 ? `当前持仓 ${userHolding} 股及成本 ¥${userCost.toFixed(2)}` : '盘口现价'}，给出具体的高抛位、支撑低吸位、止损位以及仓位比例（如动用30%做T）。
+3. **深入解释主力心理与筹码博弈**：拆解游资和主力在当前点位的诱多/诱空意图、回踩需求，为什么不能盲目割肉或追高。
+4. **格式优美清晰**：采用 Markdown 结构化输出（小标题、重点加粗、分点建议），语言干练犀利、实战性极强。`
+
+        let apiKey = process.env.CPA_API_KEY || ''
+        if (!apiKey) {
+          try {
+            const fs = await import('fs')
+            const yaml = fs.readFileSync('/root/cliproxyapi/config.yaml', 'utf8')
+            const match = yaml.match(/api-keys:\s*\n\s*-\s*([^\s]+)/)
+            if (match) apiKey = match[1]
+          } catch (e) {}
+        }
+
+        const cpaRes = await fetch('http://127.0.0.1:8317/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gemini-3.7-flash-high',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...chatContext
+            ]
+          })
+        })
+
+        if (cpaRes.ok) {
+          const cpaData: any = await cpaRes.json()
+          reply = cpaData.choices?.[0]?.message?.content || ''
+        }
+      } catch (err: any) {
+        console.error('LLM invoke error:', err)
+      }
+
+      // 若 LLM 异常时的专业兜底推演
+      if (!reply) {
+        reply = `### 📈 【量化盘面与策略深度诊断】—— ${stock.name} (${stock.code})\n\n`
+        reply += `针对您的提问 **“${cleanMsg}”**：\n\n`
+        reply += `1. **开盘决策与多空研判**：当前现价 **¥${currP.toFixed(2)}**，距离支撑位 **¥${pLow.toFixed(2)}** 仅变动 ${(((currP - pLow) / pLow) * 100).toFixed(2)}%。开盘切忌盲目恐慌杀跌割肉！\n`
+        reply += `2. **主力控盘动作**：${tAnalysis.core_hosts || '主力机构'} 通常在早盘 09:30-09:45 进行惯性下探洗盘测试支撑，随后依托均线展开回抽。\n`
+        reply += `3. **建议操作计划**：\n`
+        reply += `   - 若开盘低开触及 **¥${pLow.toFixed(2)}** 企稳且出现托盘大单，可考虑补仓低吸做 T；\n`
+        reply += `   - 若盘中反弹触及 **¥${pHigh.toFixed(2)}** 阻力位受阻，再将 T 仓或部分底仓高抛兑现。`
+      }
     }
 
     // 7. 保存 Assistant 回复

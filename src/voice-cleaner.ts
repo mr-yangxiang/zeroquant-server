@@ -96,10 +96,22 @@ export interface TradeIntentResult {
 export function parseTradingIntent(rawText: string, defaultPrice: number = 0): TradeIntentResult {
   const cleaned = cleanVoiceTradingText(rawText)
   
-  // 1. 判断是否包含买卖/建仓动作
-  const isBuy = /(?:又?买(?:了|入)?|加仓(?:了)?|低吸(?:了)?|补仓(?:了)?|扫货)/i.test(cleaned)
-  const isSell = /(?:又?卖(?:了|出)?|减仓(?:了)?|高抛(?:了)?|止损(?:了)?|平仓(?:了)?|出货|清仓)/i.test(cleaned)
-  const isSetPos = /(?:底仓|持仓|建仓(?:了)?|现有持仓|设置持仓)/i.test(cleaned) && /(?:改成|设为|为|是|有)/i.test(cleaned)
+  // 排除疑问句、反问句、征求意见句（如：卖吗、买吗、要不要买、该不该卖、怎么办、什么时候买）
+  const isQuestion = /(?:吗|么|呢|吧|？|\?|怎么办|如何|要不要|该不该|什么时候|能不能|是不是|建议|请问)/i.test(cleaned)
+  if (isQuestion) {
+    return {
+      isTradeAction: false,
+      actionType: null,
+      price: null,
+      shares: null,
+      rawCleaned: cleaned
+    }
+  }
+
+  // 1. 判断是否包含明确陈述性的买卖/建仓动作（如“买了”、“已买”、“以3.85买了1000股”、“卖出1000股”）
+  const isBuy = /(?:已买|又买|刚买|买了|买入|加仓了|加了仓|低吸了|建了仓)/i.test(cleaned)
+  const isSell = /(?:已卖|又卖|刚卖|卖了|卖出|减仓了|减了仓|高抛了|平仓了|止损了|清仓了)/i.test(cleaned)
+  const isSetPos = /(?:底仓|现有持仓|设置持仓)/i.test(cleaned) && /(?:改成|设为|为|是|有)/i.test(cleaned)
 
   if (!isBuy && !isSell && !isSetPos) {
     return {
