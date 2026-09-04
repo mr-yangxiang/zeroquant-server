@@ -8,6 +8,7 @@ import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
+import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -24,6 +25,11 @@ app.use(express.json())
 // 1. 健康检查
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'ZeroQuant Express Server', timestamp: new Date().toISOString() })
+})
+
+// 1.1 量化内核多线程调度状态与监控指标 API
+app.get('/api/v1/system/quant-status', (_req, res) => {
+  res.json({ code: 0, message: 'success', data: getQuantSchedulerMetrics() })
 })
 
 // 2. 登录接口
@@ -749,4 +755,6 @@ app.post('/api/v1/stocks/re-predict', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`🚀 ZeroQuant Express Server running at http://localhost:${port}`)
+  // 启动内生多线程量化调度引擎
+  startQuantInternalScheduler()
 })

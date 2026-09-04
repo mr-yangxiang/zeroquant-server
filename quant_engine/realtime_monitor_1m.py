@@ -5,7 +5,9 @@ import datetime
 import os
 import sys
 import subprocess
+import math
 import smtplib
+from concurrent.futures import ThreadPoolExecutor
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
@@ -178,158 +180,146 @@ def is_trading_day_and_time():
         return True
     return False
 
-def sync_today_intraday_trends():
+def sync_single_stock_trends(stock_item):
+    full_code, info = stock_item
     today_str = datetime.datetime.now().strftime("%Y-%m-%d")
-    
-    for full_code, info in STOCKS.items():
-        code = info["code"]
-        # 使用腾讯高可靠全量分钟分时接口
-        url = f"http://web.ifzq.gtimg.cn/appstock/app/minute/query?code={full_code}"
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-            res = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-            data = json.loads(res).get("data", {}).get(full_code, {}).get("data", {})
-            min_list = data.get("data", [])
-            if not min_list:
-                continue
+    code = info["code"]
+    # 使用腾讯高可靠全量分钟分时接口
+    url = f"http://web.ifzq.gtimg.cn/appstock/app/minute/query?code={full_code}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        res = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
+        data = json.loads(res).get("data", {}).get(full_code, {}).get("data", {})
+        min_list = data.get("data", [])
+        if not min_list:
+            return
 
-            latest_item = min_list[-1]
-            parts_latest = latest_item.split()
-            t_str_latest = parts_latest[0]
-            latest_time_only = f"{t_str_latest[:2]}:{t_str_latest[2:]}"
-            latest_price = float(parts_latest[1])
+        latest_item = min_list[-1]
+        parts_latest = latest_item.split()
+        t_str_latest = parts_latest[0]
+        latest_time_only = f"{t_str_latest[:2]}:{t_str_latest[2:]}"
+        latest_price = float(parts_latest[1])
 
-            # 1. 批量同步全量 1 分钟真实历史轨迹线点位
-            sql_del_hist = f"DELETE FROM stock_price_histories WHERE stock_code = '{code}' AND trade_date = '{today_str}'::date;"
-            subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"{sql_del_hist}\"", shell=True)
+        # 1. 批量同步全量 1 分钟真实历史轨迹线点位
+        sql_del_hist = f"DELETE FROM stock_price_histories WHERE stock_code = '{code}' AND trade_date = '{today_str}'::date;"
+        subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"{sql_del_hist}\"", shell=True)
 
-            sql_inserts_hist = []
+        sql_inserts_hist = []
+        for item in min_list:
+            parts = item.split()
+            if len(parts) >= 2:
+                t_str = parts[0]
+                hh, mm = t_str[:2], t_str[2:]
+                price = float(parts[1])
+                ts = f"{today_str} {hh}:{mm}:00+08:00"
+                sql_inserts_hist.append(
+                    f"INSERT INTO stock_price_histories (id, stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date) "
+                    f"VALUES (gen_random_uuid(), '{code}', '{ts}'::timestamptz, {price}, {price}, 0.0, '{today_str}'::date);"
+                )
+
+        if sql_inserts_hist:
+            sql_str = "\n".join(sql_inserts_hist)
+            with open(f"/tmp/hist_{code}.sql", "w", encoding="utf-8") as f_sql:
+                f_sql.write(sql_str)
+            subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db < /tmp/hist_{code}.sql", shell=True)
+
+        # 2. 从数据库获取 09:20 终极基准线
+        req_db = urllib.request.Request(f"http://127.0.0.1:3002/api/v1/stocks/{code}/advanced-history?date={today_str}")
+        res_db = urllib.request.urlopen(req_db, timeout=3).read().decode()
+        db_data = json.loads(res_db).get("data", {})
+        preds = db_data.get("predictions", [])
+        base_pred = next((p for p in preds if p.get("isBase")), preds[0] if preds else None)
+
+        if base_pred and base_pred.get("timePoints"):
+            time_pts = base_pred["timePoints"]
+            match_idx = next((i for i, tp in enumerate(time_pts) if tp["time"] == latest_time_only), len(time_pts) - 1)
+            
+            # 计算日内真实量化指标 (VWAP、近期15分钟动量斜率、日内高低点)
+            recent_prices = []
+            total_vol = 0
+            total_turnover = 0.0
             for item in min_list:
-                parts = item.split()
-                if len(parts) >= 2:
-                    t_str = parts[0]
-                    hh, mm = t_str[:2], t_str[2:]
-                    price = float(parts[1])
-                    ts = f"{today_str} {hh}:{mm}:00+08:00"
-                    sql_inserts_hist.append(
-                        f"INSERT INTO stock_price_histories (id, stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date) "
-                        f"VALUES (gen_random_uuid(), '{code}', '{ts}'::timestamptz, {price}, {price}, 0.0, '{today_str}'::date);"
-                    )
+                p_parts = item.split()
+                if len(p_parts) >= 2:
+                    p_val = float(p_parts[1])
+                    recent_prices.append(p_val)
+                    if len(p_parts) >= 4:
+                        try:
+                            v_val = float(p_parts[2])
+                            to_val = float(p_parts[3])
+                            total_vol += v_val
+                            total_turnover += to_val
+                        except Exception:
+                            pass
 
-            if sql_inserts_hist:
-                sql_str = "\n".join(sql_inserts_hist)
-                with open(f"/tmp/hist_{code}.sql", "w", encoding="utf-8") as f_sql:
-                    f_sql.write(sql_str)
-                subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db < /tmp/hist_{code}.sql", shell=True)
-
-            # 2. 从数据库获取 09:20 终极基准线
-            req_db = urllib.request.Request(f"http://127.0.0.1:3002/api/v1/stocks/{code}/advanced-history?date={today_str}")
-            res_db = urllib.request.urlopen(req_db, timeout=3).read().decode()
-            db_data = json.loads(res_db).get("data", {})
-            preds = db_data.get("predictions", [])
-            base_pred = next((p for p in preds if p.get("isBase")), preds[0] if preds else None)
-
-            if base_pred and base_pred.get("timePoints"):
-                time_pts = base_pred["timePoints"]
-                match_idx = next((i for i, tp in enumerate(time_pts) if tp["time"] == latest_time_only), len(time_pts) - 1)
-                
-                # 计算日内真实量化指标 (VWAP、近期15分钟动量斜率、日内高低点)
-                # 1. 解析最近 30 分钟分钟走势
-                recent_prices = []
-                total_vol = 0
-                total_turnover = 0.0
-                for item in min_list:
-                    p_parts = item.split()
-                    if len(p_parts) >= 2:
-                        p_val = float(p_parts[1])
-                        recent_prices.append(p_val)
-                        if len(p_parts) >= 4:
-                            try:
-                                v_val = float(p_parts[2])
-                                to_val = float(p_parts[3])
-                                total_vol += v_val
-                                total_turnover += to_val
-                            except Exception:
-                                pass
-
-                # 日内分时成交均价 VWAP (若成交量异常则回退至简单移动均价)
-                if total_vol > 0 and total_turnover > 0:
-                    vwap = round(total_turnover / (total_vol * 100), 2)
-                    if vwap <= 0 or abs(vwap - latest_price) / latest_price > 0.15:
-                        vwap = round(sum(recent_prices) / len(recent_prices), 2)
-                elif recent_prices:
+            if total_vol > 0 and total_turnover > 0:
+                vwap = round(total_turnover / (total_vol * 100), 2)
+                if vwap <= 0 or abs(vwap - latest_price) / latest_price > 0.15:
                     vwap = round(sum(recent_prices) / len(recent_prices), 2)
+            elif recent_prices:
+                vwap = round(sum(recent_prices) / len(recent_prices), 2)
+            else:
+                vwap = latest_price
+
+            lookback = min(15, len(recent_prices))
+            if lookback > 1:
+                momentum_slope = (latest_price - recent_prices[-lookback]) / float(lookback)
+            else:
+                momentum_slope = 0.0
+
+            dyn_low = info.get("dyn_low", round(latest_price * 0.985, 2))
+            dyn_high = info.get("dyn_high", round(latest_price * 1.025, 2))
+
+            sql_del = f"DELETE FROM stock_rolling_predictions WHERE stock_code = '{code}' AND predict_date = '{today_str}'::date;"
+            subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"{sql_del}\"", shell=True)
+
+            is_limit_up = False
+            is_limit_down = False
+            yest_p = info.get("pred_base", latest_price)
+            if latest_price > 0 and yest_p > 0:
+                pct_now = (latest_price - yest_p) / yest_p * 100
+                if pct_now >= 9.8 or (latest_price / yest_p) >= 1.098:
+                    is_limit_up = True
+                elif pct_now <= -9.8 or (latest_price / yest_p) <= 0.902:
+                    is_limit_down = True
+
+            sql_inserts = []
+            for idx in range(match_idx, len(time_pts)):
+                t_time = time_pts[idx]["time"]
+                if idx == match_idx:
+                    reshaped_p = latest_price
                 else:
-                    vwap = latest_price
-
-                # 近 15 分钟价格动量速率 (Momentum Slope)
-                lookback = min(15, len(recent_prices))
-                if lookback > 1:
-                    momentum_slope = (latest_price - recent_prices[-lookback]) / float(lookback)
-                else:
-                    momentum_slope = 0.0
-
-                # 获取动态支撑与阻力位
-                dyn_low = info.get("dyn_low", round(latest_price * 0.985, 2))
-                dyn_high = info.get("dyn_high", round(latest_price * 1.025, 2))
-
-                # 3. 实时重塑全天预测波动曲线
-                sql_del = f"DELETE FROM stock_rolling_predictions WHERE stock_code = '{code}' AND predict_date = '{today_str}'::date;"
-                subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"{sql_del}\"", shell=True)
-
-                # 涨跌停封板硬性检测
-                is_limit_up = False
-                is_limit_down = False
-                yest_p = info.get("pred_base", latest_price)
-                if latest_price > 0 and yest_p > 0:
-                    pct_now = (latest_price - yest_p) / yest_p * 100
-                    if pct_now >= 9.8 or (latest_price / yest_p) >= 1.098:
-                        is_limit_up = True
-                    elif pct_now <= -9.8 or (latest_price / yest_p) <= 0.902:
-                        is_limit_down = True
-
-                sql_inserts = []
-                # 仅对从当前时刻 match_idx 起到收盘 15:00 (未来时间段) 独立生成真实盘中动态前向重塑曲线！
-                # 过去时间段不生成伪数据，杜绝篡改历史预判；黄虚线从当前实盘点直接向未来动态推演！
-                for idx in range(match_idx, len(time_pts)):
-                    t_time = time_pts[idx]["time"]
-                    if idx == match_idx:
+                    if is_limit_up or is_limit_down:
                         reshaped_p = latest_price
                     else:
-                        if is_limit_up or is_limit_down:
-                            # 涨跌停封板硬性平锁
-                            reshaped_p = latest_price
-                        else:
-                            # 真实前向动态重塑算法：
-                            # 步骤 a: 初始动量外推衰减 (半衰期 15-20 分钟)
-                            future_step = idx - match_idx
-                            decay = math.exp(-future_step / 18.0)
-                            trend_extrap = momentum_slope * 12.0 * decay
+                        future_step = idx - match_idx
+                        decay = math.exp(-future_step / 18.0)
+                        trend_extrap = momentum_slope * 12.0 * decay
 
-                            # 步骤 b: 日内均线 VWAP 回归引力 (随时间逐步收敛至 VWAP 与主力筹码重心)
-                            reversion_weight = 1.0 - decay
-                            # 目标价格结合 VWAP 与主力控盘通道中枢
-                            center_target = (vwap * 0.6 + ((dyn_low + dyn_high) / 2.0) * 0.4)
-                            reversion_p = latest_price + (center_target - latest_price) * (reversion_weight * 0.7)
+                        reversion_weight = 1.0 - decay
+                        center_target = (vwap * 0.6 + ((dyn_low + dyn_high) / 2.0) * 0.4)
+                        reversion_p = latest_price + (center_target - latest_price) * (reversion_weight * 0.7)
 
-                            # 步骤 c: 融入标的主力特定时间切片惯性 (如 13:30 脉冲、14:30 对冲)
-                            time_factor_base = time_pts[idx]["price"] / float(time_pts[0]["price"] if time_pts[0]["price"] > 0 else 1.0)
-                            impulse_wave = (time_factor_base - 1.0) * latest_price * 0.5
+                        time_factor_base = time_pts[idx]["price"] / float(time_pts[0]["price"] if time_pts[0]["price"] > 0 else 1.0)
+                        impulse_wave = (time_factor_base - 1.0) * latest_price * 0.5
 
-                            # 综合得出具有真实盘中特征的全新前向预测线
-                            raw_forward_p = reversion_p + trend_extrap + impulse_wave
-                            # 约束在动态支撑与阻力位之间
-                            reshaped_p = round(max(dyn_low * 0.99, min(dyn_high * 1.01, raw_forward_p)), 2)
+                        raw_forward_p = reversion_p + trend_extrap + impulse_wave
+                        reshaped_p = round(max(dyn_low * 0.99, min(dyn_high * 1.01, raw_forward_p)), 2)
 
-                    sql_inserts.append(f"INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price) VALUES ('{code}', '{today_str}'::date, '{t_time}', {reshaped_p});")
+                sql_inserts.append(f"INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price) VALUES ('{code}', '{today_str}'::date, '{t_time}', {reshaped_p});")
 
-                if sql_inserts:
-                    sql_str = "\n".join(sql_inserts)
-                    with open(f"/tmp/roll_{code}.sql", "w", encoding="utf-8") as f_sql:
-                        f_sql.write(sql_str)
-                    subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db < /tmp/roll_{code}.sql", shell=True)
-        except Exception as e:
-            print(f"Error syncing intraday trends for {code}: {e}", file=sys.stderr)
+            if sql_inserts:
+                sql_str = "\n".join(sql_inserts)
+                with open(f"/tmp/roll_{code}.sql", "w", encoding="utf-8") as f_sql:
+                    f_sql.write(sql_str)
+                subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db < /tmp/roll_{code}.sql", shell=True)
+    except Exception as e:
+        print(f"Error syncing intraday trends for {code}: {e}", file=sys.stderr)
+
+def sync_today_intraday_trends():
+    # 4 线程并发并行同步 6 大标的分时轨迹与动态前向重塑
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        executor.map(sync_single_stock_trends, STOCKS.items())
 
 SEAT_CONFIG = {
     "600839": "国泰君安上海江苏路 (章盟主, 持股18.0%, 成本6.50元) + T+0 网格量化基金 (持股17.0%, 成本6.60元)",
@@ -458,13 +448,13 @@ def run_1m_check(is_debug=False):
         except Exception:
             pass
 
-    alerts_triggered = []
-    for full_code, info in STOCKS.items():
+    def process_single_stock_monitor(stock_item):
+        full_code, info = stock_item
         code = info["code"]
         name = info["name"]
         q = quotes.get(code)
         if not q:
-            continue
+            return
 
         curr_p = q["price"]
         low_b = info["low_bound"]
@@ -476,12 +466,10 @@ def run_1m_check(is_debug=False):
         # 每分钟 100% 动态重塑 UPDATE 所有股票的【核心主控席位与500日习惯】、【筹码分析原因】、【做T战术与后续动作】及【四大分支预案】
         update_realtime_t_analyses_every_minute(code, name, curr_p, q.get("yest", curr_p), q["pct"], q["high"], q["low"], low_b, high_b)
 
-        trigger_type = None
         # 涨跌停封板硬性检测：若单日涨幅 >= 9.8% (涨停) 或 <= -9.8% (跌停)，不触发常规突破/跌破，保持封板平锁状态
         is_limit = (q.get("pct", 0) >= 9.8 or q.get("pct", 0) <= -9.8 or (q.get("yest", 0) > 0 and (curr_p / q["yest"] >= 1.098 or curr_p / q["yest"] <= 0.902)))
 
         if not is_limit and curr_p < low_b:
-            trigger_type = f"跌破预期低吸支撑位 ({low_b:.2f}元) [系统已实时下移防守位至 {curr_p * 0.98:.2f}元]"
             # 动态重新调整数据库中的支撑阻力位与预警边界
             new_low = round(curr_p * 0.98, 2)
             new_high = round(curr_p * 1.03, 2)
@@ -499,7 +487,6 @@ def run_1m_check(is_debug=False):
             sc4 = f"【深跌破位】：若失守 {round(new_low * 0.97, 2):.2f} 元，停止做 T 倒仓，减仓观望。"
             subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"UPDATE stocks SET predicted_low = {new_low}, predicted_high = {new_high} WHERE code = '{code}'; UPDATE stock_t_analyses SET do_reasons='{do_reasons}', dont_reasons='{dont_reasons}', chip_analysis='{chip_analysis}', scenario_1='{sc1}', scenario_2='{sc2}', scenario_3='{sc3}', scenario_4='{sc4}', updated_at=NOW() WHERE stock_code='{code}';\"", shell=True)
         elif not is_limit and curr_p > high_b:
-            trigger_type = f"放量突破预期高抛阻力位 ({high_b:.2f}元) [系统已实时上移高抛位至 {curr_p * 1.02:.2f}元]"
             new_low = round(curr_p * 0.97, 2)
             new_high = round(curr_p * 1.02, 2)
             do_reasons = f"【动态修正理由】：股价放量突破原阻力位，高抛阻力位已动态上移至 {new_high:.2f} 元。原阻力位 {high_b:.2f} 元转换为第一支撑。"
@@ -516,23 +503,11 @@ def run_1m_check(is_debug=False):
             sc4 = f"【深跌破位】：若失守 {round(new_low * 0.97, 2):.2f} 元，暂停做 T，回退防守。"
             subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db -c \"UPDATE stocks SET predicted_low = {new_low}, predicted_high = {new_high} WHERE code = '{code}'; UPDATE stock_t_analyses SET do_reasons='{do_reasons}', dont_reasons='{dont_reasons}', chip_analysis='{chip_analysis}', scenario_1='{sc1}', scenario_2='{sc2}', scenario_3='{sc3}', scenario_4='{sc4}', updated_at=NOW() WHERE stock_code='{code}';\"", shell=True)
 
-        if trigger_type:
-            last_alert_time = cooldowns.get(code, 0)
-            if time.time() - last_alert_time > 1200 or is_debug:
-                if not is_debug:
-                    cooldowns[code] = time.time()
-                    with open(ALERT_COOLDOWN_FILE, "w") as f:
-                        json.dump(cooldowns, f, indent=2)
+    # 4 线程并发并行监控 6 大标的
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        executor.map(process_single_stock_monitor, STOCKS.items())
 
-                recipients = get_alert_recipients(code, is_debug)
-                alert_recips = get_alert_recipients(code, is_debug)
-                sent = send_alert_email(name, code, curr_p, low_b, high_b, q["pct"], q["high"], q["low"], trigger_type, alert_recips)
-                alerts_triggered.append(f"{name} {trigger_type} (Email Sent: {sent})")
-
-    log_line = f"[{now_str}] 1M Sync & Verify Complete: {len(STOCKS)} stocks synced to DB."
-    if alerts_triggered:
-        log_line += f" Alerts: {'; '.join(alerts_triggered)}"
-    log_line += "\n"
+    log_line = f"[{now_str}] 1M 4-Core Parallel Sync & Verify Complete: {len(STOCKS)} stocks processed in parallel.\n"
 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(log_line)

@@ -5,13 +5,15 @@ import math
 import subprocess
 import sys
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 # ==============================================================================
 # ZeroQuant 历史画像与500日大数据分时模式库 (Big-Data Historical Profiling Engine)
 # 彻底剔除任何随机模拟噪声！严格基于主力控盘席位 500 日真实分时统计轨迹与动量推演！
 # ==============================================================================
 
-LOG_DIR = "/root/stock_quant/daily_analysis_logs"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(BASE_DIR, "daily_analysis_logs")
 
 def write_and_rotate_daily_analysis_log(target_date, log_content):
     """
@@ -228,37 +230,34 @@ def run_generator(target_date=None):
     analysis_log = [
         f"# 📊 ZeroQuant 每日量化分析推演与修正过程档案 ({t_date})",
         f"\n**生成时间**：{now_dt.strftime('%Y-%m-%d %H:%M:%S')} (CST)",
-        f"**核心算法模型**：HMM 状态转移 + 500日主力盘口画像 + 集合竞价动能突变 (Volume-Burst) + Hermite 三次样条插值\n",
+        f"**核心算法模型**：HMM 状态转移 + 500日主力盘口画像 + 集合竞价动能突变 (Volume-Burst) + Hermite 三次样条插值 (4线程并发并行运算)\n",
         "## 一、 6 大重点做 T 标的分析过程、输入信息与模型修正明细\n"
     ]
 
-    with open(sql_file, "w", encoding="utf-8") as f:
-        f.write(f"DELETE FROM stock_day_predictions WHERE predict_date = '{t_date}';\n")
+    def process_single_stock(item):
+        code, profile = item
+        q = quotes.get(code, {})
+        yest_p = q.get("yest", 10.0)
+        curr_p = q.get("curr", yest_p)
+        news_factor = fetch_news_factor(code, q)
 
-        for code, profile in BIG_DATA_INTRADAY_PROFILES.items():
-            q = quotes.get(code, {})
-            yest_p = q.get("yest", 10.0)
-            curr_p = q.get("curr", yest_p)
-            news_factor = fetch_news_factor(code, q)
+        points_data = interpolate_profile_curve(yest_p, profile["time_factors"], news_factor)
+        prices_arr = [p["price"] for p in points_data]
+        pred_low = min(prices_arr)
+        pred_high = max(prices_arr)
+        dir_str = "看涨偏强" if prices_arr[-1] >= yest_p else "看跌防守"
+        target_pct = round(((prices_arr[-1] - yest_p) / yest_p) * 100, 2)
 
-            # 1. 生成 100% 依据 500 日大数据与主力画像计算的实打实预测分时曲线
-            points_data = interpolate_profile_curve(yest_p, profile["time_factors"], news_factor)
+        log_segment = [
+            f"### 📌 【{profile['name']} ({code})】",
+            f"- **输入行情与基准数据**：昨收价 ¥{yest_p:.2f}，开盘现价 ¥{curr_p:.2f}，开盘涨跌幅 {q.get('pct', 0):+}%",
+            f"- **主力控盘模型与画像**：`{profile['type']}` (Beta = {profile['beta']})",
+            f"- **多因子修正参数**：公告情绪/竞价动量修正系数 = `{news_factor:.3f}`",
+            f"- **算法推演输出**：预判方向 **【{dir_str}】** (目标幅度 {target_pct:+}% | 预测做T箱体 [¥{pred_low:.2f} ~ ¥{pred_high:.2f}])",
+            f"- **知识库修正应用**：已融入 Log #001~#007 经验（涨跌停封板平锁熔断、集合竞价多空自适应切换、ATR动态振幅扩展）\n"
+        ]
 
-            prices_arr = [p["price"] for p in points_data]
-            pred_low = min(prices_arr)
-            pred_high = max(prices_arr)
-            dir_str = "看涨偏强" if prices_arr[-1] >= yest_p else "看跌防守"
-            target_pct = round(((prices_arr[-1] - yest_p) / yest_p) * 100, 2)
-
-            # 记录该标的详尽推演逻辑
-            analysis_log.append(f"### 📌 【{profile['name']} ({code})】")
-            analysis_log.append(f"- **输入行情与基准数据**：昨收价 ¥{yest_p:.2f}，开盘现价 ¥{curr_p:.2f}，开盘涨跌幅 {q.get('pct', 0):+}%")
-            analysis_log.append(f"- **主力控盘模型与画像**：`{profile['type']}` (Beta = {profile['beta']})")
-            analysis_log.append(f"- **多因子修正参数**：公告情绪/竞价动量修正系数 = `{news_factor:.3f}`")
-            analysis_log.append(f"- **算法推演输出**：预判方向 **【{dir_str}】** (目标幅度 {target_pct:+}% | 预测做T箱体 [¥{pred_low:.2f} ~ ¥{pred_high:.2f}])")
-            analysis_log.append(f"- **知识库修正应用**：已融入 Log #001~#006 经验（涨跌停封板平锁熔断、集合竞价多空自适应切换、ATR动态振幅扩展）\n")
-
-            f.write(f"""
+        sql_update = f"""
 UPDATE stocks
 SET current_price = {curr_p},
     yesterday_price = {yest_p},
@@ -266,16 +265,31 @@ SET current_price = {curr_p},
     predicted_high = {pred_high},
     updated_at = NOW()
 WHERE code = '{code}';
-""")
+"""
+        json_str = json.dumps(points_data).replace("'", "''")
+        sql_insert = f"INSERT INTO stock_day_predictions (stock_code, predict_date, version, is_base, time_points, direction, target_pct) VALUES ('{code}', '{t_date}', 1, TRUE, '{json_str}', '{dir_str}', {target_pct});\n"
+        
+        return {
+            "code": code,
+            "sql": sql_update + sql_insert,
+            "log": "\n".join(log_segment)
+        }
 
-            json_str = json.dumps(points_data).replace("'", "''")
-            f.write(f"INSERT INTO stock_day_predictions (stock_code, predict_date, version, is_base, time_points, direction, target_pct) VALUES ('{code}', '{t_date}', 1, TRUE, '{json_str}', '{dir_str}', {target_pct});\n")
+    # 利用服务器 4 个 CPU Core 进行 4 线程并发并行计算
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = list(executor.map(process_single_stock, BIG_DATA_INTRADAY_PROFILES.items()))
+
+    with open(sql_file, "w", encoding="utf-8") as f:
+        f.write(f"DELETE FROM stock_day_predictions WHERE predict_date = '{t_date}';\n")
+        for res in results:
+            f.write(res["sql"])
+            analysis_log.append(res["log"])
 
     subprocess.run(f"docker exec -i truecost-postgres psql -U truecost -d zeroquant_db < {sql_file}", shell=True)
     
     # 写入并轮转清理（仅保留最近7天）
     write_and_rotate_daily_analysis_log(t_date, "\n".join(analysis_log))
-    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 100% Big-Data & Intraday Profile Predictions generated for {t_date}. Daily analysis log written & rotated (7-day retention).")
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 100% Big-Data & Intraday Profile Predictions generated for {t_date} (4-Core Parallel Executed).")
 
 if __name__ == "__main__":
     t_date = sys.argv[1] if len(sys.argv) > 1 else None
