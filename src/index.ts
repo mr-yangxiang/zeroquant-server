@@ -6,9 +6,15 @@ import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -579,6 +585,28 @@ app.post('/api/v1/chat/send', async (req, res) => {
           content: h.content
         }))
 
+        // 动态读取 quant_engine/knowledge_base.md 中的最新策略与复盘经验
+        let kbContent = ''
+        try {
+          const kbPath = path.resolve(__dirname, '../quant_engine/knowledge_base.md')
+          if (fs.existsSync(kbPath)) {
+            kbContent = fs.readFileSync(kbPath, 'utf-8')
+          }
+        } catch (_) {}
+
+        // 动态抓取个股最新公告与新闻（东财实时 API）
+        let liveNewsText = '暂无重大异常公告'
+        try {
+          const newsRes = await fetch(`https://np-anotice-stock.eastmoney.com/api/security/ann?page_size=5&page_index=1&ann_type=A&stock_list=${stockCode}`, { signal: AbortSignal.timeout(2500) })
+          if (newsRes.ok) {
+            const newsData: any = await newsRes.json()
+            const annList = newsData?.data?.list || []
+            if (annList.length > 0) {
+              liveNewsText = annList.map((a: any) => `• [${a.notice_date?.slice(0, 10) || '最新'}] ${a.title_ch}`).join('\n')
+            }
+          }
+        } catch (_) {}
+
         const systemPrompt = `你是一名拥有15年A股实战操盘经验的【ZeroQuant 首席量化投资总监兼顶级做T操盘手】。
 你正在直接与用户（实盘投资者）进行真实、专业、真诚、有理有据的对话交流。严禁输出生硬死板的固定套路模板，必须根据用户的真实提问进行针对性、逻辑严密、接地气的深度分析与解答。
 
@@ -590,10 +618,16 @@ app.post('/api/v1/chat/send', async (req, res) => {
 - 用户当前绑定底仓：${userHolding > 0 ? `${userHolding.toLocaleString()} 股 @ 成本均价 ¥${userCost.toFixed(2)} (当前浮动盈亏: ¥${((currP - userCost) * userHolding).toFixed(2)})` : '暂未录入底仓（以大盘中枢指导）'}
 - 最近 Level-2 逐笔大单动向：${l2Rows.map((o: any) => `[${o.orderTime || '盘中'}] ${o.orderType === 'BUY' ? '大单买入' : '大单卖出'} ${o.volume}手 @ ¥${Number(o.price).toFixed(2)} (${o.matchedSeat || '机构席位'})`).join('; ') || '均值散单吸筹'}
 
+【实时个股最新公告与资讯】：
+${liveNewsText}
+
+【已沉淀的量化自主演进策略知识库与历史经验 (knowledge_base.md)】：
+${kbContent.slice(-2500)}
+
 【核心分析原则与要求】：
-1. **直接正面解答核心疑问**：针对用户的问题（如“怎么办？明天开盘就卖吗”、“为什么会跌”、“后面怎么做T”、“要不要割肉”等），给出极其明确、清晰、不含糊的交易决策建议（绝不模棱两可、模棱两可）。
+1. **直接正面解答核心疑问**：针对用户的问题（如“怎么办？明天开盘就卖吗”、“为什么会跌”、“后面怎么做T”、“要不要割肉”等），给出极其明确、清晰、不含糊的交易决策建议（绝不模棱两可）。
 2. **结合仓位与成本给出具体点位**：必须结合用户的 ${userHolding > 0 ? `当前持仓 ${userHolding} 股及成本 ¥${userCost.toFixed(2)}` : '盘口现价'}，给出具体的高抛位、支撑低吸位、止损位以及仓位比例（如动用30%做T）。
-3. **深入解释主力心理与筹码博弈**：拆解游资和主力在当前点位的诱多/诱空意图、回踩需求，为什么不能盲目割肉或追高。
+3. **深入结合知识库经验与最新新闻**：若有最新公告（如预增/减持/异常波动）或极端封板，必须强制结合知识库规则（如涨停坚决锁仓不卖、踩空决不盲目追高等）进行深度解释。
 4. **格式优美清晰**：采用 Markdown 结构化输出（小标题、重点加粗、分点建议），语言干练犀利、实战性极强。`
 
         let apiKey = process.env.CPA_API_KEY || ''
