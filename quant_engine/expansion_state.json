@@ -1,0 +1,31 @@
+{
+  "start_time": "2026-08-07 00:05:48",
+  "active_24h_window": false,
+  "stocks": {
+    "四川长虹": {
+      "consecutive_matches": 33,
+      "years_back": 8,
+      "max_years": 8
+    },
+    "紫金矿业": {
+      "consecutive_matches": 33,
+      "years_back": 8,
+      "max_years": 8
+    },
+    "安记食品": {
+      "consecutive_matches": 33,
+      "years_back": 8,
+      "max_years": 8
+    },
+    "海马汽车": {
+      "consecutive_matches": 33,
+      "years_back": 8,
+      "max_years": 8
+    },
+    "日出东方": {
+      "consecutive_matches": 33,
+      "years_back": 8,
+      "max_years": 8
+    }
+  }
+}
