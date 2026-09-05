@@ -52,6 +52,66 @@ async function seed() {
       scenario_4 TEXT NOT NULL,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS stock_backtest_stats (
+      id SERIAL PRIMARY KEY,
+      stock_code VARCHAR(20) REFERENCES stocks(code) ON DELETE CASCADE,
+      period VARCHAR(20) NOT NULL,
+      win_rate DOUBLE PRECISION NOT NULL,
+      cum_roi DOUBLE PRECISION NOT NULL,
+      daily_roi_points JSONB NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(stock_code, period)
+    );
+
+    CREATE TABLE IF NOT EXISTS stock_daily_reviews (
+      id SERIAL PRIMARY KEY,
+      stock_code VARCHAR(20) REFERENCES stocks(code) ON DELETE CASCADE,
+      review_date DATE NOT NULL,
+      block_trades TEXT NOT NULL,
+      holding_ratio TEXT NOT NULL,
+      institution_style TEXT NOT NULL,
+      tomorrow_advice TEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      deviation_reason TEXT,
+      key_lesson TEXT,
+      future_action TEXT,
+      UNIQUE(stock_code, review_date)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_positions (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(64) DEFAULT '1',
+      stock_code VARCHAR(20) NOT NULL,
+      holding_shares INTEGER DEFAULT 0,
+      cost_price DOUBLE PRECISION DEFAULT 0.0,
+      t_shares INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE(user_id, stock_code)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_trade_actions (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(64) DEFAULT '1',
+      stock_code VARCHAR(20) NOT NULL,
+      action_type VARCHAR(20) NOT NULL,
+      trade_price DOUBLE PRECISION NOT NULL,
+      trade_shares INTEGER NOT NULL,
+      trade_time TIMESTAMPTZ DEFAULT now(),
+      note TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS user_chat_messages (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(64) NOT NULL,
+      stock_code VARCHAR(16) NOT NULL,
+      role VARCHAR(16) NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_chat_user_stock ON user_chat_messages(user_id, stock_code, created_at);
   `)
 
   // 2. 管理员凭据只能由部署环境显式提供，禁止在仓库内置通用密码。
