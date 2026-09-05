@@ -5,3 +5,8 @@ dist
 *.pyc
 __pycache__
 *.db
+.DS_Store
+quant_engine/state/
+quant_engine/daily_analysis_logs/prediction_runs/
+quant_engine/daily_analysis_logs/reviews/
+quant_engine/daily_analysis_logs/probability_analysis_*.md

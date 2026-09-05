@@ -3,12 +3,16 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 import sys
+import os
 
-def send_stock_email(subject, html_content, recipients=["819379841@qq.com", "2524153777@qq.com"]):
-    smtp_host = "smtp.qq.com"
-    smtp_port = 465
-    sender_email = "819379841@qq.com"
-    auth_code = "jzyalbvownvmbeae"
+def send_stock_email(subject, html_content, recipients=None):
+    smtp_host = os.getenv("ZEROQUANT_SMTP_HOST", "smtp.qq.com")
+    smtp_port = int(os.getenv("ZEROQUANT_SMTP_PORT", "465"))
+    sender_email = os.getenv("ZEROQUANT_SMTP_SENDER", "")
+    auth_code = os.getenv("ZEROQUANT_SMTP_AUTH_CODE", "")
+    recipients = recipients or [item.strip() for item in os.getenv("ZEROQUANT_EMAIL_RECIPIENTS", "").split(",") if item.strip()]
+    if not sender_email or not auth_code or not recipients:
+        raise RuntimeError("SMTP credentials and recipients must be configured through environment variables")
 
     msg = MIMEMultipart()
     msg["From"] = formataddr(("ZeroQuant", sender_email))

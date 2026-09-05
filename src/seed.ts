@@ -54,17 +54,45 @@ async function seed() {
     );
   `)
 
-  // 2. 初始化管理员 (15079393100 / admin@3100)
-  const hashedPassword = await bcrypt.hash('admin@3100', 10)
-  await pool.query(
-    `INSERT INTO users (username, phone, password)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (phone) DO UPDATE SET password = EXCLUDED.password;`,
-    ['ZeroQuant 总控管理员', '15079393100', hashedPassword]
-  )
-  console.log('✅ 管理员账号初始化成功: 15079393100')
+  // 2. 管理员凭据只能由部署环境显式提供，禁止在仓库内置通用密码。
+  const adminPhone = process.env.ZEROQUANT_SEED_ADMIN_PHONE
+  const adminPassword = process.env.ZEROQUANT_SEED_ADMIN_PASSWORD
+  if (adminPhone && adminPassword) {
+    const hashedPassword = await bcrypt.hash(adminPassword, 10)
+    await pool.query(
+      `INSERT INTO users (username, phone, password)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (phone) DO UPDATE SET password = EXCLUDED.password;`,
+      ['ZeroQuant 管理员', adminPhone, hashedPassword]
+    )
+    console.log('✅ 管理员账号由环境变量初始化成功')
+  } else {
+    console.log('ℹ️ 未设置管理员环境变量，跳过管理员账号初始化')
+  }
 
-  // 3. 全量 6 支股票做 T 博弈档案与 4 大分支策略
+  // 股票身份属于配置数据，可以安全初始化；行情和分析结论不得伪造。
+  const coreStocks = [
+    ['000572', 'sz000572', '海马汽车'],
+    ['600362', 'sh600362', '江西铜业'],
+    ['600839', 'sh600839', '四川长虹'],
+    ['601899', 'sh601899', '紫金矿业'],
+    ['603366', 'sh603366', '日出东方'],
+    ['603696', 'sh603696', '安记食品'],
+  ]
+  for (const [code, fullCode, name] of coreStocks) {
+    await pool.query(
+      `INSERT INTO stocks (code, full_code, name) VALUES ($1, $2, $3)
+       ON CONFLICT (code) DO UPDATE SET full_code = EXCLUDED.full_code, name = EXCLUDED.name`,
+      [code, fullCode, name]
+    )
+  }
+
+  if (process.env.ZEROQUANT_SEED_DEMO_DATA !== 'true') {
+    console.log('✅ 核心股票身份初始化完成；默认不写入模拟行情或虚构分析')
+    return
+  }
+
+  // 3. 仅限显式开启的 UI 演示环境，绝不能用于实盘或回测。
   const STOCKS_DATA = [
     {
       code: '600839',
@@ -233,8 +261,8 @@ async function seed() {
     for (let i = 30; i >= 0; i--) {
       const ts = now.subtract(i * 5, 'minute').toDate()
       const sineWave = Math.sin((30 - i) / 3) * (basePrice * 0.015)
-      const realP = Number((basePrice + sineWave + (Math.random() - 0.5) * 0.05).toFixed(2))
-      const predP = Number((basePrice + sineWave * 0.95 + (Math.random() - 0.5) * 0.03).toFixed(2))
+      const realP = Number((basePrice + sineWave).toFixed(2))
+      const predP = Number((basePrice + sineWave * 0.95).toFixed(2))
       const devPct = Number(((Math.abs(realP - predP) / realP) * 100).toFixed(2))
 
       await pool.query(

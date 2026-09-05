@@ -17,9 +17,9 @@ DEBUG_RECIPIENTS = [PRIMARY_USER]
 
 SMTP_HOST = "smtp.qq.com"
 SMTP_PORT = 465
-SENDER_EMAIL = "819379841@qq.com"
-AUTH_CODE = "jzyalbvownvmbeae"
-LOG_FILE = "/root/stock_quant/hourly_check.log"
+SENDER_EMAIL = os.getenv("ZEROQUANT_SMTP_SENDER", "")
+AUTH_CODE = os.getenv("ZEROQUANT_SMTP_AUTH_CODE", "")
+LOG_FILE = os.getenv("ZEROQUANT_REPORT_LOG_FILE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "state", "stock_report.log"))
 
 def fetch_realtime_data():
     codes = "sh600839,sh601899,sh600362,sh603696,sz000572,sh603366,sh000001,sz399001"

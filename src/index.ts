@@ -6,15 +6,12 @@ import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { randomBytes } from 'crypto'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { ensureQuantSchema } from './quant-schema.js'
+import { createQuantRouter, quantInternalOnly } from './quant-routes.js'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -23,10 +20,14 @@ dotenv.config()
 
 const app = express()
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3002
-const JWT_SECRET = process.env.JWT_SECRET || 'zeroquant_secret_2026_super_safe'
+const JWT_SECRET = process.env.JWT_SECRET || randomBytes(32).toString('hex')
+if (!process.env.JWT_SECRET) {
+  console.warn('[Security] JWT_SECRET is not set; generated an ephemeral development secret.')
+}
 
 app.use(cors())
 app.use(express.json())
+app.use('/api/v1/quant', createQuantRouter())
 
 // 1. 健康检查
 app.get('/health', (_req, res) => {
@@ -403,7 +404,7 @@ app.get('/api/v1/chat/messages', async (req, res) => {
     if (rows.length === 0) {
       const { rows: stockRows } = await pool.query(`SELECT * FROM stocks WHERE code = $1`, [stockCode])
       const s = stockRows[0] || { name: '目标标的', code: stockCode, current_price: 0, pct: 0, predicted_low: 0, predicted_high: 0 }
-      const initGreeting = `您好战友！我是 **ZeroQuant 首席量化策略分析师**。已为您锁定标的 **【${s.name} (${s.code})】**。\n\n当前实时盘口现价：**¥${Number(s.current_price || 0).toFixed(2)}** (${Number(s.pct || 0) >= 0 ? '+' : ''}${Number(s.pct || 0).toFixed(2)}%)，预判做 T 波动区间为 **[¥${Number(s.predicted_low || 0).toFixed(2)} ~ ¥${Number(s.predicted_high || 0).toFixed(2)}]**。\n\n您可以随时向我咨询：\n1. 📊 **盘中行情多空异动归因与预测偏差量化复盘**\n2. 🎯 **结合您个人底仓成本与仓位的专属 T+0 挂单指导**\n3. 🔍 **主力游资/机构席位 Level-2 逐笔大单撤单与吸筹诊断**\n4. ⚙️ **实战预测参数动态反馈与自适应矫正**\n\n请问您当前有什么策略问题或行情见解？`
+      const initGreeting = `您好，我是 **ZeroQuant 量化研究解释器**。当前标的是 **${s.name} (${s.code})**。\n\n实时盘口现价：**¥${Number(s.current_price || 0).toFixed(2)}** (${Number(s.pct || 0) >= 0 ? '+' : ''}${Number(s.pct || 0).toFixed(2)}%)，当前概率风险区间为 **[¥${Number(s.predicted_low || 0).toFixed(2)} ~ ¥${Number(s.predicted_high || 0).toFixed(2)}]**。该区间不是收益承诺或确定支撑阻力。\n\n我可以解释：概率分布、数据质量、模型误差、新闻事件、持仓风险和不同情景的失效条件。公开逐笔成交不包含最终账户身份，因此我不会虚构具体机构或游资席位。`
       
       return res.json({
         code: 0,
@@ -434,22 +435,33 @@ app.post('/api/v1/chat/send', async (req, res) => {
     const { rows: stockRows } = await pool.query(`SELECT * FROM stocks WHERE code = $1`, [stockCode])
     const stock = stockRows[0] || { name: '目标标的', code: stockCode, current_price: 10.0, yesterday_price: 10.0, high_price: 10.0, low_price: 10.0, pct: 0, predicted_low: 9.8, predicted_high: 10.3 }
     
-    // 2. 抓取该标的的做 T 画像与主力席位
-    const { rows: tRows } = await pool.query(`SELECT * FROM stock_t_analyses WHERE stock_code = $1`, [stockCode])
-    const tAnalysis = tRows[0] || {}
-
     // 3. 抓取当前用户的专属持仓与成本
     const { rows: posRows } = await pool.query(`SELECT * FROM user_positions WHERE user_id = $1 AND stock_code = $2`, [currentUserId, stockCode])
     const pos = posRows[0] || { holding_shares: 0, cost_price: 0 }
 
-    // 4. 抓取最近的 Level-2 逐笔大单
+    // 4. 抓取最近公开逐笔成交。该数据不包含最终账户或营业部身份。
     const { rows: l2Rows } = await pool.query(
-      `SELECT time_str as "orderTime", price, volume_lots as "volume", type as "orderType", note as "matchedSeat"
+      `SELECT time_str as "orderTime", price, volume_lots as "volume", type as "orderType", note as "dataNote"
        FROM stock_l2_orders
        WHERE stock_code = $1
        ORDER BY id DESC LIMIT 5`,
       [stockCode]
     )
+
+    const { rows: quantRows } = await pool.query(
+      `SELECT r.run_id as "runId", r.as_of as "asOf", r.model_version as "modelVersion",
+              r.model_state as "modelState", r.regime, r.features, r.news_events as "newsEvents", r.warnings,
+              f.p_up as "pUp", f.p_flat as "pFlat", f.p_down as "pDown",
+              f.q10_return_pct as "q10ReturnPct", f.q50_return_pct as "q50ReturnPct",
+              f.q90_return_pct as "q90ReturnPct", f.confidence, f.actionable, f.reasons
+       FROM quant_prediction_runs r
+       JOIN quant_horizon_forecasts f ON f.run_id = r.run_id AND f.horizon_minutes = 15
+       WHERE r.stock_code = $1
+       ORDER BY r.as_of DESC LIMIT 1`,
+      [stockCode]
+    )
+    const quantForecast = quantRows[0] || null
+    const quantActionable = Boolean(quantForecast?.actionable)
 
     // 5. 保存用户消息
     await pool.query(
@@ -505,7 +517,7 @@ app.post('/api/v1/chat/send', async (req, res) => {
         
         reply += `### 💡 【本次加仓买入深度量化评估与诊断】\n\n`
         if (isBuyHigh) {
-          reply += `1. ⚠️ **买入位置评估（盘中略有追高风险）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 高于当前盘口现价 **¥${currP.toFixed(2)}** (${priceDiffPct}%)，处于日内冲高阻尼区间。该标的主力席位（${tAnalysis.core_hosts || '游资量化'}）常在脉冲拉升后进行获利回吐洗盘，后续切忌再度追高！\n`
+          reply += `1. ⚠️ **买入位置评估（盘中略有追高风险）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 高于当前盘口现价 **¥${currP.toFixed(2)}** (${priceDiffPct}%)。公开数据无法证明具体席位行为，应继续观察成交与订单流确认。\n`
         } else if (isBuyLow) {
           reply += `1. 💎 **买入位置评估（精准低吸）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 低于当前现价 **¥${currP.toFixed(2)}**，贴近模型预判强支撑位 **¥${pLow.toFixed(2)}**，属于高性价比的左侧/回踩建仓，筹码结构优异。\n`
         } else {
@@ -515,7 +527,7 @@ app.post('/api/v1/chat/send', async (req, res) => {
         
         reply += `### 🎯 【针对本次新增 ${tradeResult.shares.toLocaleString()} 股 T 仓的专属操作与解盘指引】\n\n`
         reply += `1. 🔴 **高抛兑现目标（接力高卖）**：\n`
-        reply += `   建议在今日或次日分时冲高触及预测阻力位 **¥${pHigh.toFixed(2)}** 附近时，坚决挂单卖出本次建仓的 **${tradeResult.shares.toLocaleString()} 股 T 仓**，单笔预计锁定净收益 **¥${tProfit} 元**（已扣除手续费与印花税）。\n`
+        reply += `   风险区间上界为 **¥${pHigh.toFixed(2)}**；若模型已通过门槛且盘口确认，可将其作为情景参考。本次价格差对应的毛收益约 **¥${tProfit} 元**，尚未扣除费用、税费、滑点和冲击。\n`
         reply += `2. 🚨 **做 T 被套极端防守预案**：\n`
         reply += `   若买入后盘口遭遇突发抛压跳水跌破 **¥${stopLoss}**（跌幅超 1.5%），且 14:30 仍未收复 VWAP 均价线，请坚决平出这 ${tradeResult.shares.toLocaleString()} 股 T 仓止损，严禁将日内短 T 变为被动死扛！\n`
         reply += `3. 🔄 **防卖飞/深跌接回备用策略**：\n`
@@ -541,12 +553,12 @@ app.post('/api/v1/chat/send', async (req, res) => {
         reply = `### ✅ 【实盘高抛/卖出已自动入库】—— ${stock.name} (${stock.code})\n\n`
         reply += `已根据您说的话，为您自动同步录入实盘高抛并锁定收益：\n`
         reply += `- 🔴 **本次操作**：**卖出 ${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**\n`
-        reply += `- 💰 **本笔锁定利润**：预估实现净利润 **¥${lockedProfit} 元**\n`
+        reply += `- 💰 **本笔价差毛收益**：约 **¥${lockedProfit} 元**（未扣除费用、税费和滑点）\n`
         reply += `- 📊 **持仓更新**：剩余底仓 **${remainShares.toLocaleString()} 股**（成本保持 ¥${userCost.toFixed(2)}）\n\n`
         
         reply += `### 💡 【本次高抛卖出量化时机与盘口评估】\n\n`
         reply += `1. 🎯 **卖点位置质量**：卖出价格 **¥${tradeResult.price.toFixed(2)}** 距离预测阻力位 **¥${pHigh.toFixed(2)}** 贴合度高，成功将浮盈落袋为安，有效规避了日内冲高回落倒仓风险。\n`
-        reply += `2. 🔍 **主力洗盘与承接预判**：${tAnalysis.core_hosts || '主力机构与活跃游资'} 通常在拉高出货后寻找日内支撑（**¥${pLow.toFixed(2)}**）重新接盘洗盘，保持仓位主动权。\n\n`
+        reply += `2. 🔍 **承接情景**：公开成交无法识别最终操盘者；只有在风险下界附近出现可验证的成交与订单流改善时，承接情景才获得确认。\n\n`
         
         reply += `### 🎯 【高抛后低吸接回与防踩空/深跌预案】\n\n`
         reply += `1. 🟢 **低位接回挂单点**：\n`
@@ -570,6 +582,12 @@ app.post('/api/v1/chat/send', async (req, res) => {
         reply += `已根据您的指令将持仓设置为：**${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**。\n`
         reply += `后续做 T 测算与挂单点位将基于此持仓基准为您精确计算收益与止损线！`
       }
+      if (!quantActionable) {
+        const probabilities = quantForecast
+          ? `15分钟概率为上涨 ${(Number(quantForecast.pUp) * 100).toFixed(1)}%、震荡 ${(Number(quantForecast.pFlat) * 100).toFixed(1)}%、下跌 ${(Number(quantForecast.pDown) * 100).toFixed(1)}%`
+          : '当前没有可用的版本化概率预测'
+        reply = `### 操作记录已更新——${stock.name} (${stock.code})\n\n系统只记录了您明确陈述的成交/持仓信息，没有向券商下单。${probabilities}。\n\n当前模型状态为 **${quantForecast?.modelState || 'unavailable'}**，尚未达到自动交易门槛，因此不会根据未校准模型生成精确挂单或收益承诺。请以券商实际成交、A股 T+1 可卖库存和个人风险上限为准。`
+      }
     } else {
       // 🚀 核心升级：调用大语言模型（LLM）基于真实实盘数据和知识库进行全方位深度解答（真实你问我答）
       try {
@@ -585,62 +603,35 @@ app.post('/api/v1/chat/send', async (req, res) => {
           content: h.content
         }))
 
-        // 动态读取 quant_engine/knowledge_base.md 中的最新策略与复盘经验
-        let kbContent = ''
-        try {
-          const kbPath = path.resolve(__dirname, '../quant_engine/knowledge_base.md')
-          if (fs.existsSync(kbPath)) {
-            kbContent = fs.readFileSync(kbPath, 'utf-8')
-          }
-        } catch (_) {}
+        const liveNewsText = Array.isArray(quantForecast?.newsEvents) && quantForecast.newsEvents.length > 0
+          ? quantForecast.newsEvents.map((event: any) => `• [${event.published_at || '时间未知'}] ${event.title}（${event.event_type}）`).join('\n')
+          : '当前预测快照没有时间点一致的公告事件'
 
-        // 动态抓取个股最新公告与新闻（东财实时 API）
-        let liveNewsText = '暂无重大异常公告'
-        try {
-          const newsRes = await fetch(`https://np-anotice-stock.eastmoney.com/api/security/ann?page_size=5&page_index=1&ann_type=A&stock_list=${stockCode}`, { signal: AbortSignal.timeout(2500) })
-          if (newsRes.ok) {
-            const newsData: any = await newsRes.json()
-            const annList = newsData?.data?.list || []
-            if (annList.length > 0) {
-              liveNewsText = annList.map((a: any) => `• [${a.notice_date?.slice(0, 10) || '最新'}] ${a.title_ch}`).join('\n')
-            }
-          }
-        } catch (_) {}
-
-        const systemPrompt = `你是一名拥有15年A股实战操盘经验的【ZeroQuant 首席量化投资总监兼顶级做T操盘手】。
-你正在直接与用户（实盘投资者）进行真实、专业、真诚、有理有据的对话交流。严禁输出生硬死板的固定套路模板，必须根据用户的真实提问进行针对性、逻辑严密、接地气的深度分析与解答。
+        const systemPrompt = `你是 ZeroQuant 的量化研究解释器。你只能解释可观察数据、模型概率、风险与失效条件，不得声称知道未提供的真实机构/游资身份，不得承诺收益或把概率区间说成确定支撑阻力。
 
 【当前标的实盘量化底表数据】：
 - 股票名称与代码：${stock.name} (${stock.code})
 - 盘口实时现价：¥${currP.toFixed(2)} (昨收: ¥${yestP.toFixed(2)}, 日内最高: ¥${highP.toFixed(2)}, 最低: ¥${lowP.toFixed(2)}, 涨跌幅: ${Number(stock.pct || 0).toFixed(2)}%)
-- 09:20 锁定量化做T区间：低吸支撑位 ¥${pLow.toFixed(2)} ~ 高抛阻力位 ¥${pHigh.toFixed(2)}
-- 核心控盘主力与游资画像：${tAnalysis.core_hosts || '机构量化基金 + 活跃游资席位高频倒仓'}
+- 当前概率风险区间：P10 下界 ¥${pLow.toFixed(2)} ~ P90 上界 ¥${pHigh.toFixed(2)}
 - 用户当前绑定底仓：${userHolding > 0 ? `${userHolding.toLocaleString()} 股 @ 成本均价 ¥${userCost.toFixed(2)} (当前浮动盈亏: ¥${((currP - userCost) * userHolding).toFixed(2)})` : '暂未录入底仓（以大盘中枢指导）'}
-- 最近 Level-2 逐笔大单动向：${l2Rows.map((o: any) => `[${o.orderTime || '盘中'}] ${o.orderType === 'BUY' ? '大单买入' : '大单卖出'} ${o.volume}手 @ ¥${Number(o.price).toFixed(2)} (${o.matchedSeat || '机构席位'})`).join('; ') || '均值散单吸筹'}
+- 最近公开逐笔成交：${l2Rows.map((o: any) => `[${o.orderTime || '盘中'}] ${o.orderType} ${o.volume}手 @ ¥${Number(o.price).toFixed(2)}`).join('; ') || '暂无可验证逐笔成交'}
+- 模型版本与状态：${quantForecast?.modelVersion || '无'} / ${quantForecast?.modelState || '无'}
+- 15分钟概率：上涨 ${quantForecast ? (Number(quantForecast.pUp) * 100).toFixed(1) : '--'}%，震荡 ${quantForecast ? (Number(quantForecast.pFlat) * 100).toFixed(1) : '--'}%，下跌 ${quantForecast ? (Number(quantForecast.pDown) * 100).toFixed(1) : '--'}%
+- P10/P50/P90收益：${quantForecast ? `${Number(quantForecast.q10ReturnPct).toFixed(2)}% / ${Number(quantForecast.q50ReturnPct).toFixed(2)}% / ${Number(quantForecast.q90ReturnPct).toFixed(2)}%` : '无'}
+- 是否通过交易门槛：${quantActionable ? '是' : '否'}
 
 【实时个股最新公告与资讯】：
 ${liveNewsText}
 
-【已沉淀的量化自主演进策略知识库与历史经验 (knowledge_base.md)】：
-${kbContent.slice(-2500)}
+【回答约束】：
+1. 先说明数据时间和模型是否已校准；未通过交易门槛时只能给情景、风险和需要继续观察的确认信号。
+2. 区分事实、模型推断和未知；公开逐笔成交不能归因为具体席位。
+3. 新闻只使用上述时间点一致事件，Markdown 复盘没有经过验证时不得当作模型事实。
+4. 结合用户持仓说明 T+1、成本、滑点和最大损失，但不替用户作出确定性买卖决定。`
 
-【核心分析原则与要求】：
-1. **直接正面解答核心疑问**：针对用户的问题（如“怎么办？明天开盘就卖吗”、“为什么会跌”、“后面怎么做T”、“要不要割肉”等），给出极其明确、清晰、不含糊的交易决策建议（绝不模棱两可）。
-2. **结合仓位与成本给出具体点位**：必须结合用户的 ${userHolding > 0 ? `当前持仓 ${userHolding} 股及成本 ¥${userCost.toFixed(2)}` : '盘口现价'}，给出具体的高抛位、支撑低吸位、止损位以及仓位比例（如动用30%做T）。
-3. **深入结合知识库经验与最新新闻**：若有最新公告（如预增/减持/异常波动）或极端封板，必须强制结合知识库规则（如涨停坚决锁仓不卖、踩空决不盲目追高等）进行深度解释。
-4. **格式优美清晰**：采用 Markdown 结构化输出（小标题、重点加粗、分点建议），语言干练犀利、实战性极强。`
-
-        let apiKey = process.env.CPA_API_KEY || ''
-        if (!apiKey) {
-          try {
-            const fs = await import('fs')
-            const yaml = fs.readFileSync('/root/cliproxyapi/config.yaml', 'utf8')
-            const match = yaml.match(/api-keys:\s*\n\s*-\s*([^\s]+)/)
-            if (match) apiKey = match[1]
-          } catch (e) {}
-        }
-
-        const cpaRes = await fetch('http://127.0.0.1:8317/v1/chat/completions', {
+        const apiKey = process.env.CPA_API_KEY || ''
+        if (apiKey) {
+          const cpaRes = await fetch('http://127.0.0.1:8317/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -653,11 +644,12 @@ ${kbContent.slice(-2500)}
               ...chatContext
             ]
           })
-        })
+          })
 
-        if (cpaRes.ok) {
-          const cpaData: any = await cpaRes.json()
-          reply = cpaData.choices?.[0]?.message?.content || ''
+          if (cpaRes.ok) {
+            const cpaData: any = await cpaRes.json()
+            reply = cpaData.choices?.[0]?.message?.content || ''
+          }
         }
       } catch (err: any) {
         console.error('LLM invoke error:', err)
@@ -665,13 +657,10 @@ ${kbContent.slice(-2500)}
 
       // 若 LLM 异常时的专业兜底推演
       if (!reply) {
-        reply = `### 📈 【量化盘面与策略深度诊断】—— ${stock.name} (${stock.code})\n\n`
-        reply += `针对您的提问 **“${cleanMsg}”**：\n\n`
-        reply += `1. **开盘决策与多空研判**：当前现价 **¥${currP.toFixed(2)}**，距离支撑位 **¥${pLow.toFixed(2)}** 仅变动 ${(((currP - pLow) / pLow) * 100).toFixed(2)}%。开盘切忌盲目恐慌杀跌割肉！\n`
-        reply += `2. **主力控盘动作**：${tAnalysis.core_hosts || '主力机构'} 通常在早盘 09:30-09:45 进行惯性下探洗盘测试支撑，随后依托均线展开回抽。\n`
-        reply += `3. **建议操作计划**：\n`
-        reply += `   - 若开盘低开触及 **¥${pLow.toFixed(2)}** 企稳且出现托盘大单，可考虑补仓低吸做 T；\n`
-        reply += `   - 若盘中反弹触及 **¥${pHigh.toFixed(2)}** 阻力位受阻，再将 T 仓或部分底仓高抛兑现。`
+        reply = `### 概率研究快照——${stock.name} (${stock.code})\n\n`
+        reply += quantForecast
+          ? `当前模型 **${quantForecast.modelState}** 的15分钟输出为：上涨 ${(Number(quantForecast.pUp) * 100).toFixed(1)}%、震荡 ${(Number(quantForecast.pFlat) * 100).toFixed(1)}%、下跌 ${(Number(quantForecast.pDown) * 100).toFixed(1)}%，置信度 ${(Number(quantForecast.confidence) * 100).toFixed(1)}%。\n\nP10-P90 是风险范围，不是保证成交的支撑阻力。当前是否通过交易门槛：**${quantActionable ? '是' : '否'}**。`
+          : '当前没有完成版本化概率预测，系统不会用固定话术代替缺失数据。'
       }
     }
 
@@ -713,7 +702,7 @@ app.delete('/api/v1/chat/messages', async (req, res) => {
 })
 
 // 5. 1分钟轮询脚本实时写入 (包含实盘价、提前5分钟动态预测线、版本重预测判断)
-app.post('/api/v1/stocks/sync-point', async (req, res) => {
+app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
   try {
     const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr } = req.body
 
@@ -757,38 +746,24 @@ app.post('/api/v1/stocks/sync-point', async (req, res) => {
   }
 })
 
-// 6. 重新模拟/生成版本对比预测线 (当偏差过大时)
-app.post('/api/v1/stocks/re-predict', async (req, res) => {
-  try {
-    const { stockCode, date, newTimePoints } = req.body
-    if (!stockCode || !newTimePoints) {
-      return res.status(400).json({ code: 400, message: '参数缺失', data: null })
-    }
-
-    const tDate = date || '2026-08-10'
-
-    // 获取当前最大 version
-    const { rows: verRows } = await pool.query(
-      `SELECT COALESCE(MAX(version), 0) as max_ver FROM stock_day_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
-      [stockCode, tDate]
-    )
-    const nextVer = verRows[0].max_ver + 1
-
-    await pool.query(
-      `INSERT INTO stock_day_predictions (stock_code, predict_date, version, is_base, time_points)
-       VALUES ($1, $2::date, $3, FALSE, $4)`,
-      [stockCode, tDate, nextVer, JSON.stringify(newTimePoints)]
-    )
-
-    return res.json({ code: 0, message: `成功重新模拟生成第 ${nextVer} 版预测对比折线`, data: { version: nextVer } })
-  } catch (err: any) {
-    console.error('Re-predict error:', err)
-    return res.status(500).json({ code: 500, message: '重新模拟失败', data: null })
-  }
+// 旧接口曾允许前端提交随机正弦曲线。保留明确的退役响应，防止旧客户端静默写入伪预测。
+app.post('/api/v1/stocks/re-predict', (_req, res) => {
+  return res.status(410).json({
+    code: 410,
+    message: '任意曲线重模拟接口已退役；请使用版本化概率模型生成新的预测运行',
+    data: null,
+  })
 })
 
-app.listen(port, () => {
-  console.log(`🚀 ZeroQuant Express Server running at http://localhost:${port}`)
-  // 启动内生多线程量化调度引擎
-  startQuantInternalScheduler()
+async function startServer() {
+  await ensureQuantSchema()
+  app.listen(port, () => {
+    console.log(`🚀 ZeroQuant Express Server running at http://localhost:${port}`)
+    startQuantInternalScheduler()
+  })
+}
+
+startServer().catch((error) => {
+  console.error('ZeroQuant startup failed:', error)
+  process.exit(1)
 })

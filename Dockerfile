@@ -4,10 +4,7 @@
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
-COPY prisma ./prisma/
-RUN apt-get update -y && apt-get install -y openssl
 RUN npm ci
-RUN npx prisma generate
 COPY . .
 RUN npm run build
 
@@ -16,13 +13,17 @@ RUN npm run build
 # ==========================================
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
-RUN apt-get update -y && apt-get install -y openssl
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/prisma ./prisma
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends python3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/package.json ./
+COPY --chown=node:node --from=builder /app/quant_engine ./quant_engine
 
 ENV NODE_ENV=production
+ENV PYTHONDONTWRITEBYTECODE=1
 EXPOSE 3002
 
+USER node
 CMD ["node", "dist/index.js"]

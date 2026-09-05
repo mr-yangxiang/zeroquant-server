@@ -23,7 +23,7 @@ interface TaskMetric {
 
 const taskMetrics: Record<string, TaskMetric> = {
   minutelyMonitor: {
-    name: '1分钟盘口高频监控与前向动态重塑',
+    name: '1分钟盘口概率更新与数据质量检查',
     cronExpr: '* * * * *',
     lastRunAt: null,
     lastDurationMs: 0,
@@ -33,7 +33,7 @@ const taskMetrics: Record<string, TaskMetric> = {
     totalErrors: 0,
   },
   openingBaseline: {
-    name: '09:20 竞价终极基准线与动量推演锁定',
+    name: '09:20 盘前概率基线与风险区间生成',
     cronExpr: '20 9 * * 1-5',
     lastRunAt: null,
     lastDurationMs: 0,
@@ -42,19 +42,9 @@ const taskMetrics: Record<string, TaskMetric> = {
     totalRuns: 0,
     totalErrors: 0,
   },
-  midnightAudit: {
-    name: '00:00 全量系统健康巡检与首轮基准预测',
-    cronExpr: '0 0 * * *',
-    lastRunAt: null,
-    lastDurationMs: 0,
-    status: 'IDLE',
-    lastError: null,
-    totalRuns: 0,
-    totalErrors: 0,
-  },
-  hourlyVerifier: {
-    name: '逐小时实盘偏差核对与样本自主演进',
-    cronExpr: '0 * * * *',
+  nightlyReview: {
+    name: '18:10 收盘后概率评估与候选经验报告',
+    cronExpr: '10 18 * * 1-5',
     lastRunAt: null,
     lastDurationMs: 0,
     status: 'IDLE',
@@ -169,7 +159,7 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
 export function startQuantInternalScheduler() {
   console.log('⚡ [QuantScheduler] 正在初始化 ZeroQuant 内生多线程量化调度引擎...')
 
-  // 1. 每分钟盘口监控与动态前向重塑 (* * * * *)
+  // 1. 每分钟盘口概率更新；脚本内部严格过滤非连续竞价时段
   cron.schedule(
     taskMetrics.minutelyMonitor.cronExpr,
     async () => {
@@ -182,12 +172,12 @@ export function startQuantInternalScheduler() {
     { timezone: 'Asia/Shanghai' }
   )
 
-  // 2. 开盘前 09:20 竞价终极基准线锁定 (20 9 * * 1-5)
+  // 2. 开盘前 09:20 概率基线与风险区间
   cron.schedule(
     taskMetrics.openingBaseline.cronExpr,
     async () => {
       try {
-        console.log('🎯 [QuantScheduler] 触发 09:20 终极基准线开盘推演与锁定...')
+        console.log('🎯 [QuantScheduler] 触发 09:20 概率基线生成...')
         await executeQuantScript('openingBaseline', 'generate_daily_predictions.py')
       } catch (err: any) {
         //
@@ -196,13 +186,13 @@ export function startQuantInternalScheduler() {
     { timezone: 'Asia/Shanghai' }
   )
 
-  // 3. 每日 00:00 凌晨系统巡检与首轮基准生成 (0 0 * * *)
+  // 3. 收盘后评估。只记录证据，不因单日结果自动修改模型或知识库。
   cron.schedule(
-    taskMetrics.midnightAudit.cronExpr,
+    taskMetrics.nightlyReview.cronExpr,
     async () => {
       try {
-        console.log('🌙 [QuantScheduler] 触发 00:00 凌晨系统健康巡检与首轮预测...')
-        await executeQuantScript('midnightAudit', 'midnight_audit_and_predict.py')
+        console.log('📏 [QuantScheduler] 触发收盘后概率质量评估...')
+        await executeQuantScript('nightlyReview', 'nightly_review.py')
       } catch (err: any) {
         //
       }
@@ -210,20 +200,7 @@ export function startQuantInternalScheduler() {
     { timezone: 'Asia/Shanghai' }
   )
 
-  // 4. 逐小时实盘偏差核对 (0 * * * *)
-  cron.schedule(
-    taskMetrics.hourlyVerifier.cronExpr,
-    async () => {
-      try {
-        await executeQuantScript('hourlyVerifier', 'hourly_verifier.py')
-      } catch (err: any) {
-        //
-      }
-    },
-    { timezone: 'Asia/Shanghai' }
-  )
-
-  console.log('🚀 [QuantScheduler] ZeroQuant 内生量化调度引擎已全量激活 (已加载 4 项高并发定时任务)')
+  console.log('🚀 [QuantScheduler] ZeroQuant 概率量化调度已激活 (3 项受控任务)')
 }
 
 /**

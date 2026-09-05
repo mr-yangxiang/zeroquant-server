@@ -1,0 +1,23 @@
+{
+  "version": "bootstrap_probability_v1",
+  "state": "untrained_bootstrap",
+  "calibrated": false,
+  "weights": {
+    "momentum_z": 0.42,
+    "vwap_gap_z": -0.18,
+    "range_position": 0.10,
+    "volume_acceleration": 0.05,
+    "momentum_volume": 0.08,
+    "news_score": 0.28,
+    "order_flow_imbalance": 0.60
+  },
+  "regimeAdjustments": {
+    "trend_up": 0.12,
+    "trend_down": -0.12,
+    "event_driven": 0.0,
+    "high_volatility": 0.0,
+    "range_bound": 0.0
+  },
+  "minimumQuality": 0.80,
+  "minimumConfidence": 0.62
+}
