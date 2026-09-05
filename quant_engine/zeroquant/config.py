@@ -39,7 +39,26 @@ class Settings:
     estimated_round_trip_cost_bps: float
 
     @classmethod
+    def _load_dotenv(cls) -> None:
+        env_file = ENGINE_DIR.parent / ".env"
+        if not env_file.exists():
+            return
+        try:
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip().strip("'\"")
+                if key and key not in os.environ:
+                    os.environ[key] = value
+        except Exception:
+            pass
+
+    @classmethod
     def from_env(cls) -> "Settings":
+        cls._load_dotenv()
         def configured_path(name: str, default: Path) -> Path:
             raw = os.getenv(name)
             if not raw:

@@ -16,7 +16,7 @@ import { createQuantRouter, quantInternalOnly } from './quant-routes.js'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-dotenv.config()
+dotenv.config({ override: true })
 
 const app = express()
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3002
