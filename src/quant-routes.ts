@@ -37,6 +37,19 @@ function validateProbability(value: unknown): number | null {
   return parsed !== null && parsed >= 0 && parsed <= 1 ? parsed : null
 }
 
+function localizeModelState(value: unknown) {
+  const state = String(value || '')
+  if (state === 'untrained_bootstrap') {
+    return {
+      label: '基础试运行模型（尚未训练）',
+      explanation: '当前只是验证数据管道和页面的初始规则权重，尚未用多年历史样本训练，也未通过样本外回测和概率校准，不能据此证明预测准确率。',
+    }
+  }
+  if (state === 'shadow') return { label: '影子验证中', explanation: '模型已训练，正在模拟成交中验证滑点、延迟和成本后的表现。' }
+  if (state === 'champion') return { label: '已通过生产门槛', explanation: '模型已通过既定样本外、校准和影子交易门槛，仍受实时数据质量与风控约束。' }
+  return { label: '状态待确认', explanation: '当前模型状态没有对应的中文说明。' }
+}
+
 export function createQuantRouter() {
   const router = Router()
 
@@ -47,6 +60,7 @@ export function createQuantRouter() {
     const tradeDate = String(body.tradeDate || '')
     const asOf = String(body.asOf || '')
     const mode = String(body.mode || '')
+    const modelState = String(body.modelState || '')
     const horizons = Array.isArray(body.horizons) ? body.horizons : []
     const referencePrice = finiteNumber(body.referencePrice)
     const previousClose = finiteNumber(body.previousClose)
@@ -77,14 +91,14 @@ export function createQuantRouter() {
         `INSERT INTO quant_prediction_runs
           (run_id, stock_code, trade_date, as_of, mode, reference_price, previous_close, model_version, model_state, regime, features, news_events, input_hash, warnings)
          VALUES ($1::uuid, $2, $3::date, $4::timestamptz, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13, $14::jsonb)`,
-        [runId, stockCode, tradeDate, asOf, mode, referencePrice, previousClose, String(body.modelVersion || ''), String(body.modelState || ''), JSON.stringify(body.regime || {}), JSON.stringify(body.features || {}), JSON.stringify(body.newsEvents || []), String(body.inputHash || ''), JSON.stringify(body.warnings || [])]
+          [runId, stockCode, tradeDate, asOf, mode, referencePrice, previousClose, String(body.modelVersion || ''), modelState, JSON.stringify(body.regime || {}), JSON.stringify(body.features || {}), JSON.stringify(body.newsEvents || []), String(body.inputHash || ''), JSON.stringify(body.warnings || [])]
       )
       for (const item of parsedHorizons) {
         await client.query(
           `INSERT INTO quant_horizon_forecasts
             (run_id, horizon_minutes, p_up, p_flat, p_down, expected_return_pct, q10_return_pct, q50_return_pct, q90_return_pct, confidence, actionable, reasons)
            VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)`,
-          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), Boolean(item.actionable), JSON.stringify(item.reasons || [])]
+          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), modelState === 'champion' && Boolean(item.actionable), JSON.stringify(item.reasons || [])]
         )
       }
 
@@ -122,13 +136,19 @@ export function createQuantRouter() {
 
   router.get('/stocks/:code/latest-forecast', async (req, res) => {
     try {
+      const asOfDate = typeof req.query.asOf === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.asOf)
+        ? req.query.asOf
+        : null
       const { rows: runRows } = await pool.query(
         `SELECT run_id as "runId", stock_code as "stockCode", trade_date as "tradeDate", as_of as "asOf",
                 mode, reference_price as "referencePrice", previous_close as "previousClose",
                 model_version as "modelVersion", model_state as "modelState", regime, features,
                 news_events as "newsEvents", input_hash as "inputHash", warnings
-         FROM quant_prediction_runs WHERE stock_code = $1 ORDER BY as_of DESC LIMIT 1`,
-        [req.params.code]
+         FROM quant_prediction_runs
+         WHERE stock_code = $1
+           AND ($2::date IS NULL OR as_of < $2::date + INTERVAL '1 day')
+         ORDER BY as_of DESC LIMIT 1`,
+        [req.params.code, asOfDate]
       )
       if (runRows.length === 0) return res.json({ code: 0, message: 'forecast not found', data: null })
       const { rows: forecasts } = await pool.query(
@@ -138,7 +158,17 @@ export function createQuantRouter() {
          FROM quant_horizon_forecasts WHERE run_id = $1::uuid ORDER BY horizon_minutes`,
         [runRows[0].runId]
       )
-      return res.json({ code: 0, message: 'ok', data: { ...runRows[0], horizons: forecasts } })
+      const localized = localizeModelState(runRows[0].modelState)
+      return res.json({
+        code: 0,
+        message: 'ok',
+        data: {
+          ...runRows[0],
+          modelStateLabel: localized.label,
+          modelStateExplanation: localized.explanation,
+          horizons: forecasts,
+        },
+      })
     } catch (error) {
       console.error('Fetch latest forecast error:', error)
       return res.status(500).json({ code: 500, message: 'forecast query failed', data: null })

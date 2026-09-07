@@ -15,95 +15,6 @@ def trading_time_points() -> list[str]:
     return points
 
 
-# 500日分时大数据行为画像：定义各时间切片的主力控盘相对振幅与价格重心因子 (1.0 = 昨收价)
-# 严格源于 6 大标的历史真实筹码与盘口博弈规律
-BIG_DATA_INTRADAY_PROFILES: dict[str, dict[str, Any]] = {
-    "000572": {
-        "name": "海马汽车",
-        "type": "均值回归冲高回落型",
-        "beta": 1.45,
-        # 500日分时习惯：09:30-09:45 探底吸筹 (0.975) ➔ 10:30 快速冲高诱多 (1.032) ➔ 11:30 回归 VWAP (0.995) ➔ 13:30 弱反弹 (1.010) ➔ 15:00 稳态 (0.985)
-        "time_factors": [
-            (0.00, 1.000), (0.06, 0.975), (0.15, 0.988), (0.25, 1.032), 
-            (0.50, 0.995), (0.65, 1.010), (0.80, 0.990), (1.00, 0.985)
-        ]
-    },
-    "600839": {
-        "name": "四川长虹",
-        "type": "网格脉冲型 (章盟主)",
-        "beta": 1.20,
-        # 500日分时习惯：09:30 顺开 (1.00) ➔ 10:15 刻意打压 MA10 (0.982) ➔ 11:30 缓步推升 (1.015) ➔ 13:30 网格脉冲高点 (1.042) ➔ 14:15 机器砸盘 (1.005) ➔ 15:00 (1.002)
-        "time_factors": [
-            (0.00, 1.000), (0.10, 1.012), (0.19, 0.982), (0.35, 1.005),
-            (0.50, 1.015), (0.70, 1.042), (0.85, 1.005), (1.00, 1.002)
-        ]
-    },
-    "601899": {
-        "name": "紫金矿业",
-        "type": "宏观大宗周期型 (外资控盘)",
-        "beta": 0.85,
-        # 500日分时习惯：全天波动平滑，09:30 随隔夜伦铜高开/低开 ➔ 盘中受外盘大宗商品影响单边微幅震荡
-        "time_factors": [
-            (0.00, 1.000), (0.15, 0.992), (0.35, 0.988), (0.50, 0.985),
-            (0.65, 0.982), (0.80, 0.980), (1.00, 0.978)
-        ]
-    },
-    "600362": {
-        "name": "江西铜业",
-        "type": "宏观大宗周期型 (外资+公募)",
-        "beta": 0.95,
-        # 500日分时习惯：跟随紫金矿业与伦敦铜走势，早盘 09:40 见全天相对高点后，午盘与尾盘逐步承压回落
-        "time_factors": [
-            (0.00, 1.000), (0.08, 1.015), (0.25, 0.995), (0.50, 0.982),
-            (0.70, 0.978), (0.85, 0.970), (1.00, 0.965)
-        ]
-    },
-    "603696": {
-        "name": "安记食品",
-        "type": "游资妖股高换手博弈型",
-        "beta": 2.20,
-        # 500日分时习惯：09:30-09:45 游资迅猛抢筹拉高 (+5.8% 甚至冲击涨停) ➔ 10:30 获利盘涌出宽幅洗盘 ➔ 13:30-14:00 二次封板/拉升 ➔ 14:45 筹码分化
-        "time_factors": [
-            (0.00, 1.000), (0.06, 1.058), (0.15, 1.035), (0.28, 0.985),
-            (0.50, 1.020), (0.72, 1.065), (0.88, 1.030), (1.00, 1.025)
-        ]
-    },
-    "603366": {
-        "name": "日出东方",
-        "type": "波段游资博弈型",
-        "beta": 1.65,
-        # 500日分时习惯：09:30-10:00 冲高 ➔ 10:30-11:30 缩量回踩 ➔ 14:00 尾盘脉冲
-        "time_factors": [
-            (0.00, 1.000), (0.12, 1.030), (0.30, 0.995), (0.50, 0.985),
-            (0.75, 1.025), (0.90, 0.990), (1.00, 0.988)
-        ]
-    }
-}
-
-
-def interpolate_profile_curve(base_price: float, profile_factors: list[tuple[float, float]], total_pts: int = 242) -> list[float]:
-    factors = profile_factors
-    res = []
-    for idx in range(total_pts):
-        prog = idx / float(total_pts - 1)
-        p1 = factors[0]
-        p2 = factors[-1]
-        for i in range(len(factors) - 1):
-            if factors[i][0] <= prog <= factors[i+1][0]:
-                p1 = factors[i]
-                p2 = factors[i+1]
-                break
-        t_span = p2[0] - p1[0]
-        if t_span <= 0:
-            interp = p1[1]
-        else:
-            rel_t = (prog - p1[0]) / t_span
-            smooth_t = rel_t * rel_t * (3.0 - 2.0 * rel_t)
-            interp = p1[1] + (p2[1] - p1[1]) * smooth_t
-        res.append(round(base_price * interp, 2))
-    return res
-
-
 def _interpolate(anchors: list[tuple[int, float]], minute: int) -> float:
     if minute <= anchors[0][0]:
         return anchors[0][1]
@@ -123,29 +34,24 @@ def build_compatible_curve(
     stock_code: str | None = None,
     limit_ratio: float = 0.10,
 ) -> list[dict[str, float | str]]:
-    """Render probability forecasts for the legacy chart with 500-day intraday patterns."""
+    """Render the model quantiles without injecting hand-written stock waves.
+
+    ``stock_code`` remains in the signature for compatibility with callers. A
+    genuine intraday seasonal profile may only be added after it is estimated
+    point-in-time from versioned historical data and validated out of sample.
+    """
     points = trading_time_points()
-    total_pts = len(points)
     q10 = [(0, 0.0)] + [(item.horizon_minutes, item.q10_return_pct) for item in forecasts]
     q50 = [(0, 0.0)] + [(item.horizon_minutes, item.q50_return_pct) for item in forecasts]
     q90 = [(0, 0.0)] + [(item.horizon_minutes, item.q90_return_pct) for item in forecasts]
     lower_limit = previous_close * (1.0 - limit_ratio)
     upper_limit = previous_close * (1.0 + limit_ratio)
 
-    profile = BIG_DATA_INTRADAY_PROFILES.get(stock_code or "")
-    if profile:
-        profile_prices = interpolate_profile_curve(reference_price, profile["time_factors"], total_pts)
-    else:
-        profile_prices = [reference_price] * total_pts
-
     curve: list[dict[str, float | str]] = []
     for minute, label in enumerate(points):
-        base_p = profile_prices[minute]
-        model_ret = _interpolate(q50, minute)
-        median = base_p * (1.0 + model_ret / 100.0 * 0.5)
-
-        low = median * (1.0 + _interpolate(q10, minute) / 100.0)
-        high = median * (1.0 + _interpolate(q90, minute) / 100.0)
+        low = reference_price * (1.0 + _interpolate(q10, minute) / 100.0)
+        median = reference_price * (1.0 + _interpolate(q50, minute) / 100.0)
+        high = reference_price * (1.0 + _interpolate(q90, minute) / 100.0)
 
         low = max(lower_limit, min(upper_limit, low))
         median = max(lower_limit, min(upper_limit, median))
@@ -236,11 +142,11 @@ def build_forward_rolling_curve(
             base_future = float(base_points[idx].get("price", current_price))
             wave_diff = base_future - base_at_match
 
-            # 即时动量外推与指数衰减 (半衰期约 18 分钟)
+            # 即时动量外推与指数衰减；外推距离随预测步数增长，避免首个未来点突然跳变。
             decay = math.exp(-future_step / 18.0)
-            trend_extrap = momentum_slope * 12.0 * decay
+            trend_extrap = momentum_slope * future_step * decay
 
-            # 向日内均线 VWAP 与主力筹码重心回归引力
+            # 向可观察的日内 VWAP 回归，不假定任何“主力筹码重心”。
             reversion_weight = (1.0 - math.exp(-future_step / 35.0)) * 0.40
             reversion = (vwap - current_price) * reversion_weight
 

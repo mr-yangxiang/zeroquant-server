@@ -62,7 +62,7 @@ python3 quant_engine/realtime_monitor_1m.py --debug --no-persist
 - `JWT_SECRET`
 - `ZEROQUANT_INTERNAL_TOKEN`
 
-可选配置包括行情超时、公告缓存、审计目录、模型文件和估算交易成本。`ZEROQUANT_ALLOW_UNCALIBRATED_TRADING` 默认且应保持为 `false`。
+可选配置包括行情超时、公告缓存、审计目录、模型文件和估算交易成本。旧变量 `ZEROQUANT_ALLOW_UNCALIBRATED_TRADING` 仅为配置兼容保留，已经不能绕过“已校准且已晋级生产模型”的硬门槛。
 
 ## 调度
 

@@ -12,6 +12,7 @@ import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
 import { ensureQuantSchema } from './quant-schema.js'
 import { createQuantRouter, quantInternalOnly } from './quant-routes.js'
+import { fetchOwnershipProfile } from './ownership.js'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -98,8 +99,8 @@ app.post('/api/v1/auth/register', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 10)
     const { rows } = await pool.query(
-      `INSERT INTO users (id, phone, username, password, updated_at)
-       VALUES (gen_random_uuid()::text, $1, $2, $3, NOW())
+      `INSERT INTO users (phone, username, password)
+       VALUES ($1, $2, $3)
        RETURNING id, phone, username, avatar`,
       [phone, username, hash]
     )
@@ -122,7 +123,7 @@ app.post('/api/v1/auth/register', async (req, res) => {
   }
 })
 
-function getUserFromReq(req: express.Request): string {
+function getUserFromReq(req: express.Request): string | null {
   try {
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -135,8 +136,81 @@ function getUserFromReq(req: express.Request): string {
   } catch (err) {
     // fallback
   }
-  return '1'
+  return null
 }
+
+function requireUser(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!getUserFromReq(req)) return res.status(401).json({ code: 401, message: '登录状态无效，请重新登录', data: null })
+  return next()
+}
+
+class InsufficientRecordedPositionError extends Error {
+  constructor(public readonly availableShares: number) {
+    super(`insufficient recorded position: ${availableShares}`)
+  }
+}
+
+async function persistUserTrade(
+  userId: string,
+  stockCode: string,
+  actionType: 'BUY' | 'SELL' | 'SET_POSITION',
+  price: number,
+  shares: number,
+) {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    // 即使该用户尚无持仓行，也要串行化同一用户/标的的并发更新，避免首次写入丢失更新。
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`${userId}|${stockCode}`])
+    const { rows } = await client.query(
+      `SELECT holding_shares, cost_price
+       FROM user_positions
+       WHERE user_id = $1 AND stock_code = $2
+       FOR UPDATE`,
+      [userId, stockCode]
+    )
+    const previousShares = Number(rows[0]?.holding_shares) || 0
+    const previousCost = Number(rows[0]?.cost_price) || 0
+    let nextShares = shares
+    let nextCost = price
+
+    if (actionType === 'BUY') {
+      nextShares = previousShares + shares
+      nextCost = Number(((previousShares * previousCost + shares * price) / nextShares).toFixed(4))
+    } else if (actionType === 'SELL') {
+      if (shares > previousShares) throw new InsufficientRecordedPositionError(previousShares)
+      nextShares = previousShares - shares
+      nextCost = previousCost
+    }
+
+    if (actionType !== 'SET_POSITION') {
+      await client.query(
+        `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [userId, stockCode, actionType, price, shares]
+      )
+    }
+    await client.query(
+      `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id, stock_code) DO UPDATE SET
+         holding_shares = EXCLUDED.holding_shares,
+         cost_price = EXCLUDED.cost_price,
+         updated_at = NOW()`,
+      [userId, stockCode, nextShares, nextCost]
+    )
+    await client.query('COMMIT')
+    return { previousShares, previousCost, nextShares, nextCost }
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+app.use('/api/v1/user', requireUser)
+app.use('/api/v1/chat', requireUser)
 
 // 3. 获取所有 6 支重点做 T 股票列表
 app.get('/api/v1/stocks', async (_req, res) => {
@@ -144,36 +218,35 @@ app.get('/api/v1/stocks', async (_req, res) => {
     const { rows: stocks } = await pool.query('SELECT * FROM stocks ORDER BY code ASC')
     
     for (const stock of stocks) {
-      const { rows: analyses } = await pool.query(
-        'SELECT * FROM stock_t_analyses WHERE stock_code = $1 ORDER BY updated_at DESC LIMIT 1',
-        [stock.code]
-      )
-      stock.analyses = analyses.map(a => ({
-        id: a.id,
-        chipAnalysis: a.chip_analysis,
-        hostStyle: a.host_style,
-        doReasons: a.do_reasons || '【推荐买入/做T理由】：处于均线密集密集托盘带，现货大宗支撑强劲，适合分批建仓。',
-        dontReasons: a.dont_reasons || '【不推荐/禁忌行为】：严禁在分时快速脉冲拉高时追高！严禁在跌破强止损线时盲目补仓死扛！',
-        realtimeAdvice: a.realtime_advice || '【实时开盘盘口指导】：盘中请紧盯 09:40-10:15 的回踩确认点与 13:30 午后脉冲点。',
-        scenario1: a.scenario_1,
-        scenario2: a.scenario_2,
-        scenario3: a.scenario_3,
-        scenario4: a.scenario_4,
-        updatedAt: a.updated_at
-      }))
+      // 旧表中的分析为手工演示文本且没有来源、样本区间或版本，禁止继续下发给实盘页面。
+      stock.analyses = []
       stock.currentPrice = stock.current_price
       stock.yesterdayPrice = stock.yesterday_price
       stock.highPrice = stock.high_price
       stock.lowPrice = stock.low_price
       stock.predictedHigh = stock.predicted_high
       stock.predictedLow = stock.predicted_low
-      stock.winRate = stock.win_rate
+      // 旧字段的 88.5 等默认值没有可复现的回测证据，不能作为“胜率”下发。
+      stock.winRate = null
+      delete stock.win_rate
     }
 
     return res.json({ code: 0, message: 'ok', data: stocks })
   } catch (err: any) {
     console.error('Fetch stocks error:', err)
     return res.status(500).json({ code: 500, message: '数据获取失败', data: null })
+  }
+})
+
+// 主要公开股东与持仓变化：按公告日过滤，历史复盘不会看到未来披露。
+app.get('/api/v1/stocks/:code/ownership-profile', async (req, res) => {
+  try {
+    const asOf = String(req.query.asOf || dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD'))
+    const data = await fetchOwnershipProfile(req.params.code, asOf)
+    return res.json({ code: 0, message: 'ok', data })
+  } catch (err: any) {
+    console.error('Fetch ownership profile error:', err)
+    return res.status(502).json({ code: 502, message: '公开股东披露暂时不可用', data: null })
   }
 })
 
@@ -249,7 +322,7 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
-    // D. Level-2 逐笔大单 (>=1000手) 与冰山压单/托盘买单
+    // D. 公开逐笔大额成交（>=1000手）。它不是多档委托簿，也不含账户/席位身份。
     const { rows: l2Orders } = await pool.query(
       `SELECT time_str as "timeStr", type, price, volume_lots as "volumeLots", note
        FROM stock_l2_orders
@@ -259,43 +332,24 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
-    // E. 30天与100天做T历史回测累积收益率看板
-    const { rows: backtestStats } = await pool.query(
-      `SELECT period, win_rate as "winRate", cum_roi as "cumRoi", daily_roi_points as "dailyRoiPoints"
-       FROM stock_backtest_stats
-       WHERE stock_code = $1`,
-      [code]
-    )
-
-    // F. 每日龙虎榜/大宗交易与机构持仓复盘 (包含偏差原因剖析、总结道理与后续算法改进)
-    const { rows: dailyReviews } = await pool.query(
-      `SELECT block_trades as "blockTrades", holding_ratio as "holdingRatio",
-              institution_style as "institutionStyle", tomorrow_advice as "tomorrowAdvice",
-              deviation_reason as "deviationReason", key_lesson as "keyLesson",
-              future_action as "futureAction"
-       FROM stock_daily_reviews
-       WHERE stock_code = $1
-       ORDER BY review_date DESC
-       LIMIT 1`,
-      [code]
-    )
-
-    // G. 用户实时持仓与个人实盘操作记录 (针对个人仓位和买卖动作)
+    // E. 用户实时持仓与个人成交记录。
     const currentUserId = getUserFromReq(req)
-
-    const { rows: positionRows } = await pool.query(
-      `SELECT holding_shares as "holdingShares", cost_price as "costPrice", t_shares as "tShares"
-       FROM user_positions WHERE stock_code = $1 AND user_id = $2`,
-      [code, currentUserId]
-    )
-
-    const { rows: tradeRows } = await pool.query(
-      `SELECT id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", 
-              TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime", note
-       FROM user_trade_actions WHERE stock_code = $1 AND user_id = $2 AND (trade_time AT TIME ZONE 'Asia/Shanghai')::date = $3::date
-       ORDER BY trade_time DESC`,
-      [code, currentUserId, targetDate]
-    )
+    const positionRows = currentUserId
+      ? (await pool.query(
+          `SELECT holding_shares as "holdingShares", cost_price as "costPrice", t_shares as "tShares"
+           FROM user_positions WHERE stock_code = $1 AND user_id = $2`,
+          [code, currentUserId]
+        )).rows
+      : []
+    const tradeRows = currentUserId
+      ? (await pool.query(
+          `SELECT id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares",
+                  TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime", note
+           FROM user_trade_actions WHERE stock_code = $1 AND user_id = $2 AND (trade_time AT TIME ZONE 'Asia/Shanghai')::date = $3::date
+           ORDER BY trade_time DESC`,
+          [code, currentUserId, targetDate]
+        )).rows
+      : []
 
     return res.json({
       code: 0,
@@ -307,8 +361,9 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
         predictions,
         rollingPredictions,
         l2Orders,
-        backtestStats,
-        dailyReview: dailyReviews[0] || null,
+        // 旧表没有策略版本、样本区间、成本和样本外证据，明确停止下发。
+        backtestStats: [],
+        dailyReview: null,
         position: positionRows[0] || { holdingShares: 0, costPrice: 0.0, tShares: 0 },
         userTrades: tradeRows
       }
@@ -322,9 +377,14 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
 // 7. 用户个人仓位设置 API
 app.post('/api/v1/user/position', async (req, res) => {
   try {
-    const currentUserId = getUserFromReq(req)
+    const currentUserId = getUserFromReq(req)!
     const { stockCode, holdingShares, costPrice } = req.body
-    if (!stockCode) return res.status(400).json({ code: 400, message: '股票代码缺失' })
+    const shares = Number(holdingShares)
+    const cost = Number(costPrice)
+    if (!/^\d{6}$/.test(String(stockCode || ''))) return res.status(400).json({ code: 400, message: '股票代码格式错误' })
+    if (!Number.isInteger(shares) || shares < 0 || !Number.isFinite(cost) || cost < 0) {
+      return res.status(400).json({ code: 400, message: '持仓股数必须为非负整数，成本必须为非负数' })
+    }
 
     await pool.query(
       `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
@@ -333,7 +393,7 @@ app.post('/api/v1/user/position', async (req, res) => {
          holding_shares = EXCLUDED.holding_shares,
          cost_price = EXCLUDED.cost_price,
          updated_at = NOW()`,
-      [currentUserId, stockCode, parseInt(holdingShares) || 0, parseFloat(costPrice) || 0.0]
+      [currentUserId, stockCode, shares, cost]
     )
     return res.json({ code: 0, message: '个人持仓保存成功' })
   } catch (err: any) {
@@ -347,18 +407,24 @@ app.post('/api/v1/user/trade-action', async (req, res) => {
   try {
     const currentUserId = getUserFromReq(req)
     const { stockCode, actionType, tradePrice, tradeShares } = req.body
-    if (!stockCode || !actionType || !tradePrice || !tradeShares) {
-      return res.status(400).json({ code: 400, message: '操作参数不完整' })
+    const normalizedAction = String(actionType || '').toUpperCase()
+    const price = Number(tradePrice)
+    const shares = Number(tradeShares)
+    if (!/^\d{6}$/.test(String(stockCode || '')) || !['BUY', 'SELL'].includes(normalizedAction)) {
+      return res.status(400).json({ code: 400, message: '股票代码或成交方向无效' })
+    }
+    if (!Number.isFinite(price) || price <= 0 || !Number.isInteger(shares) || shares <= 0) {
+      return res.status(400).json({ code: 400, message: '成交价格必须大于零，成交股数必须为正整数' })
     }
 
     const { rows } = await pool.query(
       `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
        VALUES ($1, $2, $3, $4, $5, NOW())
        RETURNING id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime"`,
-      [currentUserId, stockCode, actionType.toUpperCase(), parseFloat(tradePrice), parseInt(tradeShares)]
+      [currentUserId, stockCode, normalizedAction, price, shares]
     )
 
-    return res.json({ code: 0, message: '实盘操作录入成功', data: rows[0] })
+    return res.json({ code: 0, message: '用户陈述的成交记录已保存（未向券商下单）', data: rows[0] })
   } catch (err: any) {
     console.error('Trade action error:', err)
     return res.status(500).json({ code: 500, message: '实盘操作录入失败' })
@@ -379,7 +445,7 @@ app.delete('/api/v1/user/trade-action/:id', async (req, res) => {
       [parseInt(id), currentUserId]
     )
 
-    return res.json({ code: 0, message: '成功撤销该笔实盘操作' })
+    return res.json({ code: 0, message: '成交记录已撤销' })
   } catch (err: any) {
     console.error('Delete trade action error:', err)
     return res.status(500).json({ code: 500, message: '删除失败' })
@@ -433,7 +499,8 @@ app.post('/api/v1/chat/send', async (req, res) => {
 
     // 1. 抓取当前股票的最新行情与量化参数
     const { rows: stockRows } = await pool.query(`SELECT * FROM stocks WHERE code = $1`, [stockCode])
-    const stock = stockRows[0] || { name: '目标标的', code: stockCode, current_price: 10.0, yesterday_price: 10.0, high_price: 10.0, low_price: 10.0, pct: 0, predicted_low: 9.8, predicted_high: 10.3 }
+    if (stockRows.length === 0) return res.status(404).json({ code: 404, message: '标的不存在', data: null })
+    const stock = stockRows[0]
     
     // 3. 抓取当前用户的专属持仓与成本
     const { rows: posRows } = await pool.query(`SELECT * FROM user_positions WHERE user_id = $1 AND stock_code = $2`, [currentUserId, stockCode])
@@ -462,6 +529,13 @@ app.post('/api/v1/chat/send', async (req, res) => {
     )
     const quantForecast = quantRows[0] || null
     const quantActionable = Boolean(quantForecast?.actionable)
+    const quantModelStateLabel = quantForecast?.modelState === 'untrained_bootstrap'
+      ? '基础试运行模型（尚未训练）'
+      : quantForecast?.modelState === 'shadow'
+        ? '影子验证中'
+        : quantForecast?.modelState === 'champion'
+          ? '已通过生产门槛'
+          : '状态待确认'
 
     // 5. 保存用户消息
     await pool.query(
@@ -484,109 +558,60 @@ app.post('/api/v1/chat/send', async (req, res) => {
     const tradeResult = parseTradingIntent(cleanMsg, currP)
 
     if (tradeResult.isTradeAction && tradeResult.price && tradeResult.shares) {
-      // 🚀 核心：根据用户所说的明确陈述性买卖内容，直接自动帮用户执行对应实盘操作，并给出针对性合理建议与分析
+      // 只持久化用户明确陈述的已成交事实；交易记录与持仓更新必须原子提交。
       if (tradeResult.actionType === 'BUY') {
-        // 1. 自动写入实盘买入操作
-        await pool.query(
-          `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
-           VALUES ($1, $2, 'BUY', $3, $4, NOW())`,
-          [currentUserId, stockCode, tradeResult.price, tradeResult.shares]
-        )
-        // 2. 自动重算综合持仓与均价成本
-        const newShares = userHolding + tradeResult.shares
-        const newCost = Number(((userHolding * userCost + tradeResult.shares * tradeResult.price) / newShares).toFixed(2))
-        await pool.query(
-          `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (user_id, stock_code) DO UPDATE SET
-             holding_shares = EXCLUDED.holding_shares,
-             cost_price = EXCLUDED.cost_price,
-             updated_at = NOW()`,
-          [currentUserId, stockCode, newShares, newCost]
-        )
-        const tProfit = ((pHigh - tradeResult.price) * tradeResult.shares).toFixed(2)
-        const stopLoss = (tradeResult.price * 0.985).toFixed(2)
+        const persisted = await persistUserTrade(currentUserId!, stockCode, 'BUY', tradeResult.price, tradeResult.shares)
+        const newShares = persisted.nextShares
+        const newCost = persisted.nextCost
         const priceDiffPct = (((tradeResult.price - currP) / currP) * 100).toFixed(2)
         const isBuyHigh = tradeResult.price > currP * 1.01
         const isBuyLow = tradeResult.price < currP * 0.99
         
-        reply = `### ✅ 【实盘买入已自动入库并重算】—— ${stock.name} (${stock.code})\n\n`
-        reply += `已根据您说的话，为您自动同步录入实盘操作并重算名下持仓：\n`
+        reply = `### ✅ 【用户陈述的买入成交已记录】—— ${stock.name} (${stock.code})\n\n`
+        reply += `系统只记录您明确陈述的成交，没有向券商下单。\n`
         reply += `- 🟢 **本次操作**：**买入 ${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**\n`
-        reply += `- 📊 **持仓重算**：名下持仓由 ${userHolding.toLocaleString()} 股增至 **${newShares.toLocaleString()} 股**，综合成本均价由 ¥${userCost.toFixed(2)} 调整为 **¥${newCost.toFixed(2)}**\n\n`
+        reply += `- 📊 **持仓重算**：记录持仓由 ${persisted.previousShares.toLocaleString()} 股增至 **${newShares.toLocaleString()} 股**，记录成本均价由 ¥${persisted.previousCost.toFixed(2)} 调整为 **¥${newCost.toFixed(2)}**\n\n`
         
-        reply += `### 💡 【本次加仓买入深度量化评估与诊断】\n\n`
+        reply += `### 【价格位置观察】\n\n`
         if (isBuyHigh) {
-          reply += `1. ⚠️ **买入位置评估（盘中略有追高风险）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 高于当前盘口现价 **¥${currP.toFixed(2)}** (${priceDiffPct}%)。公开数据无法证明具体席位行为，应继续观察成交与订单流确认。\n`
+          reply += `成交价高于当前盘口约 ${priceDiffPct}%，存在追价风险。\n`
         } else if (isBuyLow) {
-          reply += `1. 💎 **买入位置评估（精准低吸）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 低于当前现价 **¥${currP.toFixed(2)}**，贴近模型预判强支撑位 **¥${pLow.toFixed(2)}**，属于高性价比的左侧/回踩建仓，筹码结构优异。\n`
+          reply += `成交价低于当前盘口，但这只能说明当前有浮动价差，不能证明买点质量。\n`
         } else {
-          reply += `1. 📊 **买入位置评估（平稳跟随）**：您本次买入单价 **¥${tradeResult.price.toFixed(2)}** 紧随当前盘口现价 **¥${currP.toFixed(2)}**，处于日内 VWAP 均价线健康波动中枢（[¥${pLow.toFixed(2)} ~ ¥${pHigh.toFixed(2)}]）。\n`
+          reply += `成交价接近当前盘口，方向优势尚不明显。\n`
         }
-        reply += `2. 🔍 **主力盘口与席位动态**：当前盘口多空处于平衡博弈期，日内关键防守位在 **¥${pLow.toFixed(2)}**。只要盘中不跌破该托盘线，本次加仓筹码具有较好的胜率基础。\n\n`
-        
-        reply += `### 🎯 【针对本次新增 ${tradeResult.shares.toLocaleString()} 股 T 仓的专属操作与解盘指引】\n\n`
-        reply += `1. 🔴 **高抛兑现目标（接力高卖）**：\n`
-        reply += `   风险区间上界为 **¥${pHigh.toFixed(2)}**；若模型已通过门槛且盘口确认，可将其作为情景参考。本次价格差对应的毛收益约 **¥${tProfit} 元**，尚未扣除费用、税费、滑点和冲击。\n`
-        reply += `2. 🚨 **做 T 被套极端防守预案**：\n`
-        reply += `   若买入后盘口遭遇突发抛压跳水跌破 **¥${stopLoss}**（跌幅超 1.5%），且 14:30 仍未收复 VWAP 均价线，请坚决平出这 ${tradeResult.shares.toLocaleString()} 股 T 仓止损，严禁将日内短 T 变为被动死扛！\n`
-        reply += `3. 🔄 **防卖飞/深跌接回备用策略**：\n`
-        reply += `   后续在 ¥${pHigh.toFixed(2)} 高抛后若股价继续放量主升浪突破，决不直接追高，待回踩确认突破位时再接；若高抛后回落跌超 1.5% 且在支撑位出现万手托盘，再挂单接回完成滚仓。`
+        reply += `当前偏弱/偏强观察边界为 ¥${pLow.toFixed(2)}～¥${pHigh.toFixed(2)}。跌破下界代表风险扩大；接近上界后只有出现滞涨证据才评估卖出。区间不是收益承诺。`
       } else if (tradeResult.actionType === 'SELL') {
-        // 1. 自动写入实盘卖出操作
-        await pool.query(
-          `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
-           VALUES ($1, $2, 'SELL', $3, $4, NOW())`,
-          [currentUserId, stockCode, tradeResult.price, tradeResult.shares]
-        )
-        // 2. 更新剩余持仓
-        const remainShares = Math.max(0, userHolding - tradeResult.shares)
-        const lockedProfit = userCost > 0 ? ((tradeResult.price - userCost) * tradeResult.shares).toFixed(2) : ((tradeResult.price - pLow) * tradeResult.shares).toFixed(2)
-        await pool.query(
-          `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (user_id, stock_code) DO UPDATE SET
-             holding_shares = EXCLUDED.holding_shares,
-             updated_at = NOW()`,
-          [currentUserId, stockCode, remainShares, userCost]
-        )
-        reply = `### ✅ 【实盘高抛/卖出已自动入库】—— ${stock.name} (${stock.code})\n\n`
-        reply += `已根据您说的话，为您自动同步录入实盘高抛并锁定收益：\n`
+        let persisted
+        try {
+          persisted = await persistUserTrade(currentUserId!, stockCode, 'SELL', tradeResult.price, tradeResult.shares)
+        } catch (error) {
+          if (error instanceof InsufficientRecordedPositionError) {
+            return res.status(400).json({ code: 400, message: `卖出数量超过系统记录的持仓 ${error.availableShares} 股，请先同步真实持仓`, data: null })
+          }
+          throw error
+        }
+        const remainShares = persisted.nextShares
+        const lockedProfit = persisted.previousCost > 0 ? ((tradeResult.price - persisted.previousCost) * tradeResult.shares).toFixed(2) : null
+        reply = `### ✅ 【用户陈述的卖出成交已记录】—— ${stock.name} (${stock.code})\n\n`
+        reply += `系统只记录您明确陈述的成交，没有向券商下单。\n`
         reply += `- 🔴 **本次操作**：**卖出 ${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**\n`
-        reply += `- 💰 **本笔价差毛收益**：约 **¥${lockedProfit} 元**（未扣除费用、税费和滑点）\n`
-        reply += `- 📊 **持仓更新**：剩余底仓 **${remainShares.toLocaleString()} 股**（成本保持 ¥${userCost.toFixed(2)}）\n\n`
-        
-        reply += `### 💡 【本次高抛卖出量化时机与盘口评估】\n\n`
-        reply += `1. 🎯 **卖点位置质量**：卖出价格 **¥${tradeResult.price.toFixed(2)}** 距离预测阻力位 **¥${pHigh.toFixed(2)}** 贴合度高，成功将浮盈落袋为安，有效规避了日内冲高回落倒仓风险。\n`
-        reply += `2. 🔍 **承接情景**：公开成交无法识别最终操盘者；只有在风险下界附近出现可验证的成交与订单流改善时，承接情景才获得确认。\n\n`
-        
-        reply += `### 🎯 【高抛后低吸接回与防踩空/深跌预案】\n\n`
-        reply += `1. 🟢 **低位接回挂单点**：\n`
-        reply += `   建议等待股价回踩第一支撑位 **¥${pLow.toFixed(2)}** 且盘口出现连续托盘大单时，重新挂单接回 **${tradeResult.shares.toLocaleString()} 股**，完成完整做 T 闭环。\n`
-        reply += `2. 🚀 **踩空/卖飞应对预案**：\n`
-        reply += `   若高卖后股价不跌反涨（放量突破主升浪），**决不可盲目追高**！必须等待股价回踩突破确认位（¥${(tradeResult.price * 1.01).toFixed(2)} 附近企稳）才可考虑重新进场。\n`
-        reply += `3. 📉 **深跌预案**：\n`
-        reply += `   若高卖后盘中大跌，只有差价 >1.5% 且企稳才接回，若直接跌破强支撑位决不盲目接飞刀。`
+        reply += lockedProfit === null
+          ? `- 💰 **收益估算**：没有有效持仓成本，暂不计算收益\n`
+          : `- 💰 **相对持仓成本的毛收益**：约 **¥${lockedProfit} 元**（未扣除费用、税费和滑点）\n`
+        reply += `- 📊 **持仓更新**：记录剩余持仓 **${remainShares.toLocaleString()} 股**（记录成本保持 ¥${persisted.previousCost.toFixed(2)}）\n\n`
+        reply += `当前回落观察边界为 ¥${pLow.toFixed(2)}。只有回落后止跌且净差价覆盖费用，才评估接回；若价格持续突破 ¥${pHigh.toFixed(2)}，等待模型重算，不按旧上界追价。`
       } else if (tradeResult.actionType === 'SET_POSITION') {
-        // 设置底仓
-        await pool.query(
-          `INSERT INTO user_positions (user_id, stock_code, holding_shares, cost_price)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (user_id, stock_code) DO UPDATE SET
-             holding_shares = EXCLUDED.holding_shares,
-             cost_price = EXCLUDED.cost_price,
-             updated_at = NOW()`,
-          [currentUserId, stockCode, tradeResult.shares, tradeResult.price]
-        )
+        await persistUserTrade(currentUserId!, stockCode, 'SET_POSITION', tradeResult.price, tradeResult.shares)
         reply = `### ✅ 【个人持仓底仓已同步更新】—— ${stock.name} (${stock.code})\n\n`
         reply += `已根据您的指令将持仓设置为：**${tradeResult.shares.toLocaleString()} 股 @ ¥${tradeResult.price.toFixed(2)}**。\n`
-        reply += `后续做 T 测算与挂单点位将基于此持仓基准为您精确计算收益与止损线！`
+        reply += `后续风险情景会以此记录成本为基准；它不替代券商真实持仓、可卖库存、费用和成交回报。`
       }
       if (!quantActionable) {
         const probabilities = quantForecast
           ? `15分钟概率为上涨 ${(Number(quantForecast.pUp) * 100).toFixed(1)}%、震荡 ${(Number(quantForecast.pFlat) * 100).toFixed(1)}%、下跌 ${(Number(quantForecast.pDown) * 100).toFixed(1)}%`
           : '当前没有可用的版本化概率预测'
-        reply = `### 操作记录已更新——${stock.name} (${stock.code})\n\n系统只记录了您明确陈述的成交/持仓信息，没有向券商下单。${probabilities}。\n\n当前模型状态为 **${quantForecast?.modelState || 'unavailable'}**，尚未达到自动交易门槛，因此不会根据未校准模型生成精确挂单或收益承诺。请以券商实际成交、A股 T+1 可卖库存和个人风险上限为准。`
+        reply = `### 操作记录已更新——${stock.name} (${stock.code})\n\n系统只记录了您明确陈述的成交/持仓信息，没有向券商下单。${probabilities}。\n\n当前模型状态为 **${quantModelStateLabel}**，尚未达到自动交易门槛，因此不会根据未校准模型生成精确挂单或收益承诺。请以券商实际成交、A股 T+1 可卖库存和个人风险上限为准。`
       }
     } else {
       // 🚀 核心升级：调用大语言模型（LLM）基于真实实盘数据和知识库进行全方位深度解答（真实你问我答）
@@ -612,12 +637,12 @@ app.post('/api/v1/chat/send', async (req, res) => {
 【当前标的实盘量化底表数据】：
 - 股票名称与代码：${stock.name} (${stock.code})
 - 盘口实时现价：¥${currP.toFixed(2)} (昨收: ¥${yestP.toFixed(2)}, 日内最高: ¥${highP.toFixed(2)}, 最低: ¥${lowP.toFixed(2)}, 涨跌幅: ${Number(stock.pct || 0).toFixed(2)}%)
-- 当前概率风险区间：P10 下界 ¥${pLow.toFixed(2)} ~ P90 上界 ¥${pHigh.toFixed(2)}
+- 当前价格情景：偏弱边界 ¥${pLow.toFixed(2)} ~ 偏强边界 ¥${pHigh.toFixed(2)}
 - 用户当前绑定底仓：${userHolding > 0 ? `${userHolding.toLocaleString()} 股 @ 成本均价 ¥${userCost.toFixed(2)} (当前浮动盈亏: ¥${((currP - userCost) * userHolding).toFixed(2)})` : '暂未录入底仓（以大盘中枢指导）'}
 - 最近公开逐笔成交：${l2Rows.map((o: any) => `[${o.orderTime || '盘中'}] ${o.orderType} ${o.volume}手 @ ¥${Number(o.price).toFixed(2)}`).join('; ') || '暂无可验证逐笔成交'}
-- 模型版本与状态：${quantForecast?.modelVersion || '无'} / ${quantForecast?.modelState || '无'}
+- 模型版本与状态：${quantForecast?.modelVersion || '无'} / ${quantModelStateLabel}
 - 15分钟概率：上涨 ${quantForecast ? (Number(quantForecast.pUp) * 100).toFixed(1) : '--'}%，震荡 ${quantForecast ? (Number(quantForecast.pFlat) * 100).toFixed(1) : '--'}%，下跌 ${quantForecast ? (Number(quantForecast.pDown) * 100).toFixed(1) : '--'}%
-- P10/P50/P90收益：${quantForecast ? `${Number(quantForecast.q10ReturnPct).toFixed(2)}% / ${Number(quantForecast.q50ReturnPct).toFixed(2)}% / ${Number(quantForecast.q90ReturnPct).toFixed(2)}%` : '无'}
+- 偏弱/最可能/偏强收益情景：${quantForecast ? `${Number(quantForecast.q10ReturnPct).toFixed(2)}% / ${Number(quantForecast.q50ReturnPct).toFixed(2)}% / ${Number(quantForecast.q90ReturnPct).toFixed(2)}%` : '无'}
 - 是否通过交易门槛：${quantActionable ? '是' : '否'}
 
 【实时个股最新公告与资讯】：
@@ -659,7 +684,7 @@ ${liveNewsText}
       if (!reply) {
         reply = `### 概率研究快照——${stock.name} (${stock.code})\n\n`
         reply += quantForecast
-          ? `当前模型 **${quantForecast.modelState}** 的15分钟输出为：上涨 ${(Number(quantForecast.pUp) * 100).toFixed(1)}%、震荡 ${(Number(quantForecast.pFlat) * 100).toFixed(1)}%、下跌 ${(Number(quantForecast.pDown) * 100).toFixed(1)}%，置信度 ${(Number(quantForecast.confidence) * 100).toFixed(1)}%。\n\nP10-P90 是风险范围，不是保证成交的支撑阻力。当前是否通过交易门槛：**${quantActionable ? '是' : '否'}**。`
+          ? `当前模型 **${quantModelStateLabel}** 的15分钟输出为：上涨 ${(Number(quantForecast.pUp) * 100).toFixed(1)}%、震荡 ${(Number(quantForecast.pFlat) * 100).toFixed(1)}%、下跌 ${(Number(quantForecast.pDown) * 100).toFixed(1)}%，置信度 ${(Number(quantForecast.confidence) * 100).toFixed(1)}%。\n\n偏弱到偏强情景是风险范围，不是保证成交的支撑阻力。当前是否通过交易门槛：**${quantActionable ? '是' : '否'}**。`
           : '当前没有完成版本化概率预测，系统不会用固定话术代替缺失数据。'
       }
     }
@@ -703,69 +728,81 @@ app.delete('/api/v1/chat/messages', async (req, res) => {
 
 // 5. 1分钟轮询脚本实时写入 (包含实盘价、盘中动态前向重塑线、版本重预测判断)
 app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
+  const client = await pool.connect()
   try {
     const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr, rollingPredictions } = req.body
-
-    if (!stockCode || realPrice === undefined) {
-      return res.status(400).json({ code: 400, message: '参数缺失', data: null })
+    const observedPrice = Number(realPrice)
+    if (!/^\d{6}$/.test(String(stockCode || '')) || !Number.isFinite(observedPrice) || observedPrice <= 0) {
+      return res.status(400).json({ code: 400, message: '股票代码或实盘价格无效', data: null })
     }
 
     const tDate = tradeDate || dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD')
-    const tStamp = timestampStr ? dayjs(timestampStr).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss+08:00') : dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss+08:00')
-    const deviationPct = predictedPrice ? Number(((Math.abs(realPrice - predictedPrice) / realPrice) * 100).toFixed(2)) : 0
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(tDate))) {
+      return res.status(400).json({ code: 400, message: '交易日期无效', data: null })
+    }
+    const parsedTimestamp = timestampStr ? dayjs(timestampStr) : dayjs()
+    if (!parsedTimestamp.isValid()) {
+      return res.status(400).json({ code: 400, message: '行情时间无效', data: null })
+    }
+    const tStamp = parsedTimestamp.tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss+08:00')
+    const predicted = Number(predictedPrice)
+    const safePredicted = Number.isFinite(predicted) && predicted > 0 ? predicted : observedPrice
+    const deviationPct = Number(((Math.abs(observedPrice - safePredicted) / observedPrice) * 100).toFixed(2))
 
-    // 1. 更新 Stocks 表最新价
-    await pool.query(
+    const validRolling = Array.isArray(rollingPredictions)
+      ? rollingPredictions.filter((item: any) =>
+          item && /^\d{2}:\d{2}$/.test(String(item.targetTime || '')) &&
+          Number.isFinite(Number(item.predictedPrice)) && Number(item.predictedPrice) > 0
+        ).slice(0, 242)
+      : []
+
+    await client.query('BEGIN')
+    await client.query(
       `UPDATE stocks
-       SET current_price = $1, pct = COALESCE($2, pct), high_price = GREATEST(high_price, $3), low_price = LEAST(low_price, $4), updated_at = NOW()
+       SET current_price = $1,
+           pct = COALESCE($2, pct),
+           high_price = GREATEST(COALESCE(high_price, 0), $3),
+           low_price = CASE WHEN COALESCE(low_price, 0) <= 0 THEN $4 ELSE LEAST(low_price, $4) END,
+           updated_at = NOW()
        WHERE code = $5`,
-      [currentPrice || realPrice, pct, highPrice || realPrice, lowPrice || realPrice, stockCode]
+      [Number(currentPrice) || observedPrice, Number.isFinite(Number(pct)) ? Number(pct) : null, Number(highPrice) || observedPrice, Number(lowPrice) || observedPrice, stockCode]
     )
 
-    // 2. 插入真实轨迹点 (使用 ID 自动生成与北京时间 timestamptz)
-    const { rows } = await pool.query(
+    const { rows } = await client.query(
       `INSERT INTO stock_price_histories (id, stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date)
        VALUES (gen_random_uuid()::text, $1, $2::timestamptz, $3, $4, $5, $6::date)
        RETURNING id, stock_code as "stockCode", timestamp, real_price as "realPrice", predicted_price as "predictedPrice", deviation_pct as "deviationPct"`,
-      [stockCode, tStamp, realPrice, predictedPrice || realPrice, deviationPct, tDate]
+      [stockCode, tStamp, observedPrice, safePredicted, deviationPct, tDate]
     )
 
-    // 3. 记录盘中动态前向重塑线 (从当前分钟延伸至 15:00)
-    if (Array.isArray(rollingPredictions) && rollingPredictions.length > 0) {
-      await pool.query(
+    if (validRolling.length > 0) {
+      await client.query(
         `DELETE FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
         [stockCode, tDate]
       )
-      const client = await pool.connect()
-      try {
-        await client.query('BEGIN')
-        for (const rp of rollingPredictions) {
-          if (rp.targetTime && rp.predictedPrice !== undefined) {
-            await client.query(
-              `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
-               VALUES ($1, $2::date, $3, $4)`,
-              [stockCode, tDate, rp.targetTime, rp.predictedPrice]
-            )
-          }
-        }
-        await client.query('COMMIT')
-      } catch (e) {
-        await client.query('ROLLBACK')
-      } finally {
-        client.release()
+      for (const rp of validRolling) {
+        await client.query(
+          `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
+           VALUES ($1, $2::date, $3, $4)`,
+          [stockCode, tDate, rp.targetTime, Number(rp.predictedPrice)]
+        )
       }
-    } else if (targetTime && predictedPrice !== undefined) {
-      await pool.query(
+    } else if (targetTime && Number.isFinite(predicted) && predicted > 0) {
+      await client.query(
         `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
          VALUES ($1, $2::date, $3, $4)`,
-        [stockCode, tDate, targetTime, predictedPrice]
+        [stockCode, tDate, targetTime, predicted]
       )
     }
 
+    await client.query('COMMIT')
     return res.json({ code: 0, message: '数据点同步成功', data: rows[0] })
   } catch (err: any) {
+    await client.query('ROLLBACK')
     console.error('Sync point error:', err)
     return res.status(500).json({ code: 500, message: '同步失败', data: null })
+  } finally {
+    client.release()
   }
 })
 

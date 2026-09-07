@@ -7,7 +7,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from zeroquant.config import ENGINE_DIR, Settings
-from zeroquant.curve import build_compatible_curve, trading_time_points
+from zeroquant.curve import build_compatible_curve, build_forward_rolling_curve, trading_time_points
 from zeroquant.features import extract_features
 from zeroquant.forecast import ModelArtifact, ProbabilityForecastEngine
 from zeroquant.models import DailyBar, MinuteBar, NewsEvent, QuoteSnapshot
@@ -57,6 +57,10 @@ class ProbabilityCoreTests(unittest.TestCase):
             self.assertAlmostEqual(forecast.p_up + forecast.p_flat + forecast.p_down, 1.0, places=5)
             self.assertFalse(forecast.actionable)
             self.assertLessEqual(forecast.confidence, 0.60)
+        forced = ProbabilityForecastEngine(artifact, 18, allow_uncalibrated_trading=True).predict(
+            quote(), features, detect_regime(features)
+        )
+        self.assertTrue(all(not forecast.actionable for forecast in forced))
 
     def test_curve_is_legacy_compatible_and_exposes_uncertainty(self):
         as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
@@ -68,6 +72,34 @@ class ProbabilityCoreTests(unittest.TestCase):
         self.assertEqual(len(trading_time_points()), 242)
         self.assertTrue(all(point["lower"] <= point["price"] <= point["upper"] for point in curve))
         self.assertTrue(all(9.0 <= point["price"] <= 11.0 for point in curve))
+
+    def test_curve_does_not_inject_hand_written_stock_profiles(self):
+        as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
+        features = extract_features(quote(), as_of, daily_bars(), minute_bars(), [])
+        artifact = ModelArtifact.load(ENGINE_DIR / "models" / "bootstrap_probability_v1.json")
+        forecasts = ProbabilityForecastEngine(artifact, 18).predict(
+            quote(), features, detect_regime(features), (5, 15, 30, 60, 120, 240)
+        )
+        first = build_compatible_curve(quote().price, quote().previous_close, forecasts, stock_code="600839")
+        second = build_compatible_curve(quote().price, quote().previous_close, forecasts, stock_code="603696")
+        self.assertEqual(first, second)
+
+    def test_realtime_curve_contains_only_current_and_future_points(self):
+        as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
+        features = extract_features(quote(), as_of, daily_bars(), minute_bars(), [])
+        artifact = ModelArtifact.load(ENGINE_DIR / "models" / "bootstrap_probability_v1.json")
+        forecasts = ProbabilityForecastEngine(artifact, 18).predict(quote(), features, detect_regime(features))
+        curve = build_forward_rolling_curve(
+            stock_code="600839",
+            current_time="10:00",
+            current_price=10.20,
+            previous_close=10.00,
+            minute_bars=minute_bars(),
+            forecasts=forecasts,
+        )
+        self.assertEqual(curve[0], {"targetTime": "10:00", "predictedPrice": 10.20})
+        self.assertEqual(curve[-1]["targetTime"], "15:00")
+        self.assertTrue(all(point["targetTime"] >= "10:00" for point in curve))
 
     def test_pipeline_hash_is_stable_for_identical_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

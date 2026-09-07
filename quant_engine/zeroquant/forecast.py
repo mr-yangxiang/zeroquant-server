@@ -116,7 +116,9 @@ class ProbabilityForecastEngine:
             confidence_cap = 0.92 if self.artifact.calibrated else 0.60
             confidence = _clip(raw_confidence, 0.05, confidence_cap)
             clears_cost = abs(expected) > self.cost_pct * 1.25
-            trusted_model = self.artifact.calibrated or self.allow_uncalibrated_trading
+            # 实盘动作门槛不可由环境变量绕过：只有已校准且正式晋级的产物才可信。
+            # allow_uncalibrated_trading 仅为旧配置兼容保留，不再影响 actionable。
+            trusted_model = self.artifact.calibrated and self.artifact.state == "champion"
             actionable = (
                 trusted_model
                 and features.quality_score >= self.artifact.minimum_quality
@@ -126,6 +128,8 @@ class ProbabilityForecastEngine:
             reasons = list(base_reasons)
             if not self.artifact.calibrated:
                 reasons.append("模型尚未通过样本外概率校准")
+            elif self.artifact.state != "champion":
+                reasons.append("模型尚未通过生产晋级门槛")
             if not clears_cost:
                 reasons.append("预期波动未覆盖估算交易成本安全边际")
             forecasts.append(
