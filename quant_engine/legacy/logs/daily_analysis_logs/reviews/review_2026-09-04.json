@@ -1,0 +1,91 @@
+{
+  "tradeDate": "2026-09-04",
+  "evaluatedAt": "2026-09-06T00:25:43.740798+08:00",
+  "sampleSize": 6,
+  "meanBrierScore": 0.270087,
+  "meanAbsoluteReturnErrorPct": 3.178862,
+  "p10P90Coverage": 0.833333,
+  "promotionDecision": "NO_CHANGE_INSUFFICIENT_EVIDENCE",
+  "modelMutation": false,
+  "failures": [],
+  "rows": [
+    {
+      "stockCode": "000572",
+      "stockName": "海马汽车",
+      "runId": "abc15f15-0725-42fa-93b7-5288f2520cf4",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 3.87,
+      "actualClose": 3.91,
+      "realizedReturnPct": 1.033592,
+      "outcome": "up",
+      "brierScore": 0.428473,
+      "absoluteReturnErrorPct": 2.518462,
+      "insideP10P90": true
+    },
+    {
+      "stockCode": "600362",
+      "stockName": "江西铜业",
+      "runId": "b2358f1e-937a-48ba-b1d3-d10a4e5bfc18",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 46.88,
+      "actualClose": 45.86,
+      "realizedReturnPct": -2.175768,
+      "outcome": "down",
+      "brierScore": 0.02508,
+      "absoluteReturnErrorPct": 0.483517,
+      "insideP10P90": true
+    },
+    {
+      "stockCode": "600839",
+      "stockName": "四川长虹",
+      "runId": "a58baae9-2cad-478e-9bb4-4b9ed5810e0e",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 6.96,
+      "actualClose": 6.95,
+      "realizedReturnPct": -0.143678,
+      "outcome": "flat",
+      "brierScore": 0.318872,
+      "absoluteReturnErrorPct": 0.86594,
+      "insideP10P90": true
+    },
+    {
+      "stockCode": "601899",
+      "stockName": "紫金矿业",
+      "runId": "43588b88-5eff-4ff9-a449-94ab0080ac38",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 33.31,
+      "actualClose": 33.35,
+      "realizedReturnPct": 0.120084,
+      "outcome": "flat",
+      "brierScore": 0.433686,
+      "absoluteReturnErrorPct": 2.274068,
+      "insideP10P90": true
+    },
+    {
+      "stockCode": "603366",
+      "stockName": "日出东方",
+      "runId": "766b1a5f-0e30-4354-8885-875b48ea93c0",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 7.6,
+      "actualClose": 7.83,
+      "realizedReturnPct": 3.026316,
+      "outcome": "up",
+      "brierScore": 0.02508,
+      "absoluteReturnErrorPct": 0.495007,
+      "insideP10P90": true
+    },
+    {
+      "stockCode": "603696",
+      "stockName": "安记食品",
+      "runId": "591d7b07-c400-4831-91de-59804451bd96",
+      "modelVersion": "bootstrap_probability_v1",
+      "referencePrice": 13.75,
+      "actualClose": 15.13,
+      "realizedReturnPct": 10.036364,
+      "outcome": "up",
+      "brierScore": 0.389331,
+      "absoluteReturnErrorPct": 12.436175,
+      "insideP10P90": false
+    }
+  ]
+}

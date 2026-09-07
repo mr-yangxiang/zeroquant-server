@@ -6,13 +6,14 @@ import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
 import { ensureQuantSchema } from './quant-schema.js'
 import { createQuantRouter, quantInternalOnly } from './quant-routes.js'
 import { fetchOwnershipProfile } from './ownership.js'
+import { runMigrationsUp } from './migrations/runner.js'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -98,11 +99,12 @@ app.post('/api/v1/auth/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10)
+    const newId = randomUUID()
     const { rows } = await pool.query(
-      `INSERT INTO users (phone, username, password)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (id, phone, username, password)
+       VALUES ($1, $2, $3, $4)
        RETURNING id, phone, username, avatar`,
-      [phone, username, hash]
+      [newId, phone, username, hash]
     )
 
     const user = rows[0]
@@ -405,7 +407,7 @@ app.post('/api/v1/user/position', async (req, res) => {
 // 8. 用户实盘买卖操作录入与战术对策指导 API
 app.post('/api/v1/user/trade-action', async (req, res) => {
   try {
-    const currentUserId = getUserFromReq(req)
+    const currentUserId = getUserFromReq(req)!
     const { stockCode, actionType, tradePrice, tradeShares } = req.body
     const normalizedAction = String(actionType || '').toUpperCase()
     const price = Number(tradePrice)
@@ -417,14 +419,41 @@ app.post('/api/v1/user/trade-action', async (req, res) => {
       return res.status(400).json({ code: 400, message: '成交价格必须大于零，成交股数必须为正整数' })
     }
 
-    const { rows } = await pool.query(
-      `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
-       VALUES ($1, $2, $3, $4, $5, NOW())
-       RETURNING id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime"`,
-      [currentUserId, stockCode, normalizedAction, price, shares]
-    )
+    try {
+      const positionResult = await persistUserTrade(
+        currentUserId,
+        stockCode,
+        normalizedAction as 'BUY' | 'SELL',
+        price,
+        shares
+      )
 
-    return res.json({ code: 0, message: '用户陈述的成交记录已保存（未向券商下单）', data: rows[0] })
+      const { rows } = await pool.query(
+        `SELECT id, action_type as "actionType", trade_price as "tradePrice", trade_shares as "tradeShares", TO_CHAR(trade_time AT TIME ZONE 'Asia/Shanghai', 'HH24:MI:SS') as "tradeTime"
+         FROM user_trade_actions
+         WHERE user_id = $1 AND stock_code = $2
+         ORDER BY id DESC LIMIT 1`,
+        [currentUserId, stockCode]
+      )
+
+      return res.json({
+        code: 0,
+        message: '用户陈述的成交记录已保存（未向券商下单）',
+        data: {
+          ...rows[0],
+          position: positionResult,
+        },
+      })
+    } catch (tradeErr: any) {
+      if (tradeErr instanceof InsufficientRecordedPositionError) {
+        return res.status(400).json({
+          code: 400,
+          message: `卖出数量超过当前持仓，已被拒绝（当前可用持仓: ${tradeErr.availableShares} 股）`,
+          data: null,
+        })
+      }
+      throw tradeErr
+    }
   } catch (err: any) {
     console.error('Trade action error:', err)
     return res.status(500).json({ code: 500, message: '实盘操作录入失败' })
@@ -433,22 +462,62 @@ app.post('/api/v1/user/trade-action', async (req, res) => {
 
 // 9. 删除/撤销某笔用户实盘操作 API
 app.delete('/api/v1/user/trade-action/:id', async (req, res) => {
+  const client = await pool.connect()
   try {
-    const currentUserId = getUserFromReq(req)
+    const currentUserId = getUserFromReq(req)!
     const { id } = req.params
-    if (!id) {
-      return res.status(400).json({ code: 400, message: '参数缺失' })
+    const tradeId = parseInt(id)
+    if (!Number.isInteger(tradeId)) {
+      return res.status(400).json({ code: 400, message: '参数缺失或无效' })
     }
 
-    await pool.query(
-      `DELETE FROM user_trade_actions WHERE id = $1 AND user_id = $2`,
-      [parseInt(id), currentUserId]
+    await client.query('BEGIN')
+    const { rows: tradeRows } = await client.query(
+      `SELECT * FROM user_trade_actions WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+      [tradeId, currentUserId]
+    )
+    if (tradeRows.length === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ code: 404, message: '成交记录不存在' })
+    }
+
+    const trade = tradeRows[0]
+    const stockCode = trade.stock_code
+    const actionType = trade.action_type
+    const shares = Number(trade.trade_shares)
+
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`${currentUserId}|${stockCode}`])
+    const { rows: posRows } = await client.query(
+      `SELECT holding_shares, cost_price FROM user_positions WHERE user_id = $1 AND stock_code = $2 FOR UPDATE`,
+      [currentUserId, stockCode]
+    )
+    const currentShares = Number(posRows[0]?.holding_shares) || 0
+    let nextShares = currentShares
+
+    if (actionType === 'BUY') {
+      if (shares > currentShares) {
+        await client.query('ROLLBACK')
+        return res.status(400).json({ code: 400, message: '撤销该买入记录将导致持仓为负，已被拒绝' })
+      }
+      nextShares = currentShares - shares
+    } else if (actionType === 'SELL') {
+      nextShares = currentShares + shares
+    }
+
+    await client.query(`DELETE FROM user_trade_actions WHERE id = $1 AND user_id = $2`, [tradeId, currentUserId])
+    await client.query(
+      `UPDATE user_positions SET holding_shares = $1, updated_at = NOW() WHERE user_id = $2 AND stock_code = $3`,
+      [nextShares, currentUserId, stockCode]
     )
 
-    return res.json({ code: 0, message: '成交记录已撤销' })
+    await client.query('COMMIT')
+    return res.json({ code: 0, message: '成交记录已撤销并回滚持仓', data: { holdingShares: nextShares } })
   } catch (err: any) {
+    await client.query('ROLLBACK').catch(() => {})
     console.error('Delete trade action error:', err)
     return res.status(500).json({ code: 500, message: '删除失败' })
+  } finally {
+    client.release()
   }
 })
 
@@ -816,7 +885,7 @@ app.post('/api/v1/stocks/re-predict', (_req, res) => {
 })
 
 async function startServer() {
-  await ensureQuantSchema()
+  await runMigrationsUp()
   app.listen(port, () => {
     console.log(`🚀 ZeroQuant Express Server running at http://localhost:${port}`)
     startQuantInternalScheduler()
