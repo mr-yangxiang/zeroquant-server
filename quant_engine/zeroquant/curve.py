@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+from datetime import datetime
 from .models import HorizonForecast
 
 
@@ -59,3 +61,44 @@ def build_compatible_curve(
             }
         )
     return curve
+
+
+def build_forward_rolling_curve(
+    current_time: str | datetime,
+    current_price: float,
+    previous_close: float,
+    forecasts: list[HorizonForecast],
+    limit_ratio: float = 0.10,
+    vwap: float | None = None,
+) -> list[dict[str, float | str]]:
+    """Generate forward rolling predictions from current minute to 15:00.
+
+    Does NOT backfill past timestamps:
+    - At match_idx (current minute): exact current_price (smooth anchor)
+    - Future minutes (match_idx + 1 .. 15:00): forward prediction based on horizon forecast + VWAP reversion
+    """
+    points = trading_time_points()
+    now_str = current_time if isinstance(current_time, str) else current_time.strftime("%H:%M")
+    match_idx = next((i for i, t in enumerate(points) if t >= now_str), len(points) - 1)
+
+    q50 = [(0, 0.0)] + [(item.horizon_minutes, item.q50_return_pct) for item in forecasts]
+    lower_limit = previous_close * (1.0 - limit_ratio)
+    upper_limit = previous_close * (1.0 + limit_ratio)
+    target_vwap = vwap if (vwap and vwap > 0) else current_price
+
+    rolling: list[dict[str, float | str]] = []
+    for idx in range(match_idx, len(points)):
+        label = points[idx]
+        if idx == match_idx:
+            rolling.append({"targetTime": label, "predictedPrice": round(current_price, 4)})
+        else:
+            future_mins = idx - match_idx
+            ret_pct = _interpolate(q50, min(future_mins, 240))
+            forecast_p = current_price * (1.0 + ret_pct / 100.0)
+
+            # VWAP reversion over time
+            reversion_weight = min(0.45, (1.0 - math.exp(-future_mins / 30.0)) * 0.5)
+            forward_p = forecast_p * (1.0 - reversion_weight) + target_vwap * reversion_weight
+            forward_p = max(lower_limit, min(upper_limit, forward_p))
+            rolling.append({"targetTime": label, "predictedPrice": round(forward_p, 4)})
+    return rolling

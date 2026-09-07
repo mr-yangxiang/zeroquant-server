@@ -701,10 +701,10 @@ app.delete('/api/v1/chat/messages', async (req, res) => {
   }
 })
 
-// 5. 1分钟轮询脚本实时写入 (包含实盘价、提前5分钟动态预测线、版本重预测判断)
+// 5. 1分钟轮询脚本实时写入 (包含实盘价、盘中动态前向重塑线、版本重预测判断)
 app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
   try {
-    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr } = req.body
+    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr, rollingPredictions } = req.body
 
     if (!stockCode || realPrice === undefined) {
       return res.status(400).json({ code: 400, message: '参数缺失', data: null })
@@ -730,8 +730,31 @@ app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
       [stockCode, tStamp, realPrice, predictedPrice || realPrice, deviationPct, tDate]
     )
 
-    // 3. 记录提前 5 分钟动态修正线
-    if (targetTime && predictedPrice !== undefined) {
+    // 3. 记录盘中动态前向重塑线 (从当前分钟延伸至 15:00)
+    if (Array.isArray(rollingPredictions) && rollingPredictions.length > 0) {
+      await pool.query(
+        `DELETE FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
+        [stockCode, tDate]
+      )
+      const client = await pool.connect()
+      try {
+        await client.query('BEGIN')
+        for (const rp of rollingPredictions) {
+          if (rp.targetTime && rp.predictedPrice !== undefined) {
+            await client.query(
+              `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
+               VALUES ($1, $2::date, $3, $4)`,
+              [stockCode, tDate, rp.targetTime, rp.predictedPrice]
+            )
+          }
+        }
+        await client.query('COMMIT')
+      } catch (e) {
+        await client.query('ROLLBACK')
+      } finally {
+        client.release()
+      }
+    } else if (targetTime && predictedPrice !== undefined) {
       await pool.query(
         `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
          VALUES ($1, $2::date, $3, $4)`,

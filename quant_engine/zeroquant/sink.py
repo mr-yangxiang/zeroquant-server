@@ -44,26 +44,27 @@ class PredictionSink:
         high_price: float,
         low_price: float,
         pct: float,
+        rolling_predictions: list[dict[str, Any]] | None = None,
     ) -> None:
-        five_minute = next(item for item in run.horizons if item.horizon_minutes == 5)
-        predicted_price = real_price * (1.0 + five_minute.q50_return_pct / 100.0)
+        five_minute = next((item for item in run.horizons if item.horizon_minutes == 5), None)
+        predicted_price = real_price * (1.0 + (five_minute.q50_return_pct if five_minute else 0.0) / 100.0)
         target = run.as_of.timestamp() + 5 * 60
         target_time = datetime.fromtimestamp(target, tz=run.as_of.tzinfo).strftime("%H:%M")
-        self._post(
-            "/api/v1/stocks/sync-point",
-            {
-                "stockCode": run.stock_code,
-                "realPrice": real_price,
-                "predictedPrice": round(predicted_price, 4),
-                "currentPrice": real_price,
-                "pct": pct,
-                "highPrice": high_price,
-                "lowPrice": low_price,
-                "tradeDate": run.trade_date,
-                "timestampStr": run.as_of.isoformat(),
-                "targetTime": target_time,
-            },
-        )
+        payload: dict[str, Any] = {
+            "stockCode": run.stock_code,
+            "realPrice": real_price,
+            "predictedPrice": round(predicted_price, 4),
+            "currentPrice": real_price,
+            "pct": pct,
+            "highPrice": high_price,
+            "lowPrice": low_price,
+            "tradeDate": run.trade_date,
+            "timestampStr": run.as_of.isoformat(),
+            "targetTime": target_time,
+        }
+        if rolling_predictions:
+            payload["rollingPredictions"] = rolling_predictions
+        self._post("/api/v1/stocks/sync-point", payload)
 
     def persist_public_trades(self, records: list[dict[str, Any]]) -> None:
         self._post("/api/v1/quant/public-trades/batch", {"records": records})

@@ -17,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 from zeroquant.audit import append_run_jsonl
 from zeroquant.config import STOCKS, Settings, StockSpec
+from zeroquant.curve import build_forward_rolling_curve
 from zeroquant.models import ForecastRun, QuoteSnapshot
 from zeroquant.news import AnnouncementClient
 from zeroquant.pipeline import ForecastPipeline
@@ -127,12 +128,22 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             quote = quotes.get(run.stock_code)
             if quote is None:
                 continue
+            
+            # 实时生成从当前分钟精准锚定、平滑延伸至 15:00 的盘中动态前向重塑线 (黄虚线)
+            current_hhmm = now.strftime("%H:%M")
+            rolling_curve = build_forward_rolling_curve(
+                current_time=current_hhmm,
+                current_price=quote.price,
+                previous_close=quote.previous_close,
+                forecasts=run.horizons,
+            )
             sink.persist_realtime_point(
                 run,
                 real_price=quote.price,
                 high_price=quote.high,
                 low_price=quote.low,
                 pct=quote.pct_change,
+                rolling_predictions=rolling_curve,
             )
         except Exception as exc:
             print(f"{run.stock_code}: persistence failed: {exc}", file=sys.stderr)
