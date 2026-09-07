@@ -222,12 +222,12 @@ def build_forward_rolling_curve(
 
     rolling: list[dict[str, float | str]] = []
 
-    for idx, label in enumerate(points):
-        if idx < match_idx:
-            # 严格保留历史预判轨迹！历史预判错了就是错了，绝不篡改历史！
-            past_price = float(base_points[idx].get("price", current_price))
-            rolling.append({"targetTime": label, "predictedPrice": round(past_price, 2)})
-        elif idx == match_idx:
+    # 铁律：严禁虚假补充历史数据！
+    # 数据库没有落盘真实数据就返回没有，空在那里，图表里也断开缺失，绝不允许虚假捏造补齐！
+    # 动态重塑线仅从当前分钟锚点 (match_idx) 起向未来生成真实的动态重塑走势
+    for idx in range(match_idx, total_pts):
+        label = points[idx]
+        if idx == match_idx:
             # 当前时间点平滑锚定在实盘最新成交价
             rolling.append({"targetTime": label, "predictedPrice": round(current_price, 2)})
         else:
