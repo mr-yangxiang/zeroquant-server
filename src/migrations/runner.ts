@@ -3,10 +3,12 @@ import type { PoolClient } from 'pg'
 import type { Migration } from './types.js'
 import { migration001 } from './001_initial_baseline.js'
 import { migration002 } from './002_data_warehouse_core.js'
+import { migration003 } from './003_baseline_contract_fixes.js'
 
 const ALL_MIGRATIONS: Migration[] = [
   migration001,
   migration002,
+  migration003,
 ]
 
 export async function ensureMigrationTable(client: PoolClient) {
@@ -56,6 +58,9 @@ export async function runMigrationsUp() {
 }
 
 export async function runMigrationsDown() {
+  if (process.env.NODE_ENV === 'production' && process.env.ZEROQUANT_ALLOW_DESTRUCTIVE_MIGRATION_DOWN !== 'true') {
+    throw new Error('生产环境禁止回滚迁移；如已完成备份并明确授权，请设置 ZEROQUANT_ALLOW_DESTRUCTIVE_MIGRATION_DOWN=true')
+  }
   const client = await pool.connect()
   try {
     await client.query('BEGIN')

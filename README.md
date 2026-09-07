@@ -25,7 +25,7 @@ ZeroQuant 是一个面向 A 股盘前与盘中研究的概率预测系统。当�
       硬风控门禁 + PostgreSQL + JSONL
 ```
 
-公共逐笔成交不包含最终账户或营业部身份。`sync_official_l2.py` 这个文件名只为兼容旧调度保留，内部现在只记录可验证的主动买入、主动卖出或中性成交，不再虚构游资席位。
+公共逐笔成交不包含最终账户或营业部身份，也不属于真实多档 Level-2 委托流。旧 `sync_official_l2.py` 已迁入 `quant_engine/legacy/scripts/` 且不再被调度；未来接入授权 Level-2 数据时必须使用新的采集器和数据合同。
 
 ## 目录
 
@@ -51,6 +51,14 @@ python3 quant_engine/generate_daily_predictions.py 2026-09-04 --no-persist
 ```bash
 python3 quant_engine/realtime_monitor_1m.py --debug --no-persist
 ```
+
+端到端测试具有写库行为，只能连接名称包含 `_test` 或 `_e2e` 的专用数据库。先参照 `.env.test.example` 启动一套禁用量化调度的独立测试服务，再在相同环境变量下运行：
+
+```bash
+npm run test:e2e
+```
+
+测试会验证 API 与测试客户端连接的是同一个数据库，并在结束时清理临时用户、股票、成交和预测。禁止把生产 `DATABASE_URL` 或生产内部令牌用于该测试。
 
 ## 配置
 

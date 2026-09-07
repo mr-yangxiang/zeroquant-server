@@ -10,7 +10,8 @@
     "seed": "tsx src/seed.ts",
     "migrate:up": "tsx src/migrations/runner.ts up",
     "migrate:down": "tsx src/migrations/runner.ts down",
-    "migrate:status": "tsx src/migrations/runner.ts status"
+    "migrate:status": "tsx src/migrations/runner.ts status",
+    "test:e2e": "node --import tsx test/e2e_baseline.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

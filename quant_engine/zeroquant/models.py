@@ -105,6 +105,7 @@ class ForecastRun:
     previous_close: float
     model_version: str
     model_state: str
+    model_calibrated: bool
     regime: Regime
     features: FeatureSnapshot
     horizons: list[HorizonForecast]
@@ -125,6 +126,7 @@ class ForecastRun:
             "previousClose": self.previous_close,
             "modelVersion": self.model_version,
             "modelState": self.model_state,
+            "modelCalibrated": self.model_calibrated,
             "regime": asdict(self.regime),
             "features": {
                 "values": self.features.values,

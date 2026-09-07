@@ -157,6 +157,7 @@ export const migration001: Migration = {
         previous_close DOUBLE PRECISION NOT NULL,
         model_version VARCHAR(120) NOT NULL,
         model_state VARCHAR(80) NOT NULL,
+        model_calibrated BOOLEAN NOT NULL DEFAULT FALSE,
         regime JSONB NOT NULL,
         features JSONB NOT NULL,
         news_events JSONB NOT NULL DEFAULT '[]'::jsonb,

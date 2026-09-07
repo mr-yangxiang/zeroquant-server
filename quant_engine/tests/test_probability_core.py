@@ -121,6 +121,7 @@ class ProbabilityCoreTests(unittest.TestCase):
             self.assertEqual(first.input_hash, second.input_hash)
             self.assertNotEqual(first.run_id, second.run_id)
             self.assertEqual(first.model_state, "untrained_bootstrap")
+            self.assertFalse(first.to_dict()["modelCalibrated"])
 
     def test_stale_data_hard_gate_overrides_model_actionability(self):
         as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)

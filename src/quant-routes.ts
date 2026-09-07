@@ -61,9 +61,18 @@ export function createQuantRouter() {
     const asOf = String(body.asOf || '')
     const mode = String(body.mode || '')
     const modelState = String(body.modelState || '')
+    const modelCalibrated = body.modelCalibrated === true
     const horizons = Array.isArray(body.horizons) ? body.horizons : []
     const referencePrice = finiteNumber(body.referencePrice)
     const previousClose = finiteNumber(body.previousClose)
+    const features = isRecord(body.features) ? body.features : {}
+    const qualityFlags = Array.isArray(features.qualityFlags) ? features.qualityFlags.map(String) : []
+    const warnings = Array.isArray(body.warnings) ? body.warnings.map(String) : []
+    const hasHardRisk = qualityFlags.some((flag) =>
+      flag.startsWith('stale_') ||
+      flag.includes('source_unavailable') ||
+      flag.includes('leakage')
+    ) || warnings.some((warning) => warning.includes('硬风控'))
     if (!/^[0-9a-f-]{36}$/i.test(runId) || !/^\d{6}$/.test(stockCode) || !/^\d{4}-\d{2}-\d{2}$/.test(tradeDate)) {
       return res.status(400).json({ code: 400, message: 'invalid run identity', data: null })
     }
@@ -89,16 +98,16 @@ export function createQuantRouter() {
       await client.query('BEGIN')
       await client.query(
         `INSERT INTO quant_prediction_runs
-          (run_id, stock_code, trade_date, as_of, mode, reference_price, previous_close, model_version, model_state, regime, features, news_events, input_hash, warnings)
-         VALUES ($1::uuid, $2, $3::date, $4::timestamptz, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13, $14::jsonb)`,
-          [runId, stockCode, tradeDate, asOf, mode, referencePrice, previousClose, String(body.modelVersion || ''), modelState, JSON.stringify(body.regime || {}), JSON.stringify(body.features || {}), JSON.stringify(body.newsEvents || []), String(body.inputHash || ''), JSON.stringify(body.warnings || [])]
+          (run_id, stock_code, trade_date, as_of, mode, reference_price, previous_close, model_version, model_state, model_calibrated, regime, features, news_events, input_hash, warnings)
+         VALUES ($1::uuid, $2, $3::date, $4::timestamptz, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15::jsonb)`,
+          [runId, stockCode, tradeDate, asOf, mode, referencePrice, previousClose, String(body.modelVersion || ''), modelState, modelCalibrated, JSON.stringify(body.regime || {}), JSON.stringify(features), JSON.stringify(body.newsEvents || []), String(body.inputHash || ''), JSON.stringify(warnings)]
       )
       for (const item of parsedHorizons) {
         await client.query(
           `INSERT INTO quant_horizon_forecasts
             (run_id, horizon_minutes, p_up, p_flat, p_down, expected_return_pct, q10_return_pct, q50_return_pct, q90_return_pct, confidence, actionable, reasons)
            VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)`,
-          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), modelState === 'champion' && Boolean(item.actionable), JSON.stringify(item.reasons || [])]
+          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), modelState === 'champion' && modelCalibrated && !hasHardRisk && Boolean(item.actionable), JSON.stringify(item.reasons || [])]
         )
       }
 
@@ -156,7 +165,7 @@ export function createQuantRouter() {
       const { rows: runRows } = await pool.query(
         `SELECT run_id as "runId", stock_code as "stockCode", trade_date as "tradeDate", as_of as "asOf",
                 mode, reference_price as "referencePrice", previous_close as "previousClose",
-                model_version as "modelVersion", model_state as "modelState", regime, features,
+                model_version as "modelVersion", model_state as "modelState", model_calibrated as "modelCalibrated", regime, features,
                 news_events as "newsEvents", input_hash as "inputHash", warnings
          FROM quant_prediction_runs
          WHERE stock_code = $1

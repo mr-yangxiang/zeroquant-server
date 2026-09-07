@@ -45,6 +45,7 @@ export async function ensureQuantSchema() {
       previous_close DOUBLE PRECISION NOT NULL,
       model_version VARCHAR(120) NOT NULL,
       model_state VARCHAR(80) NOT NULL,
+      model_calibrated BOOLEAN NOT NULL DEFAULT FALSE,
       regime JSONB NOT NULL,
       features JSONB NOT NULL,
       news_events JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -79,6 +80,7 @@ export async function ensureQuantSchema() {
   await pool.query(`
     ALTER TABLE quant_prediction_runs ADD COLUMN IF NOT EXISTS reference_price DOUBLE PRECISION;
     ALTER TABLE quant_prediction_runs ADD COLUMN IF NOT EXISTS previous_close DOUBLE PRECISION;
+    ALTER TABLE quant_prediction_runs ADD COLUMN IF NOT EXISTS model_calibrated BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE stock_day_predictions ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
     ALTER TABLE stock_day_predictions ADD COLUMN IF NOT EXISTS probability_bands JSONB NOT NULL DEFAULT '[]'::jsonb;
   `)

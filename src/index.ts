@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
-import { randomBytes, randomUUID } from 'crypto'
+import { randomBytes } from 'crypto'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
@@ -18,7 +18,7 @@ import { runMigrationsUp } from './migrations/runner.js'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-dotenv.config({ override: true })
+dotenv.config()
 
 const app = express()
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3002
@@ -99,12 +99,11 @@ app.post('/api/v1/auth/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10)
-    const newId = randomUUID()
     const { rows } = await pool.query(
-      `INSERT INTO users (id, phone, username, password)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO users (phone, username, password)
+       VALUES ($1, $2, $3)
        RETURNING id, phone, username, avatar`,
-      [newId, phone, username, hash]
+      [phone, username, hash]
     )
 
     const user = rows[0]
@@ -187,9 +186,11 @@ async function persistUserTrade(
 
     if (actionType !== 'SET_POSITION') {
       await client.query(
-        `INSERT INTO user_trade_actions (user_id, stock_code, action_type, trade_price, trade_shares, trade_time)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [userId, stockCode, actionType, price, shares]
+        `INSERT INTO user_trade_actions
+          (user_id, stock_code, action_type, trade_price, trade_shares, trade_time,
+           previous_holding_shares, previous_cost_price, resulting_holding_shares, resulting_cost_price)
+         VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8, $9)`,
+        [userId, stockCode, actionType, price, shares, previousShares, previousCost, nextShares, nextCost]
       )
     }
     await client.query(
@@ -483,35 +484,34 @@ app.delete('/api/v1/user/trade-action/:id', async (req, res) => {
 
     const trade = tradeRows[0]
     const stockCode = trade.stock_code
-    const actionType = trade.action_type
-    const shares = Number(trade.trade_shares)
 
     await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`${currentUserId}|${stockCode}`])
-    const { rows: posRows } = await client.query(
-      `SELECT holding_shares, cost_price FROM user_positions WHERE user_id = $1 AND stock_code = $2 FOR UPDATE`,
+    const { rows: latestRows } = await client.query(
+      `SELECT id FROM user_trade_actions
+       WHERE user_id = $1 AND stock_code = $2
+       ORDER BY trade_time DESC, id DESC LIMIT 1`,
       [currentUserId, stockCode]
     )
-    const currentShares = Number(posRows[0]?.holding_shares) || 0
-    let nextShares = currentShares
-
-    if (actionType === 'BUY') {
-      if (shares > currentShares) {
-        await client.query('ROLLBACK')
-        return res.status(400).json({ code: 400, message: '撤销该买入记录将导致持仓为负，已被拒绝' })
-      }
-      nextShares = currentShares - shares
-    } else if (actionType === 'SELL') {
-      nextShares = currentShares + shares
+    if (Number(latestRows[0]?.id) !== tradeId) {
+      await client.query('ROLLBACK')
+      return res.status(409).json({ code: 409, message: '只能撤销该股票最新一笔成交；较早成交必须通过更正记录处理' })
     }
+    if (trade.previous_holding_shares === null || trade.previous_cost_price === null) {
+      await client.query('ROLLBACK')
+      return res.status(409).json({ code: 409, message: '该历史成交缺少撤销快照，不能安全自动回滚' })
+    }
+    const nextShares = Number(trade.previous_holding_shares)
+    const nextCost = Number(trade.previous_cost_price)
 
     await client.query(`DELETE FROM user_trade_actions WHERE id = $1 AND user_id = $2`, [tradeId, currentUserId])
     await client.query(
-      `UPDATE user_positions SET holding_shares = $1, updated_at = NOW() WHERE user_id = $2 AND stock_code = $3`,
-      [nextShares, currentUserId, stockCode]
+      `UPDATE user_positions SET holding_shares = $1, cost_price = $2, updated_at = NOW()
+       WHERE user_id = $3 AND stock_code = $4`,
+      [nextShares, nextCost, currentUserId, stockCode]
     )
 
     await client.query('COMMIT')
-    return res.json({ code: 0, message: '成交记录已撤销并回滚持仓', data: { holdingShares: nextShares } })
+    return res.json({ code: 0, message: '最新成交记录已撤销，持仓和成本已恢复', data: { holdingShares: nextShares, costPrice: nextCost } })
   } catch (err: any) {
     await client.query('ROLLBACK').catch(() => {})
     console.error('Delete trade action error:', err)
@@ -838,10 +838,10 @@ app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
     )
 
     const { rows } = await client.query(
-      `INSERT INTO stock_price_histories (id, stock_code, timestamp, real_price, predicted_price, deviation_pct, trade_date)
-       VALUES (gen_random_uuid()::text, $1, $2::timestamptz, $3, $4, $5, $6::date)
+      `INSERT INTO stock_price_histories (stock_code, timestamp, real_price, predicted_price, deviation_pct)
+       VALUES ($1, $2::timestamptz, $3, $4, $5)
        RETURNING id, stock_code as "stockCode", timestamp, real_price as "realPrice", predicted_price as "predictedPrice", deviation_pct as "deviationPct"`,
-      [stockCode, tStamp, observedPrice, safePredicted, deviationPct, tDate]
+      [stockCode, tStamp, observedPrice, safePredicted, deviationPct]
     )
 
     if (validRolling.length > 0) {
@@ -888,7 +888,11 @@ async function startServer() {
   await runMigrationsUp()
   app.listen(port, () => {
     console.log(`🚀 ZeroQuant Express Server running at http://localhost:${port}`)
-    startQuantInternalScheduler()
+    if (process.env.ZEROQUANT_DISABLE_SCHEDULER === 'true') {
+      console.log('[Scheduler] 已通过 ZEROQUANT_DISABLE_SCHEDULER 禁用（测试/维护模式）')
+    } else {
+      startQuantInternalScheduler()
+    }
   })
 }
 

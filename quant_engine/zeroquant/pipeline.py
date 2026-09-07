@@ -96,6 +96,7 @@ class ForecastPipeline:
             previous_close=quote.previous_close,
             model_version=self.artifact.version,
             model_state=self.artifact.state,
+            model_calibrated=self.artifact.calibrated,
             regime=regime,
             features=features,
             horizons=forecasts,

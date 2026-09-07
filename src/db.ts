@@ -1,7 +1,8 @@
 import pg from 'pg'
 import dotenv from 'dotenv'
 
-dotenv.config({ override: true })
+// 系统环境变量优先于仓库旁的 .env，便于测试库隔离和容器安全注入。
+dotenv.config()
 
 const { Pool } = pg
 

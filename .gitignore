@@ -1,6 +1,9 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
+!.env.test.example
 *.log
 *.pyc
 __pycache__
