@@ -13,6 +13,7 @@ import json
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, time
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from zeroquant.audit import append_run_jsonl
@@ -78,6 +79,8 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             amount=latest.amount,
         )
 
+    minutes_map: dict[str, Any] = {}
+
     def process(stock: StockSpec) -> ForecastRun:
         flags: list[str] = []
         try:
@@ -90,6 +93,7 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             flags.append("live_quote_source_unavailable_using_daily_close")
         try:
             minutes = market.fetch_minutes(stock)
+            minutes_map[stock.code] = minutes
         except MarketDataError:
             minutes = []
             flags.append("intraday_minute_source_unavailable")
@@ -129,12 +133,16 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             if quote is None:
                 continue
             
-            # 实时生成从当前分钟精准锚定、平滑延伸至 15:00 的盘中动态前向重塑线 (黄虚线)
+            # 实时生成从 09:30 保留历史预判、当前分钟平滑锚定、未来动态重塑至 15:00 的全天趋势线 (黄虚线)
             current_hhmm = now.strftime("%H:%M")
+            base_points = sink.fetch_base_points(run.stock_code, run.trade_date)
             rolling_curve = build_forward_rolling_curve(
+                stock_code=run.stock_code,
                 current_time=current_hhmm,
                 current_price=quote.price,
                 previous_close=quote.previous_close,
+                base_points=base_points,
+                minute_bars=minutes_map.get(run.stock_code, []),
                 forecasts=run.horizons,
             )
             sink.persist_realtime_point(

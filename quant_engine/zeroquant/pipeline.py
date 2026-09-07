@@ -108,5 +108,6 @@ class ForecastPipeline:
                 reference_price=quote.price,
                 previous_close=quote.previous_close,
                 forecasts=forecasts,
+                stock_code=quote.code,
             )
         return run

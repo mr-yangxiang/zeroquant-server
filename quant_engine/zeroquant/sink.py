@@ -69,6 +69,19 @@ class PredictionSink:
     def persist_public_trades(self, records: list[dict[str, Any]]) -> None:
         self._post("/api/v1/quant/public-trades/batch", {"records": records})
 
+    def fetch_base_points(self, stock_code: str, trade_date: str) -> list[dict[str, Any]]:
+        try:
+            req = urllib.request.Request(f"{self.settings.server_url}/api/v1/stocks/{stock_code}/advanced-history?date={trade_date}")
+            with urllib.request.urlopen(req, timeout=self.settings.request_timeout_seconds) as resp:
+                data = json.loads(resp.read().decode("utf-8")).get("data", {})
+                preds = data.get("predictions", [])
+                base = next((p for p in preds if p.get("isBase")), None)
+                if base and base.get("timePoints"):
+                    return base["timePoints"]
+        except Exception:
+            pass
+        return []
+
     def _write_outbox(self, run: ForecastRun, error: Exception) -> Path:
         outbox = self.settings.state_dir / "outbox"
         outbox.mkdir(parents=True, exist_ok=True)
