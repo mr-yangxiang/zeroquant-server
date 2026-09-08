@@ -41,7 +41,7 @@ function localizeModelState(value: unknown) {
   const state = String(value || '')
   if (state === 'untrained_bootstrap') {
     return {
-      label: '基础试运行模型（尚未训练）',
+      label: '尚未完成训练，仅供观察',
       explanation: '当前只是验证数据管道和页面的初始规则权重，尚未用多年历史样本训练，也未通过样本外回测和概率校准，不能据此证明预测准确率。',
     }
   }
