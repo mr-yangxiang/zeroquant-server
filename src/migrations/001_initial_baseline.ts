@@ -34,7 +34,7 @@ export const migration001: Migration = {
       CREATE TABLE IF NOT EXISTS stock_price_histories (
         id SERIAL PRIMARY KEY,
         stock_code VARCHAR(20) REFERENCES stocks(code) ON DELETE CASCADE,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         real_price DOUBLE PRECISION NOT NULL,
         predicted_price DOUBLE PRECISION NOT NULL,
         deviation_pct DOUBLE PRECISION DEFAULT 0

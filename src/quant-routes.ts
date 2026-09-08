@@ -137,8 +137,8 @@ export function createQuantRouter() {
             await client.query(
               `INSERT INTO stock_rolling_predictions
                 (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
-               VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
-                       (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
+               VALUES ($1, $2::date, $3::text, $4, $5::uuid, $6::timestamptz,
+                       (($2::date::text || ' ' || $3::text || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
               [stockCode, tradeDate, String(point.time), finiteNumber(point.price), runId, asOf, finiteNumber(point.leadMinutes)]
             )
           }

@@ -308,7 +308,7 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
     //    尚未发生的目标分钟取当前最新预测。底层快照只追加、不覆盖。
     const { rows: rollingPredictions } = await pool.query(
       `WITH latest_observation AS (
-         SELECT MAX(timestamp AT TIME ZONE 'Asia/Shanghai') AS latest_at
+         SELECT MAX(timestamp) AS latest_at
          FROM stock_price_histories
          WHERE stock_code = $1
            AND (timestamp AT TIME ZONE 'Asia/Shanghai')::date = $2::date
@@ -889,8 +889,8 @@ app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
         await client.query(
           `INSERT INTO stock_rolling_predictions
             (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
-           VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
-                   (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
+           VALUES ($1, $2::date, $3::text, $4, $5::uuid, $6::timestamptz,
+                   (($2::date::text || ' ' || $3::text || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
           [stockCode, tDate, rp.targetTime, Number(rp.predictedPrice),
             typeof runId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId) ? runId : null,
             tStamp, Number.isInteger(Number(rp.leadMinutes)) ? Number(rp.leadMinutes) : null]
@@ -900,8 +900,8 @@ app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
       await client.query(
         `INSERT INTO stock_rolling_predictions
           (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
-         VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
-                 (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), 5)`,
+         VALUES ($1, $2::date, $3::text, $4, $5::uuid, $6::timestamptz,
+                 (($2::date::text || ' ' || $3::text || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), 5)`,
         [stockCode, tDate, targetTime, predicted,
           typeof runId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId) ? runId : null,
           tStamp]

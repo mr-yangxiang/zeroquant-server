@@ -6,6 +6,9 @@ export const migration004: Migration = {
   name: 'append_only_rolling_forecast_snapshots',
   up: async (client: PoolClient) => {
     await client.query(`
+      ALTER TABLE stock_price_histories
+        ALTER COLUMN timestamp TYPE TIMESTAMPTZ;
+
       ALTER TABLE stock_rolling_predictions
         ADD COLUMN IF NOT EXISTS run_id UUID,
         ADD COLUMN IF NOT EXISTS forecast_at TIMESTAMPTZ,
