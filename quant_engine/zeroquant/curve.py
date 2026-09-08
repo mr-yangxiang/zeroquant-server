@@ -126,7 +126,7 @@ def build_forward_rolling_curve(
 
     base_at_match = float(base_points[match_idx].get("price", current_price))
 
-    rolling: list[dict[str, float | str]] = []
+    rolling: list[dict[str, float | int | str]] = []
 
     # 铁律：严禁虚假补充历史数据！
     # 数据库没有落盘真实数据就返回没有，空在那里，图表里也断开缺失，绝不允许虚假捏造补齐！
@@ -135,7 +135,7 @@ def build_forward_rolling_curve(
         label = points[idx]
         if idx == match_idx:
             # 当前时间点平滑锚定在实盘最新成交价
-            rolling.append({"targetTime": label, "predictedPrice": round(current_price, 2)})
+            rolling.append({"targetTime": label, "predictedPrice": round(current_price, 2), "leadMinutes": 0})
         else:
             # 未来时间段：动态前向重塑！
             future_step = idx - match_idx
@@ -152,6 +152,6 @@ def build_forward_rolling_curve(
 
             raw_forward_p = current_price + wave_diff + trend_extrap + reversion
             forward_p = max(lower_limit, min(upper_limit, raw_forward_p))
-            rolling.append({"targetTime": label, "predictedPrice": round(forward_p, 2)})
+            rolling.append({"targetTime": label, "predictedPrice": round(forward_p, 2), "leadMinutes": future_step})
 
     return rolling

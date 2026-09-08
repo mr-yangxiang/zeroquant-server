@@ -20,6 +20,10 @@ export async function ensureQuantSchema() {
       predict_date DATE NOT NULL,
       target_time VARCHAR(5) NOT NULL,
       predicted_price DOUBLE PRECISION NOT NULL,
+      run_id UUID,
+      forecast_at TIMESTAMPTZ,
+      target_at TIMESTAMPTZ,
+      lead_minutes INTEGER,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
@@ -83,5 +87,9 @@ export async function ensureQuantSchema() {
     ALTER TABLE quant_prediction_runs ADD COLUMN IF NOT EXISTS model_calibrated BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE stock_day_predictions ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
     ALTER TABLE stock_day_predictions ADD COLUMN IF NOT EXISTS probability_bands JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE stock_rolling_predictions ADD COLUMN IF NOT EXISTS run_id UUID;
+    ALTER TABLE stock_rolling_predictions ADD COLUMN IF NOT EXISTS forecast_at TIMESTAMPTZ;
+    ALTER TABLE stock_rolling_predictions ADD COLUMN IF NOT EXISTS target_at TIMESTAMPTZ;
+    ALTER TABLE stock_rolling_predictions ADD COLUMN IF NOT EXISTS lead_minutes INTEGER;
   `)
 }

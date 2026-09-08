@@ -4,11 +4,13 @@ import type { Migration } from './types.js'
 import { migration001 } from './001_initial_baseline.js'
 import { migration002 } from './002_data_warehouse_core.js'
 import { migration003 } from './003_baseline_contract_fixes.js'
+import { migration004 } from './004_append_only_rolling_forecasts.js'
 
 const ALL_MIGRATIONS: Migration[] = [
   migration001,
   migration002,
   migration003,
+  migration004,
 ]
 
 export async function ensureMigrationTable(client: PoolClient) {

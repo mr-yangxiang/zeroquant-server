@@ -132,6 +132,10 @@ export const migration001: Migration = {
         predict_date DATE NOT NULL,
         target_time VARCHAR(5) NOT NULL,
         predicted_price DOUBLE PRECISION NOT NULL,
+        run_id UUID,
+        forecast_at TIMESTAMPTZ,
+        target_at TIMESTAMPTZ,
+        lead_minutes INTEGER,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
 

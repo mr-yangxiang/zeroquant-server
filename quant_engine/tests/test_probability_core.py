@@ -97,8 +97,9 @@ class ProbabilityCoreTests(unittest.TestCase):
             minute_bars=minute_bars(),
             forecasts=forecasts,
         )
-        self.assertEqual(curve[0], {"targetTime": "10:00", "predictedPrice": 10.20})
+        self.assertEqual(curve[0], {"targetTime": "10:00", "predictedPrice": 10.20, "leadMinutes": 0})
         self.assertEqual(curve[-1]["targetTime"], "15:00")
+        self.assertEqual(curve[5]["leadMinutes"], 5)
         self.assertTrue(all(point["targetTime"] >= "10:00" for point in curve))
 
     def test_pipeline_hash_is_stable_for_identical_inputs(self):

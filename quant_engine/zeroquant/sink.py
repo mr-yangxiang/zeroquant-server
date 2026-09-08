@@ -61,6 +61,7 @@ class PredictionSink:
             "tradeDate": run.trade_date,
             "timestampStr": run.as_of.isoformat(),
             "targetTime": target_time,
+            "runId": run.run_id,
         }
         if rolling_predictions:
             payload["rollingPredictions"] = rolling_predictions

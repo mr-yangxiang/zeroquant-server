@@ -294,17 +294,6 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
-    // 防漏：若 11:30 存在但 13:00 缺失，自动补充 13:00 确保轨迹线在午盘接缝处平滑闭合
-    const has1300 = realHistories.some((r: any) => r.timestamp && r.timestamp.includes('T13:00:00'))
-    if (!has1300 && realHistories.length > 0) {
-      const point1130 = realHistories.find((r: any) => r.timestamp && r.timestamp.includes('T11:30:00'))
-      if (point1130) {
-        const fill1300Ts = `${targetDate}T13:00:00+08:00`
-        realHistories.push({ timestamp: fill1300Ts, realPrice: point1130.realPrice })
-        realHistories.sort((a: any, b: any) => a.timestamp.localeCompare(b.timestamp))
-      }
-    }
-
     // B. 开盘前全天预判线 (Base Version 1 与所有重预测 Version 线，包含看涨/看跌方向与目标幅度)
     const { rows: predictions } = await pool.query(
       `SELECT version, is_base as "isBase", time_points as "timePoints", direction, target_pct as "targetPct", created_at as "createdAt"
@@ -315,15 +304,65 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
       [code, targetDate]
     )
 
-    // C. 盘中提前 5 分钟动态修正线
+    // C. 可复盘的盘中动态线：过去每个目标分钟固定取至少提前 5 分钟发布的最近预测；
+    //    尚未发生的目标分钟取当前最新预测。底层快照只追加、不覆盖。
     const { rows: rollingPredictions } = await pool.query(
-      `SELECT target_time as "targetTime", predicted_price as "predictedPrice"
-       FROM stock_rolling_predictions
-       WHERE stock_code = $1
-         AND predict_date = $2::date
-       ORDER BY id ASC`,
+      `WITH latest_observation AS (
+         SELECT MAX(timestamp AT TIME ZONE 'Asia/Shanghai') AS latest_at
+         FROM stock_price_histories
+         WHERE stock_code = $1
+           AND (timestamp AT TIME ZONE 'Asia/Shanghai')::date = $2::date
+       ), ranked AS (
+         SELECT rp.target_time, rp.predicted_price, rp.forecast_at, rp.lead_minutes,
+                ROW_NUMBER() OVER (
+                  PARTITION BY rp.target_time
+                  ORDER BY
+                    CASE WHEN lo.latest_at IS NOT NULL AND rp.target_at <= lo.latest_at THEN rp.lead_minutes END ASC NULLS LAST,
+                    CASE WHEN lo.latest_at IS NULL OR rp.target_at > lo.latest_at THEN rp.forecast_at END DESC NULLS LAST,
+                    rp.forecast_at DESC NULLS LAST,
+                    rp.id DESC
+                ) AS choice_rank
+         FROM stock_rolling_predictions rp
+         CROSS JOIN latest_observation lo
+         WHERE rp.stock_code = $1
+           AND rp.predict_date = $2::date
+           AND (
+             lo.latest_at IS NULL
+             OR rp.target_at > lo.latest_at
+             OR COALESCE(rp.lead_minutes, 0) >= 5
+           )
+       )
+       SELECT target_time as "targetTime", predicted_price as "predictedPrice",
+              forecast_at as "forecastAt", lead_minutes as "leadMinutes"
+       FROM ranked
+       WHERE choice_rank = 1
+       ORDER BY target_time ASC`,
       [code, targetDate]
     )
+    const { rows: rollingArchiveRows } = await pool.query(
+      `SELECT COUNT(*)::int as "storedPointCount",
+              COUNT(DISTINCT forecast_at)::int as "snapshotCount"
+       FROM stock_rolling_predictions
+       WHERE stock_code = $1 AND predict_date = $2::date`,
+      [code, targetDate]
+    )
+    const realByMinute = new Map(realHistories.map((row: any) => [String(row.timestamp).slice(11, 16), Number(row.realPrice)]))
+    const comparableDeviations = rollingPredictions.flatMap((row: any) => {
+      const actual = realByMinute.get(String(row.targetTime))
+      const predicted = Number(row.predictedPrice)
+      return Number.isFinite(actual) && Number(actual) > 0 && Number.isFinite(predicted)
+        ? [Math.abs(predicted - Number(actual)) / Number(actual) * 100]
+        : []
+    })
+    const rollingEvaluation = {
+      snapshotCount: Number(rollingArchiveRows[0]?.snapshotCount || 0),
+      storedPointCount: Number(rollingArchiveRows[0]?.storedPointCount || 0),
+      comparablePointCount: comparableDeviations.length,
+      meanAbsoluteDeviationPct: comparableDeviations.length > 0
+        ? Number((comparableDeviations.reduce((sum: number, value: number) => sum + value, 0) / comparableDeviations.length).toFixed(4))
+        : null,
+      evaluationLeadMinutes: 5,
+    }
 
     // D. 公开逐笔大额成交（>=1000手）。它不是多档委托簿，也不含账户/席位身份。
     const { rows: l2Orders } = await pool.query(
@@ -363,6 +402,7 @@ app.get('/api/v1/stocks/:code/advanced-history', async (req, res) => {
         realHistories,
         predictions,
         rollingPredictions,
+        rollingEvaluation,
         l2Orders,
         // 旧表没有策略版本、样本区间、成本和样本外证据，明确停止下发。
         backtestStats: [],
@@ -799,7 +839,7 @@ app.delete('/api/v1/chat/messages', async (req, res) => {
 app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
   const client = await pool.connect()
   try {
-    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr, rollingPredictions } = req.body
+    const { stockCode, realPrice, predictedPrice, currentPrice, pct, highPrice, lowPrice, targetTime, tradeDate, timestampStr, rollingPredictions, runId } = req.body
     const observedPrice = Number(realPrice)
     if (!/^\d{6}$/.test(String(stockCode || '')) || !Number.isFinite(observedPrice) || observedPrice <= 0) {
       return res.status(400).json({ code: 400, message: '股票代码或实盘价格无效', data: null })
@@ -845,22 +885,26 @@ app.post('/api/v1/stocks/sync-point', quantInternalOnly, async (req, res) => {
     )
 
     if (validRolling.length > 0) {
-      await client.query(
-        `DELETE FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
-        [stockCode, tDate]
-      )
       for (const rp of validRolling) {
         await client.query(
-          `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
-           VALUES ($1, $2::date, $3, $4)`,
-          [stockCode, tDate, rp.targetTime, Number(rp.predictedPrice)]
+          `INSERT INTO stock_rolling_predictions
+            (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
+           VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
+                   (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
+          [stockCode, tDate, rp.targetTime, Number(rp.predictedPrice),
+            typeof runId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId) ? runId : null,
+            tStamp, Number.isInteger(Number(rp.leadMinutes)) ? Number(rp.leadMinutes) : null]
         )
       }
     } else if (targetTime && Number.isFinite(predicted) && predicted > 0) {
       await client.query(
-        `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
-         VALUES ($1, $2::date, $3, $4)`,
-        [stockCode, tDate, targetTime, predicted]
+        `INSERT INTO stock_rolling_predictions
+          (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
+         VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
+                 (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), 5)`,
+        [stockCode, tDate, targetTime, predicted,
+          typeof runId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId) ? runId : null,
+          tStamp]
       )
     }
 

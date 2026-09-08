@@ -164,15 +164,21 @@ async function runAllTests() {
     assert.equal(historical.data.data.runId, dailyRunId)
 
     console.log('[14/18] 盘中前向曲线写库')
-    const realtimePayload = forecastPayload({ runId: randomUUID(), mode: 'realtime', asOf: `${TEST_DATE}T10:00:00+08:00`, legacyCurve: [{ time: '10:00', price: 10 }, { time: '10:05', price: 10.05 }] })
+    const realtimePayload = forecastPayload({ runId: randomUUID(), mode: 'realtime', asOf: `${TEST_DATE}T10:00:00+08:00`, legacyCurve: [{ time: '10:00', price: 10, leadMinutes: 0 }, { time: '10:05', price: 10.05, leadMinutes: 5 }] })
     assert.equal((await request('/api/v1/quant/prediction-runs', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify(realtimePayload) })).status, 200)
     const rolling = await pool.query('SELECT target_time FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2 ORDER BY target_time', [STOCK_CODE, TEST_DATE])
     assert.deepEqual(rolling.rows.map((row) => row.target_time), ['10:00', '10:05'])
 
     console.log('[15/18] sync-point 行情和滚动线同事务写入')
-    const sync = await request('/api/v1/stocks/sync-point', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify({ stockCode: STOCK_CODE, realPrice: 10.02, currentPrice: 10.02, highPrice: 10.1, lowPrice: 9.8, pct: 1.2, tradeDate: TEST_DATE, timestampStr: `${TEST_DATE}T10:01:00+08:00`, rollingPredictions: [{ targetTime: '10:01', predictedPrice: 10.02 }, { targetTime: '10:02', predictedPrice: 10.03 }] }) })
+    const sync = await request('/api/v1/stocks/sync-point', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify({ stockCode: STOCK_CODE, realPrice: 10.02, currentPrice: 10.02, highPrice: 10.1, lowPrice: 9.8, pct: 1.2, tradeDate: TEST_DATE, timestampStr: `${TEST_DATE}T10:01:00+08:00`, rollingPredictions: [{ targetTime: '10:01', predictedPrice: 10.02, leadMinutes: 0 }, { targetTime: '10:02', predictedPrice: 10.03, leadMinutes: 1 }] }) })
     assert.equal(sync.status, 200)
     assert.equal(Number((await pool.query('SELECT COUNT(*) FROM stock_price_histories WHERE stock_code = $1', [STOCK_CODE])).rows[0].count), 1)
+    assert.equal(Number((await pool.query('SELECT COUNT(*) FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2', [STOCK_CODE, TEST_DATE])).rows[0].count), 4)
+    const replay = await request(`/api/v1/stocks/${STOCK_CODE}/advanced-history?date=${TEST_DATE}`)
+    assert.equal(replay.status, 200)
+    assert.deepEqual(replay.data.data.rollingPredictions.map((row: any) => row.targetTime), ['10:02', '10:05'])
+    assert.equal(replay.data.data.rollingEvaluation.snapshotCount, 2)
+    assert.equal(replay.data.data.rollingEvaluation.storedPointCount, 4)
 
     console.log('[16/18] 已校准生产模型仍受陈旧数据硬门禁')
     const staleRunId = randomUUID()

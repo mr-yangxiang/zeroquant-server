@@ -132,16 +132,14 @@ export function createQuantRouter() {
           await client.query(`UPDATE stocks SET predicted_low = $1, predicted_high = $2, updated_at = NOW() WHERE code = $3`, [riskLow, riskHigh, stockCode])
         }
       } else if (mode === 'realtime' && legacyCurve.length > 0) {
-        await client.query(
-          `DELETE FROM stock_rolling_predictions WHERE stock_code = $1 AND predict_date = $2::date`,
-          [stockCode, tradeDate]
-        )
         for (const point of legacyCurve) {
           if (isRecord(point) && point.time && finiteNumber(point.price) !== null) {
             await client.query(
-              `INSERT INTO stock_rolling_predictions (stock_code, predict_date, target_time, predicted_price)
-               VALUES ($1, $2::date, $3, $4)`,
-              [stockCode, tradeDate, String(point.time), finiteNumber(point.price)]
+              `INSERT INTO stock_rolling_predictions
+                (stock_code, predict_date, target_time, predicted_price, run_id, forecast_at, target_at, lead_minutes)
+               VALUES ($1, $2::date, $3, $4, $5::uuid, $6::timestamptz,
+                       (($2::date::text || ' ' || $3 || ':00')::timestamp AT TIME ZONE 'Asia/Shanghai'), $7)`,
+              [stockCode, tradeDate, String(point.time), finiteNumber(point.price), runId, asOf, finiteNumber(point.leadMinutes)]
             )
           }
         }
