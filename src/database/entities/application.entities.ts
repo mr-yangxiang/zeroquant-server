@@ -24,7 +24,7 @@ export const applicationEntities: TableEntity[] = [
     name: 'stock_price_histories', description: '实盘价格与当时预测点历史', primaryKey: ['id'],
     foreignKeys: [{ columns: ['stock_code'], referencesTable: 'stocks', referencesColumns: ['code'], onDelete: 'CASCADE' }],
     columns: {
-      id: serialId(), stock_code: varchar(20, true), timestamp: timestamp(true, 'now'),
+      id: serialId(), stock_code: varchar(20, true), timestamp: timestamptz(true, 'now'),
       real_price: column('double precision', false), predicted_price: column('double precision', false),
       deviation_pct: column('double precision', true, { default: 0 }),
     },

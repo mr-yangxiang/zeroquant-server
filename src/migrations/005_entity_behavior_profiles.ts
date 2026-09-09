@@ -10,6 +10,8 @@ export const migration005: Migration = {
         ADD COLUMN IF NOT EXISTS ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
       ALTER TABLE news_stock_relations
         ADD COLUMN IF NOT EXISTS ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+      ALTER TABLE stock_l2_orders
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
       CREATE TABLE IF NOT EXISTS market_entities (
         entity_key VARCHAR(64) PRIMARY KEY,
@@ -88,6 +90,7 @@ export const migration005: Migration = {
       DROP TABLE IF EXISTS stock_entity_profile_links CASCADE;
       DROP TABLE IF EXISTS entity_behavior_profiles CASCADE;
       DROP TABLE IF EXISTS market_entities CASCADE;
+      ALTER TABLE stock_l2_orders DROP COLUMN IF EXISTS created_at;
       ALTER TABLE news_stock_relations DROP COLUMN IF EXISTS ingested_at;
       ALTER TABLE dragon_tiger_seats DROP COLUMN IF EXISTS ingested_at;
     `)

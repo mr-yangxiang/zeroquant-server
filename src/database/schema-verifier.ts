@@ -64,57 +64,55 @@ async function loadActualSchema() {
   const client = await pool.connect()
   try {
     await client.query('BEGIN READ ONLY')
-    const [tableResult, columnResult, constraintResult, foreignKeyResult, indexResult] = await Promise.all([
-      client.query(
-        `SELECT table_name FROM information_schema.tables
-         WHERE table_schema = $1 AND table_type = 'BASE TABLE' ORDER BY table_name`,
-        [DATABASE_SCHEMA_NAME]
-      ),
-      client.query(
-        `SELECT table_name, column_name, data_type, is_nullable, character_maximum_length, column_default
-         FROM information_schema.columns WHERE table_schema = $1
-         ORDER BY table_name, ordinal_position`,
-        [DATABASE_SCHEMA_NAME]
-      ),
-      client.query(
-        `SELECT tc.table_name, tc.constraint_name, tc.constraint_type, kcu.column_name, kcu.ordinal_position
-         FROM information_schema.table_constraints tc
-         JOIN information_schema.key_column_usage kcu
-           ON kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name
-         WHERE tc.table_schema = $1 AND tc.constraint_type IN ('PRIMARY KEY', 'UNIQUE')
-         ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position`,
-        [DATABASE_SCHEMA_NAME]
-      ),
-      client.query(
-        `SELECT tc.table_name, tc.constraint_name, kcu.column_name,
-                ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name,
-                rc.delete_rule
-         FROM information_schema.table_constraints tc
-         JOIN information_schema.key_column_usage kcu
-           ON kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name
-         JOIN information_schema.constraint_column_usage ccu
-           ON ccu.constraint_schema = tc.constraint_schema AND ccu.constraint_name = tc.constraint_name
-         JOIN information_schema.referential_constraints rc
-           ON rc.constraint_schema = tc.constraint_schema AND rc.constraint_name = tc.constraint_name
-         WHERE tc.table_schema = $1 AND tc.constraint_type = 'FOREIGN KEY'
-         ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position`,
-        [DATABASE_SCHEMA_NAME]
-      ),
-      client.query(
-        `SELECT tbl.relname AS table_name, idx.relname AS index_name,
-                ARRAY_AGG(att.attname ORDER BY key_column.ordinality) FILTER (WHERE att.attname IS NOT NULL) AS columns
-         FROM pg_index definition
-         JOIN pg_class tbl ON tbl.oid = definition.indrelid
-         JOIN pg_class idx ON idx.oid = definition.indexrelid
-         JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
-         CROSS JOIN LATERAL UNNEST(definition.indkey) WITH ORDINALITY AS key_column(attnum, ordinality)
-         LEFT JOIN pg_attribute att ON att.attrelid = tbl.oid AND att.attnum = key_column.attnum
-         WHERE ns.nspname = $1
-         GROUP BY tbl.relname, idx.relname
-         ORDER BY tbl.relname, idx.relname`,
-        [DATABASE_SCHEMA_NAME]
-      ),
-    ])
+    const tableResult = await client.query(
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema = $1 AND table_type = 'BASE TABLE' ORDER BY table_name`,
+      [DATABASE_SCHEMA_NAME]
+    )
+    const columnResult = await client.query(
+      `SELECT table_name, column_name, data_type, is_nullable, character_maximum_length, column_default
+       FROM information_schema.columns WHERE table_schema = $1
+       ORDER BY table_name, ordinal_position`,
+      [DATABASE_SCHEMA_NAME]
+    )
+    const constraintResult = await client.query(
+      `SELECT tc.table_name, tc.constraint_name, tc.constraint_type, kcu.column_name, kcu.ordinal_position
+       FROM information_schema.table_constraints tc
+       JOIN information_schema.key_column_usage kcu
+         ON kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name
+       WHERE tc.table_schema = $1 AND tc.constraint_type IN ('PRIMARY KEY', 'UNIQUE')
+       ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position`,
+      [DATABASE_SCHEMA_NAME]
+    )
+    const foreignKeyResult = await client.query(
+      `SELECT tc.table_name, tc.constraint_name, kcu.column_name,
+              ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name,
+              rc.delete_rule
+       FROM information_schema.table_constraints tc
+       JOIN information_schema.key_column_usage kcu
+         ON kcu.constraint_schema = tc.constraint_schema AND kcu.constraint_name = tc.constraint_name
+       JOIN information_schema.constraint_column_usage ccu
+         ON ccu.constraint_schema = tc.constraint_schema AND ccu.constraint_name = tc.constraint_name
+       JOIN information_schema.referential_constraints rc
+         ON rc.constraint_schema = tc.constraint_schema AND rc.constraint_name = tc.constraint_name
+       WHERE tc.table_schema = $1 AND tc.constraint_type = 'FOREIGN KEY'
+       ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position`,
+      [DATABASE_SCHEMA_NAME]
+    )
+    const indexResult = await client.query(
+      `SELECT tbl.relname AS table_name, idx.relname AS index_name,
+              ARRAY_AGG(att.attname::text ORDER BY key_column.ordinality) FILTER (WHERE att.attname IS NOT NULL) AS columns
+       FROM pg_index definition
+       JOIN pg_class tbl ON tbl.oid = definition.indrelid
+       JOIN pg_class idx ON idx.oid = definition.indexrelid
+       JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
+       CROSS JOIN LATERAL UNNEST(definition.indkey) WITH ORDINALITY AS key_column(attnum, ordinality)
+       LEFT JOIN pg_attribute att ON att.attrelid = tbl.oid AND att.attnum = key_column.attnum
+       WHERE ns.nspname = $1
+       GROUP BY tbl.relname, idx.relname
+       ORDER BY tbl.relname, idx.relname`,
+      [DATABASE_SCHEMA_NAME]
+    )
     await client.query('COMMIT')
 
     const tables = new Set(tableResult.rows.map((row) => String(row.table_name)))
