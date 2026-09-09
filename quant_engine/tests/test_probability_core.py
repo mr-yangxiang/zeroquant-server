@@ -145,6 +145,24 @@ class ProbabilityCoreTests(unittest.TestCase):
         self.assertAlmostEqual(features.values["entity_behavior_signal"], 0.2)
         self.assertAlmostEqual(features.values["entity_behavior_confidence"], 0.25)
 
+    def test_news_features_preserve_company_industry_and_macro_layers(self):
+        as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
+        events = [
+            NewsEvent(
+                "company", "600839", "公司回购", as_of, "announcement", 0.55,
+                1.0, 1.0, "回购", trust_level="HIGH",
+            ),
+            NewsEvent(
+                "macro", "600839", "全球市场出现制裁风险", as_of, "global", -0.5,
+                0.26, 1.0, "制裁", trust_level="NORMAL",
+            ),
+        ]
+        features = extract_features(quote(), as_of, daily_bars(), minute_bars(), events)
+        self.assertGreater(features.values["news_company_score"], 0)
+        self.assertEqual(features.values["news_industry_score"], 0)
+        self.assertLess(features.values["news_macro_score"], 0)
+        self.assertGreater(features.values["news_source_count_log"], 0)
+
     def test_entity_profile_feature_is_clipped_and_zero_without_confidence(self):
         as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
         clipped = extract_features(

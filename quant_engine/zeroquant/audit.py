@@ -45,7 +45,7 @@ def write_daily_markdown(runs: list[ForecastRun], audit_dir: Path) -> Path:
                 f"- 15分钟收益区间：P10 {primary.q10_return_pct:+.2f}% / P50 {primary.q50_return_pct:+.2f}% / P90 {primary.q90_return_pct:+.2f}%",
                 f"- 兼容图表区间：¥{min(curve_prices):.2f} ～ ¥{max(curve_prices):.2f}",
                 f"- 是否允许自动交易：`{str(primary.actionable).lower()}`",
-                f"- 公告事件数：{len(run.news_events)}",
+                f"- 时间点一致的新闻/公告事件数：{len(run.news_events)}",
                 f"- 数据标记：{', '.join(run.features.quality_flags)}",
             ]
         )

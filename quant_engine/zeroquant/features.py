@@ -106,6 +106,16 @@ def extract_features(
     values["vwap_gap_z"] = _clip(values["vwap_gap"] / max(base_vol * 2.0, 0.001), -4.0, 4.0)
     values["momentum_volume"] = values["momentum_z"] * max(0.0, values["volume_acceleration"])
     values["news_score"] = aggregate_news_score(news_events, as_of)
+    company_news = [event for event in news_events if event.relevance >= 0.85]
+    industry_news = [event for event in news_events if 0.45 <= event.relevance < 0.85]
+    macro_news = [event for event in news_events if event.relevance < 0.45]
+    # 保留分层新闻特征供后续训练；当前 bootstrap 产物只消费 news_score，
+    # 不为这些尚未训练的变量手写权重。
+    values["news_company_score"] = aggregate_news_score(company_news, as_of)
+    values["news_industry_score"] = aggregate_news_score(industry_news, as_of)
+    values["news_macro_score"] = aggregate_news_score(macro_news, as_of)
+    values["news_event_count_log"] = math.log1p(len(news_events))
+    values["news_source_count_log"] = math.log1p(len({event.source for event in news_events}))
     # The profile signal is already point-in-time and direction aligned by the
     # backend. Confidence shrinkage here prevents sparse seat histories from
     # receiving the same influence as mature profiles.
@@ -129,6 +139,8 @@ def extract_features(
     quality -= 0.15 if minute_bars and len(minute_bars) < 16 else 0.0
     quality -= 0.15  # no true L2 OFI in the current public feed
     quality -= 0.10 if any(flag.startswith("announcement_source_unavailable") for flag in flags) else 0.0
+    quality -= 0.08 if "global_news_all_sources_unavailable" in flags else 0.0
+    quality -= 0.03 if "global_news_google_rss_unofficial" in flags else 0.0
     quality -= 0.05 if "provider_vwap_unavailable_using_price_mean" in flags else 0.0
     return FeatureSnapshot(
         values=values,

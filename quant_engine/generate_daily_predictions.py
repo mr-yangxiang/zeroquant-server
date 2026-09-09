@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from zeroquant.audit import append_run_jsonl, write_daily_markdown
 from zeroquant.config import STOCKS, Settings, StockSpec
 from zeroquant.models import ForecastRun, QuoteSnapshot
-from zeroquant.news import AnnouncementClient
+from zeroquant.news import NewsFusionClient
 from zeroquant.entity_profiles import EntityProfileClient
 from zeroquant.pipeline import ForecastPipeline
 from zeroquant.providers import (
@@ -62,7 +62,16 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
     transport = HttpTransport(settings.request_timeout_seconds)
     market = TencentMarketDataProvider(transport)
     daily = DailyHistoryProvider(transport)
-    news = AnnouncementClient(transport, settings.state_dir / "news", settings.news_cache_seconds)
+    news = NewsFusionClient(
+        transport,
+        settings.state_dir / "news",
+        announcement_cache_seconds=settings.news_cache_seconds,
+        global_cache_seconds=settings.global_news_cache_seconds,
+        global_lookback_hours=settings.global_news_lookback_hours,
+        global_enabled=settings.global_news_enabled,
+        google_rss_enabled=settings.google_news_rss_enabled,
+        finnhub_api_key=settings.finnhub_api_key,
+    )
     pipeline = ForecastPipeline(settings)
     entity_profiles = EntityProfileClient(settings)
     sink = PredictionSink(settings)

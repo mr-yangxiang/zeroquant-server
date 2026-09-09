@@ -56,6 +56,10 @@ class NewsEvent:
     relevance: float
     novelty: float
     event_type: str
+    content: str = ""
+    url: str | None = None
+    trust_level: str = "NORMAL"
+    language: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)

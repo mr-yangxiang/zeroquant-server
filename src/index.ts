@@ -744,8 +744,13 @@ app.post('/api/v1/chat/send', async (req, res) => {
         }))
 
         const liveNewsText = Array.isArray(quantForecast?.newsEvents) && quantForecast.newsEvents.length > 0
-          ? quantForecast.newsEvents.map((event: any) => `• [${event.published_at || '时间未知'}] ${event.title}（${event.event_type}）`).join('\n')
-          : '当前预测快照没有时间点一致的公告事件'
+          ? quantForecast.newsEvents.map((event: any) => {
+              const relevance = Number.isFinite(Number(event.relevance))
+                ? `，相关度 ${(Number(event.relevance) * 100).toFixed(0)}%`
+                : ''
+              return `• [${event.published_at || '时间未知'}] ${event.title}（${event.event_type}；来源 ${event.source || '未知'}${relevance}）`
+            }).join('\n')
+          : '当前预测快照没有时间点一致的新闻或公告事件'
         const entityProfileText = entityProfileContext?.profiles?.length
           ? entityProfileContext.profiles.map((profile: any) => {
               const traits = Array.isArray(profile.traits) && profile.traits.length

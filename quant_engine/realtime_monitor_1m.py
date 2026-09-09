@@ -20,7 +20,7 @@ from zeroquant.audit import append_run_jsonl
 from zeroquant.config import STOCKS, Settings, StockSpec
 from zeroquant.curve import build_forward_rolling_curve
 from zeroquant.models import ForecastRun, QuoteSnapshot
-from zeroquant.news import AnnouncementClient
+from zeroquant.news import NewsFusionClient
 from zeroquant.entity_profiles import EntityProfileClient
 from zeroquant.pipeline import ForecastPipeline
 from zeroquant.providers import (
@@ -52,7 +52,16 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
     transport = HttpTransport(settings.request_timeout_seconds)
     market = TencentMarketDataProvider(transport)
     daily = DailyHistoryProvider(transport)
-    news = AnnouncementClient(transport, settings.state_dir / "news", settings.news_cache_seconds)
+    news = NewsFusionClient(
+        transport,
+        settings.state_dir / "news",
+        announcement_cache_seconds=settings.news_cache_seconds,
+        global_cache_seconds=settings.global_news_cache_seconds,
+        global_lookback_hours=settings.global_news_lookback_hours,
+        global_enabled=settings.global_news_enabled,
+        google_rss_enabled=settings.google_news_rss_enabled,
+        finnhub_api_key=settings.finnhub_api_key,
+    )
     pipeline = ForecastPipeline(settings)
     entity_profiles = EntityProfileClient(settings)
     sink = PredictionSink(settings)

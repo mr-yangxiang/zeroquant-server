@@ -161,17 +161,21 @@ export function createQuantRouter() {
       const sentimentScore = finiteNumber(record.sentimentScore)
       const sentimentLabel = String(record.sentimentLabel || '').trim() || null
       const trustLevel = String(record.trustLevel || 'NORMAL').trim()
+      const relevanceScore = finiteNumber(record.relevanceScore) ?? 1
+      const impactLevel = String(record.impactLevel || 'MEDIUM').trim()
       if (!title || title.length > 500 || !source || source.length > 100
         || Number.isNaN(publishedAt.getTime()) || stocks.length === 0 || stocks.length !== rawStocks.length
-        || (sentimentScore !== null && (sentimentScore < -1 || sentimentScore > 1))) return null
+        || (sentimentScore !== null && (sentimentScore < -1 || sentimentScore > 1))
+        || relevanceScore < 0 || relevanceScore > 1) return null
       const fingerprint = String(record.fingerprint || '').trim()
         || createHash('sha256').update(`${source}|${publishedAt.toISOString()}|${title}|${String(record.url || '')}`).digest('hex')
       const url = String(record.url || '').trim() || null
       if (!/^[0-9a-f]{64}$/i.test(fingerprint) || (url && url.length > 1000)
         || (sentimentLabel && !['BULLISH', 'BEARISH', 'NEUTRAL'].includes(sentimentLabel))
-        || !['LOW', 'NORMAL', 'HIGH'].includes(trustLevel)) return null
+        || !['LOW', 'NORMAL', 'HIGH'].includes(trustLevel)
+        || !['LOW', 'MEDIUM', 'HIGH'].includes(impactLevel)) return null
       return { title, content, source, publishedAt: publishedAt.toISOString(), stocks: [...new Set(stocks)], fingerprint,
-        url, sentimentLabel, sentimentScore, trustLevel }
+        url, sentimentLabel, sentimentScore, trustLevel, relevanceScore, impactLevel }
     })
     if (parsed.some((item) => item === null)) {
       return res.status(400).json({ code: 400, message: 'invalid news evidence item; batch rejected atomically', data: null })
@@ -196,9 +200,11 @@ export function createQuantRouter() {
         for (const stockCode of item.stocks) {
           await client.query(
             `INSERT INTO news_stock_relations (news_id, stock_code, relevance_score, impact_level)
-             VALUES ($1, $2, 1, 'MEDIUM')
-             ON CONFLICT (news_id, stock_code) DO NOTHING`,
-            [rows[0].id, stockCode]
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (news_id, stock_code) DO UPDATE SET
+               relevance_score = EXCLUDED.relevance_score,
+               impact_level = EXCLUDED.impact_level`,
+            [rows[0].id, stockCode, item.relevanceScore, item.impactLevel]
           )
         }
       }

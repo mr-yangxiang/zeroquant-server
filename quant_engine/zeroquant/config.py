@@ -37,6 +37,11 @@ class Settings:
     model_path: Path
     allow_uncalibrated_trading: bool
     estimated_round_trip_cost_bps: float
+    global_news_enabled: bool = True
+    global_news_cache_seconds: int = 60
+    global_news_lookback_hours: int = 36
+    google_news_rss_enabled: bool = True
+    finnhub_api_key: str = ""
 
     @classmethod
     def _load_dotenv(cls) -> None:
@@ -84,4 +89,19 @@ class Settings:
             estimated_round_trip_cost_bps=float(
                 os.getenv("ZEROQUANT_ESTIMATED_ROUND_TRIP_COST_BPS", "18")
             ),
+            global_news_enabled=os.getenv(
+                "ZEROQUANT_GLOBAL_NEWS_ENABLED", "true"
+            ).lower()
+            in {"1", "true", "yes"},
+            global_news_cache_seconds=max(
+                60, int(os.getenv("ZEROQUANT_GLOBAL_NEWS_CACHE_SECONDS", "60"))
+            ),
+            global_news_lookback_hours=max(
+                1, min(72, int(os.getenv("ZEROQUANT_GLOBAL_NEWS_LOOKBACK_HOURS", "36")))
+            ),
+            google_news_rss_enabled=os.getenv(
+                "ZEROQUANT_GOOGLE_NEWS_RSS_ENABLED", "true"
+            ).lower()
+            in {"1", "true", "yes"},
+            finnhub_api_key=os.getenv("ZEROQUANT_FINNHUB_API_KEY", "").strip(),
         )

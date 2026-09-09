@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -94,17 +95,27 @@ class PredictionSink:
         records = [
             {
                 "title": event.title,
-                "content": "",
+                "content": event.content,
+                "url": event.url,
                 "source": event.source,
                 "publishedAt": event.published_at.isoformat(),
                 "stocks": [event.code],
+                "fingerprint": hashlib.sha256(
+                    f"{event.source}|{event.url or ''}|{event.title}".encode("utf-8")
+                ).hexdigest(),
                 "sentimentLabel": (
                     "BULLISH" if event.sentiment > 0
                     else "BEARISH" if event.sentiment < 0
                     else "NEUTRAL"
                 ),
                 "sentimentScore": event.sentiment,
-                "trustLevel": "NORMAL",
+                "trustLevel": event.trust_level,
+                "relevanceScore": event.relevance,
+                "impactLevel": (
+                    "HIGH" if event.relevance >= 0.85
+                    else "MEDIUM" if event.relevance >= 0.45
+                    else "LOW"
+                ),
             }
             for event in events
             if event.published_at is not None

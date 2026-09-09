@@ -2,6 +2,8 @@
 
 机构与活跃席位画像的计算口径、证据门槛与上线限制见 [行为画像算法说明](docs/entity-behavior-profiling.md)。
 
+全球新闻源、6 只固定股票的关联词典、时效与降级规则见 [全球实时新闻接入说明](docs/global-news-pipeline.md)。
+
 数据库全部 42 张预期表及字段统一定义在 [`src/database/entities/`](src/database/entities/README.md)，可通过 `npm run schema:verify` 只读核验线上缺表、缺字段与约束差异。
 
 ZeroQuant 是一个面向 A 股盘前与盘中研究的概率预测系统。当前版本已经从“手工模板生成确定曲线”迁移为“时间点一致的数据 → 可审计特征 → 市场状态 → 多周期概率分布 → 硬风控 → 版本化审计”的结构。
@@ -11,7 +13,7 @@ ZeroQuant 是一个面向 A 股盘前与盘中研究的概率预测系统。当�
 ## 核心数据流
 
 ```text
-腾讯行情 / 前复权日线 / 东财公告
+腾讯行情 / 前复权日线 / 东财公告 / GDELT + Google News RSS / 可选 Finnhub
               │
               ▼
        point-in-time 过滤与质量标记
@@ -74,7 +76,7 @@ npm run test:e2e
 - `JWT_SECRET`
 - `ZEROQUANT_INTERNAL_TOKEN`
 
-可选配置包括行情超时、公告缓存、审计目录、模型文件和估算交易成本。旧变量 `ZEROQUANT_ALLOW_UNCALIBRATED_TRADING` 仅为配置兼容保留，已经不能绕过“已校准且已晋级生产模型”的硬门槛。
+可选配置包括行情超时、公告与全球新闻缓存、Finnhub 密钥、审计目录、模型文件和估算交易成本。旧变量 `ZEROQUANT_ALLOW_UNCALIBRATED_TRADING` 仅为配置兼容保留，已经不能绕过“已校准且已晋级生产模型”的硬门槛。
 
 ## 调度
 

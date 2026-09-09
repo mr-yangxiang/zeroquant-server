@@ -99,6 +99,10 @@ class ForecastPipeline:
             warnings.append("机构/活跃席位画像样本不足，本次画像因子按零处理")
         if "entity_profile_source_unavailable" in features.quality_flags:
             warnings.append("机构/活跃席位画像服务不可用，本次画像因子按零处理")
+        if "global_news_all_sources_unavailable" in features.quality_flags:
+            warnings.append("全球新闻源暂时不可用，本次仅使用已取得的公司公告")
+        if "global_news_historical_replay_requires_warehouse" in features.quality_flags:
+            warnings.append("历史日期禁止事后调用实时新闻源，需从时间点一致的数据仓库回放")
         if risk_gates:
             warnings.append("硬风控已触发：" + ",".join(risk_gates))
 
