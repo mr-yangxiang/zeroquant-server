@@ -10,10 +10,10 @@ import { randomBytes } from 'crypto'
 import { pool } from './db.js'
 import { cleanVoiceTradingText, parseTradingIntent } from './voice-cleaner.js'
 import { startQuantInternalScheduler, getQuantSchedulerMetrics } from './scheduler/quant-scheduler.js'
-import { ensureQuantSchema } from './quant-schema.js'
 import { createQuantRouter, quantInternalOnly } from './quant-routes.js'
 import { fetchOwnershipProfile } from './ownership.js'
 import { runMigrationsUp } from './migrations/runner.js'
+import { getStockEntityProfiles } from './profiles/entity-profile-engine.js'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -637,6 +637,12 @@ app.post('/api/v1/chat/send', async (req, res) => {
       [stockCode]
     )
     const quantForecast = quantRows[0] || null
+    let entityProfileContext: Awaited<ReturnType<typeof getStockEntityProfiles>> | null = null
+    try {
+      entityProfileContext = await getStockEntityProfiles(stockCode, new Date())
+    } catch (error) {
+      console.warn('Entity profile context unavailable for chat:', error)
+    }
     const quantActionable = Boolean(quantForecast?.actionable)
     const quantModelStateLabel = quantForecast?.modelState === 'untrained_bootstrap'
       ? '基础试运行模型（尚未训练）'
@@ -740,6 +746,14 @@ app.post('/api/v1/chat/send', async (req, res) => {
         const liveNewsText = Array.isArray(quantForecast?.newsEvents) && quantForecast.newsEvents.length > 0
           ? quantForecast.newsEvents.map((event: any) => `• [${event.published_at || '时间未知'}] ${event.title}（${event.event_type}）`).join('\n')
           : '当前预测快照没有时间点一致的公告事件'
+        const entityProfileText = entityProfileContext?.profiles?.length
+          ? entityProfileContext.profiles.map((profile: any) => {
+              const traits = Array.isArray(profile.traits) && profile.traits.length
+                ? profile.traits.map((item: any) => item.label).join('、')
+                : '样本不足，未形成稳定标签'
+              return `• ${profile.name}（${profile.entityType}）：公开记录 ${profile.sampleCount} 次，可评估 ${profile.labeledSampleCount} 次，可信度 ${(Number(profile.confidence) * 100).toFixed(1)}%，证据等级 ${profile.evidenceGrade}；${traits}；最近公开出现 ${profile.lastEventDate} ${profile.lastSide === 'BUY' ? '买方榜' : '卖方榜'}`
+            }).join('\n')
+          : '当前没有达到展示条件的可验证机构/活跃席位历史画像'
 
         const systemPrompt = `你是 ZeroQuant 的量化研究解释器。你只能解释可观察数据、模型概率、风险与失效条件，不得声称知道未提供的真实机构/游资身份，不得承诺收益或把概率区间说成确定支撑阻力。
 
@@ -757,9 +771,13 @@ app.post('/api/v1/chat/send', async (req, res) => {
 【实时个股最新公告与资讯】：
 ${liveNewsText}
 
+【机构 / 活跃席位历史行为画像（统计推断，不代表当前正在交易）】：
+${entityProfileText}
+- 画像聚合方向：${entityProfileContext?.researchReadyEntityCount ? `${Number(entityProfileContext.signal) >= 0.15 ? '偏多' : Number(entityProfileContext.signal) <= -0.15 ? '偏空' : '中性'}，综合可信度 ${(Number(entityProfileContext.confidence) * 100).toFixed(1)}%` : '样本不足，不形成方向结论'}
+
 【回答约束】：
 1. 先说明数据时间和模型是否已校准；未通过交易门槛时只能给情景、风险和需要继续观察的确认信号。
-2. 区分事实、模型推断和未知；公开逐笔成交不能归因为具体席位。
+2. 区分事实、模型推断和未知；公开逐笔成交不能归因为具体席位。历史席位画像只能描述公开记录中的统计倾向，不能声称该席位今天正在买卖。
 3. 新闻只使用上述时间点一致事件，Markdown 复盘没有经过验证时不得当作模型事实。
 4. 结合用户持仓说明 T+1、成本、滑点和最大损失，但不替用户作出确定性买卖决定。`
 

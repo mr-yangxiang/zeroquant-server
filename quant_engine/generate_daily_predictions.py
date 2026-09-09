@@ -18,6 +18,7 @@ from zeroquant.audit import append_run_jsonl, write_daily_markdown
 from zeroquant.config import STOCKS, Settings, StockSpec
 from zeroquant.models import ForecastRun, QuoteSnapshot
 from zeroquant.news import AnnouncementClient
+from zeroquant.entity_profiles import EntityProfileClient
 from zeroquant.pipeline import ForecastPipeline
 from zeroquant.providers import (
     DailyHistoryProvider,
@@ -63,6 +64,7 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
     daily = DailyHistoryProvider(transport)
     news = AnnouncementClient(transport, settings.state_dir / "news", settings.news_cache_seconds)
     pipeline = ForecastPipeline(settings)
+    entity_profiles = EntityProfileClient(settings)
     sink = PredictionSink(settings)
 
     try:
@@ -73,10 +75,22 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
 
     def process(stock: StockSpec) -> ForecastRun:
         bars = daily.fetch_daily_bars(stock)
+        if persist:
+            try:
+                sink.persist_daily_bars(stock.code, bars)
+            except Exception as exc:
+                print(f"{stock.code}: daily-bar warehouse sync failed: {exc}", file=sys.stderr)
         quote = live_quotes.get(stock.code) or _historical_quote(stock, bars, as_of)
         if quote is None:
             raise MarketDataError(f"{stock.code}: no point-in-time reference price")
         events, flags = news.fetch(stock.code, as_of)
+        if persist:
+            try:
+                sink.persist_news_events(events)
+            except Exception as exc:
+                print(f"{stock.code}: news warehouse sync failed: {exc}", file=sys.stderr)
+        profile = entity_profiles.fetch(stock.code, as_of)
+        flags.extend(profile.flags)
         if quote.timestamp.date() < as_of.date():
             flags.append("premarket_quote_uses_previous_session")
         return pipeline.run(
@@ -86,6 +100,9 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
             daily_bars=bars,
             news_events=events,
             source_flags=flags,
+            entity_profile_signal=profile.signal,
+            entity_profile_confidence=profile.confidence,
+            entity_profile_snapshot_as_of=profile.snapshot_as_of,
         )
 
     runs: list[ForecastRun] = []

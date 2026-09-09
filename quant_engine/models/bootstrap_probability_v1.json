@@ -9,6 +9,7 @@
     "volume_acceleration": 0.05,
     "momentum_volume": 0.08,
     "news_score": 0.28,
+    "entity_behavior_signal": 0.12,
     "order_flow_imbalance": 0.60
   },
   "regimeAdjustments": {

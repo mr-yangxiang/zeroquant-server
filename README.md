@@ -1,5 +1,9 @@
 # ZeroQuant Server
 
+机构与活跃席位画像的计算口径、证据门槛与上线限制见 [行为画像算法说明](docs/entity-behavior-profiling.md)。
+
+数据库全部 42 张预期表及字段统一定义在 [`src/database/entities/`](src/database/entities/README.md)，可通过 `npm run schema:verify` 只读核验线上缺表、缺字段与约束差异。
+
 ZeroQuant 是一个面向 A 股盘前与盘中研究的概率预测系统。当前版本已经从“手工模板生成确定曲线”迁移为“时间点一致的数据 → 可审计特征 → 市场状态 → 多周期概率分布 → 硬风控 → 版本化审计”的结构。
 
 > 重要：仓库自带的 `bootstrap_probability_v1` 只用于打通训练、校准和展示链路，状态明确为 `untrained_bootstrap`。它不会产生自动交易指令，也不代表已经获得可持续的实盘超额收益。

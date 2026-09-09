@@ -31,6 +31,8 @@ def extract_features(
     minute_bars: list[MinuteBar] | None = None,
     news_events: list[NewsEvent] | None = None,
     source_flags: list[str] | None = None,
+    entity_profile_signal: float = 0.0,
+    entity_profile_confidence: float = 0.0,
 ) -> FeatureSnapshot:
     daily_bars = daily_bars or []
     minute_bars = minute_bars or []
@@ -104,6 +106,14 @@ def extract_features(
     values["vwap_gap_z"] = _clip(values["vwap_gap"] / max(base_vol * 2.0, 0.001), -4.0, 4.0)
     values["momentum_volume"] = values["momentum_z"] * max(0.0, values["volume_acceleration"])
     values["news_score"] = aggregate_news_score(news_events, as_of)
+    # The profile signal is already point-in-time and direction aligned by the
+    # backend. Confidence shrinkage here prevents sparse seat histories from
+    # receiving the same influence as mature profiles.
+    profile_confidence = _clip(entity_profile_confidence, 0.0, 1.0)
+    values["entity_behavior_signal"] = (
+        _clip(entity_profile_signal, -1.0, 1.0) * profile_confidence
+    )
+    values["entity_behavior_confidence"] = profile_confidence
     values["order_flow_imbalance"] = 0.0
     flags.append("true_l2_order_flow_unavailable")
 

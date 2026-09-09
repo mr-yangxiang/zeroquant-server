@@ -11,6 +11,10 @@
     "migrate:up": "tsx src/migrations/runner.ts up",
     "migrate:down": "tsx src/migrations/runner.ts down",
     "migrate:status": "tsx src/migrations/runner.ts status",
+    "schema:expected": "node --import tsx src/database/schema-verifier.ts --expected",
+    "schema:catalog-check": "node --import tsx src/database/schema-catalog-check.ts",
+    "schema:verify": "node --import tsx src/database/schema-verifier.ts",
+    "schema:verify:json": "node --import tsx src/database/schema-verifier.ts --json",
     "test:e2e": "node --import tsx test/e2e_baseline.test.ts"
   },
   "dependencies": {

@@ -119,10 +119,44 @@ class ProbabilityCoreTests(unittest.TestCase):
             as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
             first = pipeline.run(quote(), as_of, "realtime", daily_bars(), minute_bars(), [])
             second = pipeline.run(quote(), as_of, "realtime", daily_bars(), minute_bars(), [])
+            with_profile = pipeline.run(
+                quote(), as_of, "realtime", daily_bars(), minute_bars(), [],
+                entity_profile_signal=0.5,
+                entity_profile_confidence=0.8,
+                entity_profile_snapshot_as_of="2026-09-03T18:25:00+08:00",
+            )
             self.assertEqual(first.input_hash, second.input_hash)
+            self.assertNotEqual(first.input_hash, with_profile.input_hash)
             self.assertNotEqual(first.run_id, second.run_id)
             self.assertEqual(first.model_state, "untrained_bootstrap")
             self.assertFalse(first.to_dict()["modelCalibrated"])
+
+    def test_entity_profile_feature_is_confidence_shrunk(self):
+        as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
+        features = extract_features(
+            quote(),
+            as_of,
+            daily_bars(),
+            minute_bars(),
+            [],
+            entity_profile_signal=0.8,
+            entity_profile_confidence=0.25,
+        )
+        self.assertAlmostEqual(features.values["entity_behavior_signal"], 0.2)
+        self.assertAlmostEqual(features.values["entity_behavior_confidence"], 0.25)
+
+    def test_entity_profile_feature_is_clipped_and_zero_without_confidence(self):
+        as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)
+        clipped = extract_features(
+            quote(), as_of, daily_bars(), minute_bars(), [],
+            entity_profile_signal=3.0, entity_profile_confidence=2.0,
+        )
+        absent = extract_features(
+            quote(), as_of, daily_bars(), minute_bars(), [],
+            entity_profile_signal=0.9, entity_profile_confidence=0.0,
+        )
+        self.assertEqual(clipped.values["entity_behavior_signal"], 1.0)
+        self.assertEqual(absent.values["entity_behavior_signal"], 0.0)
 
     def test_stale_data_hard_gate_overrides_model_actionability(self):
         as_of = datetime(2026, 9, 4, 10, 0, tzinfo=SHANGHAI)

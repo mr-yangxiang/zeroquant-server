@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import Settings
-from .models import ForecastRun
+from .models import DailyBar, ForecastRun, NewsEvent
 
 
 class PredictionSink:
@@ -69,6 +69,48 @@ class PredictionSink:
 
     def persist_public_trades(self, records: list[dict[str, Any]]) -> None:
         self._post("/api/v1/quant/public-trades/batch", {"records": records})
+
+    def persist_daily_bars(self, stock_code: str, bars: list[DailyBar]) -> None:
+        records: list[dict[str, Any]] = []
+        for previous, current in zip(bars, bars[1:]):
+            records.append(
+                {
+                    "stockCode": stock_code,
+                    "tradeDate": current.date,
+                    "open": current.open_price,
+                    "high": current.high,
+                    "low": current.low,
+                    "close": current.close,
+                    "volume": current.volume,
+                    "amount": current.amount,
+                    "prevClose": previous.close,
+                    "source": "tencent_qfq_daily",
+                }
+            )
+        if records:
+            self._post("/api/v1/quant/profile-evidence/daily-bars/batch", {"records": records})
+
+    def persist_news_events(self, events: list[NewsEvent]) -> None:
+        records = [
+            {
+                "title": event.title,
+                "content": "",
+                "source": event.source,
+                "publishedAt": event.published_at.isoformat(),
+                "stocks": [event.code],
+                "sentimentLabel": (
+                    "BULLISH" if event.sentiment > 0
+                    else "BEARISH" if event.sentiment < 0
+                    else "NEUTRAL"
+                ),
+                "sentimentScore": event.sentiment,
+                "trustLevel": "NORMAL",
+            }
+            for event in events
+            if event.published_at is not None
+        ]
+        if records:
+            self._post("/api/v1/quant/profile-evidence/news/batch", {"records": records})
 
     def fetch_base_points(self, stock_code: str, trade_date: str) -> list[dict[str, Any]]:
         try:

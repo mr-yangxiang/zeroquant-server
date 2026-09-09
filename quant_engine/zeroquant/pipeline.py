@@ -19,6 +19,9 @@ def _input_hash(
     daily_bars: list[DailyBar],
     minute_bars: list[MinuteBar],
     events: list[NewsEvent],
+    entity_profile_signal: float,
+    entity_profile_confidence: float,
+    entity_profile_snapshot_as_of: str | None,
 ) -> str:
     payload = {
         "quote": {
@@ -35,6 +38,11 @@ def _input_hash(
         "dailyTail": [bar.__dict__ for bar in daily_bars[-30:]],
         "minuteTail": [bar.__dict__ for bar in minute_bars[-60:]],
         "eventIds": [event.event_id for event in events],
+        "entityProfile": {
+            "signal": entity_profile_signal,
+            "confidence": entity_profile_confidence,
+            "snapshotAsOf": entity_profile_snapshot_as_of,
+        },
     }
     canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -59,6 +67,9 @@ class ForecastPipeline:
         minute_bars: list[MinuteBar] | None = None,
         news_events: list[NewsEvent] | None = None,
         source_flags: list[str] | None = None,
+        entity_profile_signal: float = 0.0,
+        entity_profile_confidence: float = 0.0,
+        entity_profile_snapshot_as_of: str | None = None,
     ) -> ForecastRun:
         daily_bars = daily_bars or []
         minute_bars = minute_bars or []
@@ -70,6 +81,8 @@ class ForecastPipeline:
             minute_bars=minute_bars,
             news_events=news_events,
             source_flags=source_flags,
+            entity_profile_signal=entity_profile_signal,
+            entity_profile_confidence=entity_profile_confidence,
         )
         regime = detect_regime(features)
         horizons = (5, 15, 30, 60, 120, 240) if mode == "daily" else (5, 15, 30, 60)
@@ -82,6 +95,10 @@ class ForecastPipeline:
             warnings.append("数据质量未达到生产交易门槛")
         if "true_l2_order_flow_unavailable" in features.quality_flags:
             warnings.append("当前公共行情源不包含可验证的多档委托流，未计算真实 OFI")
+        if "entity_profile_insufficient_evidence" in features.quality_flags:
+            warnings.append("机构/活跃席位画像样本不足，本次画像因子按零处理")
+        if "entity_profile_source_unavailable" in features.quality_flags:
+            warnings.append("机构/活跃席位画像服务不可用，本次画像因子按零处理")
         if risk_gates:
             warnings.append("硬风控已触发：" + ",".join(risk_gates))
 
@@ -101,7 +118,15 @@ class ForecastPipeline:
             features=features,
             horizons=forecasts,
             news_events=news_events,
-            input_hash=_input_hash(quote, daily_bars, minute_bars, news_events),
+            input_hash=_input_hash(
+                quote,
+                daily_bars,
+                minute_bars,
+                news_events,
+                entity_profile_signal,
+                entity_profile_confidence,
+                entity_profile_snapshot_as_of,
+            ),
             warnings=warnings,
         )
         if mode == "daily":

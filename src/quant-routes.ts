@@ -1,5 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
+import { createHash } from 'node:crypto'
 import { pool } from './db.js'
+import { getStockEntityProfiles, refreshEntityProfiles } from './profiles/entity-profile-engine.js'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -52,6 +54,219 @@ function localizeModelState(value: unknown) {
 
 export function createQuantRouter() {
   const router = Router()
+
+  router.get('/stocks/:code/entity-profiles', async (req, res) => {
+    const stockCode = String(req.params.code || '')
+    const rawAsOf = typeof req.query.asOf === 'string' ? req.query.asOf : new Date().toISOString()
+    const asOf = new Date(/^\d{4}-\d{2}-\d{2}$/.test(rawAsOf) ? `${rawAsOf}T23:59:59+08:00` : rawAsOf)
+    if (!/^\d{6}$/.test(stockCode) || Number.isNaN(asOf.getTime())) {
+      return res.status(400).json({ code: 400, message: 'invalid stock code or as-of date', data: null })
+    }
+    try {
+      const data = await getStockEntityProfiles(stockCode, asOf)
+      return res.json({ code: 0, message: 'ok', data })
+    } catch (error) {
+      console.error('Fetch entity profiles error:', error)
+      return res.status(500).json({ code: 500, message: 'entity profile query failed', data: null })
+    }
+  })
+
+  router.post('/entity-profiles/refresh', quantInternalOnly, async (req, res) => {
+    const raw = String(req.body?.asOf || '')
+    const asOf = raw ? new Date(raw) : new Date()
+    if (Number.isNaN(asOf.getTime())) {
+      return res.status(400).json({ code: 400, message: 'invalid as-of timestamp', data: null })
+    }
+    try {
+      const data = await refreshEntityProfiles(asOf)
+      return res.json({ code: 0, message: 'entity profiles refreshed', data })
+    } catch (error) {
+      console.error('Refresh entity profiles error:', error)
+      return res.status(500).json({ code: 500, message: 'entity profile refresh failed', data: null })
+    }
+  })
+
+  router.post('/profile-evidence/dragon-tiger/batch', quantInternalOnly, async (req, res) => {
+    const records: unknown[] = Array.isArray(req.body?.records) ? req.body.records : []
+    if (records.length === 0 || records.length > 1000) {
+      return res.status(400).json({ code: 400, message: 'records must contain 1 to 1000 items', data: null })
+    }
+    const parsed = records.map((record: unknown) => {
+      if (!isRecord(record)) return null
+      const stockCode = String(record.stockCode || '')
+      const tradeDate = String(record.tradeDate || '')
+      const side = String(record.side || '').toUpperCase()
+      const rank = finiteNumber(record.rank)
+      const seatName = String(record.seatName || '').trim()
+      const buyAmount = finiteNumber(record.buyAmount) ?? 0
+      const sellAmount = finiteNumber(record.sellAmount) ?? 0
+      const netAmount = finiteNumber(record.netAmount) ?? buyAmount - sellAmount
+      const source = String(record.source || '').trim()
+      const disclosedAt = new Date(String(record.disclosedAt || ''))
+      const tradeDateStart = new Date(`${tradeDate}T00:00:00+08:00`)
+      if (!/^\d{6}$/.test(stockCode) || !/^\d{4}-\d{2}-\d{2}$/.test(tradeDate)
+        || !['BUY', 'SELL'].includes(side) || rank === null || !Number.isInteger(rank) || rank < 1 || rank > 100
+        || !seatName || seatName.length > 255 || !source || source.length > 100
+        || Number.isNaN(disclosedAt.getTime()) || disclosedAt < tradeDateStart || buyAmount < 0 || sellAmount < 0) return null
+      const seatType = String(record.seatType || '').trim() || null
+      if (seatType && seatType.length > 50) return null
+      return { stockCode, tradeDate, side, rank, seatName, buyAmount, sellAmount, netAmount,
+        seatType, source, disclosedAt: disclosedAt.toISOString() }
+    })
+    if (parsed.some((item) => item === null)) {
+      return res.status(400).json({ code: 400, message: 'invalid dragon-tiger evidence item; batch rejected atomically', data: null })
+    }
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      for (const item of parsed) {
+        if (!item) continue
+        await client.query(
+          `INSERT INTO dragon_tiger_seats
+            (stock_code, trade_date, side, rank, seat_name, buy_amount, sell_amount, net_amount, seat_type, source, disclosed_at)
+           VALUES ($1, $2::date, $3, $4, $5, $6, $7, $8, $9, $10, $11::timestamptz)
+           ON CONFLICT (stock_code, trade_date, side, rank) DO UPDATE SET
+             seat_name = EXCLUDED.seat_name, buy_amount = EXCLUDED.buy_amount,
+             sell_amount = EXCLUDED.sell_amount, net_amount = EXCLUDED.net_amount,
+             seat_type = EXCLUDED.seat_type, source = EXCLUDED.source,
+             disclosed_at = EXCLUDED.disclosed_at, ingested_at = NOW()`,
+          [item.stockCode, item.tradeDate, item.side, item.rank, item.seatName, item.buyAmount,
+            item.sellAmount, item.netAmount, item.seatType, item.source, item.disclosedAt]
+        )
+      }
+      await client.query('COMMIT')
+      return res.json({ code: 0, message: 'dragon-tiger evidence persisted', data: { accepted: parsed.length } })
+    } catch (error) {
+      await client.query('ROLLBACK')
+      console.error('Persist dragon-tiger evidence error:', error)
+      return res.status(500).json({ code: 500, message: 'dragon-tiger evidence persistence failed', data: null })
+    } finally {
+      client.release()
+    }
+  })
+
+  router.post('/profile-evidence/news/batch', quantInternalOnly, async (req, res) => {
+    const records: unknown[] = Array.isArray(req.body?.records) ? req.body.records : []
+    if (records.length === 0 || records.length > 500) {
+      return res.status(400).json({ code: 400, message: 'records must contain 1 to 500 items', data: null })
+    }
+    const parsed = records.map((record: unknown) => {
+      if (!isRecord(record)) return null
+      const title = String(record.title || '').trim()
+      const content = String(record.content || '').trim()
+      const source = String(record.source || '').trim()
+      const publishedAt = new Date(String(record.publishedAt || ''))
+      const rawStocks = Array.isArray(record.stocks) ? record.stocks.map((item) => String(item)) : []
+      const stocks = rawStocks.filter((item) => /^\d{6}$/.test(item))
+      const sentimentScore = finiteNumber(record.sentimentScore)
+      const sentimentLabel = String(record.sentimentLabel || '').trim() || null
+      const trustLevel = String(record.trustLevel || 'NORMAL').trim()
+      if (!title || title.length > 500 || !source || source.length > 100
+        || Number.isNaN(publishedAt.getTime()) || stocks.length === 0 || stocks.length !== rawStocks.length
+        || (sentimentScore !== null && (sentimentScore < -1 || sentimentScore > 1))) return null
+      const fingerprint = String(record.fingerprint || '').trim()
+        || createHash('sha256').update(`${source}|${publishedAt.toISOString()}|${title}|${String(record.url || '')}`).digest('hex')
+      const url = String(record.url || '').trim() || null
+      if (!/^[0-9a-f]{64}$/i.test(fingerprint) || (url && url.length > 1000)
+        || (sentimentLabel && !['BULLISH', 'BEARISH', 'NEUTRAL'].includes(sentimentLabel))
+        || !['LOW', 'NORMAL', 'HIGH'].includes(trustLevel)) return null
+      return { title, content, source, publishedAt: publishedAt.toISOString(), stocks: [...new Set(stocks)], fingerprint,
+        url, sentimentLabel, sentimentScore, trustLevel }
+    })
+    if (parsed.some((item) => item === null)) {
+      return res.status(400).json({ code: 400, message: 'invalid news evidence item; batch rejected atomically', data: null })
+    }
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      for (const item of parsed) {
+        if (!item) continue
+        const { rows } = await client.query(
+          `INSERT INTO news_articles
+            (title, content, url, source, published_at, fingerprint, sentiment_label, sentiment_score, trust_level)
+           VALUES ($1, $2, $3, $4, $5::timestamptz, $6, $7, $8, $9)
+           ON CONFLICT (fingerprint) DO UPDATE SET
+             title = EXCLUDED.title, content = EXCLUDED.content, url = EXCLUDED.url,
+             sentiment_label = EXCLUDED.sentiment_label, sentiment_score = EXCLUDED.sentiment_score,
+             trust_level = EXCLUDED.trust_level
+           RETURNING id`,
+          [item.title, item.content, item.url, item.source, item.publishedAt, item.fingerprint,
+            item.sentimentLabel, item.sentimentScore, item.trustLevel]
+        )
+        for (const stockCode of item.stocks) {
+          await client.query(
+            `INSERT INTO news_stock_relations (news_id, stock_code, relevance_score, impact_level)
+             VALUES ($1, $2, 1, 'MEDIUM')
+             ON CONFLICT (news_id, stock_code) DO NOTHING`,
+            [rows[0].id, stockCode]
+          )
+        }
+      }
+      await client.query('COMMIT')
+      return res.json({ code: 0, message: 'news evidence persisted', data: { accepted: parsed.length } })
+    } catch (error) {
+      await client.query('ROLLBACK')
+      console.error('Persist news evidence error:', error)
+      return res.status(500).json({ code: 500, message: 'news evidence persistence failed', data: null })
+    } finally {
+      client.release()
+    }
+  })
+
+  router.post('/profile-evidence/daily-bars/batch', quantInternalOnly, async (req, res) => {
+    const records: unknown[] = Array.isArray(req.body?.records) ? req.body.records : []
+    if (records.length === 0 || records.length > 1000) {
+      return res.status(400).json({ code: 400, message: 'records must contain 1 to 1000 items', data: null })
+    }
+    const parsed = records.map((record: unknown) => {
+      if (!isRecord(record)) return null
+      const stockCode = String(record.stockCode || '')
+      const tradeDate = String(record.tradeDate || '')
+      const open = finiteNumber(record.open)
+      const high = finiteNumber(record.high)
+      const low = finiteNumber(record.low)
+      const close = finiteNumber(record.close)
+      const prevClose = finiteNumber(record.prevClose)
+      const volume = finiteNumber(record.volume)
+      const amount = finiteNumber(record.amount)
+      const source = String(record.source || '').trim()
+      if (!/^\d{6}$/.test(stockCode) || !/^\d{4}-\d{2}-\d{2}$/.test(tradeDate)
+        || [open, high, low, close, prevClose, volume, amount].some((item) => item === null)
+        || !source || source.length > 50 || Math.min(open!, high!, low!, close!, prevClose!) <= 0 || volume! < 0 || amount! < 0
+        || high! < Math.max(open!, close!, low!) || low! > Math.min(open!, close!, high!)) return null
+      return { stockCode, tradeDate, open: open!, high: high!, low: low!, close: close!, prevClose: prevClose!,
+        volume: volume!, amount: amount!, source }
+    })
+    if (parsed.some((item) => item === null)) {
+      return res.status(400).json({ code: 400, message: 'invalid daily bar item; batch rejected atomically', data: null })
+    }
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      for (const item of parsed) {
+        if (!item) continue
+        await client.query(
+          `INSERT INTO daily_bars
+            (stock_code, trade_date, open, high, low, close, volume, amount, prev_close, source)
+           VALUES ($1, $2::date, $3, $4, $5, $6, $7, $8, $9, $10)
+           ON CONFLICT (stock_code, trade_date) DO UPDATE SET
+             open = EXCLUDED.open, high = EXCLUDED.high, low = EXCLUDED.low,
+             close = EXCLUDED.close, volume = EXCLUDED.volume, amount = EXCLUDED.amount,
+             prev_close = EXCLUDED.prev_close, source = EXCLUDED.source, ingested_at = NOW()`,
+          [item.stockCode, item.tradeDate, item.open, item.high, item.low, item.close,
+            item.volume, item.amount, item.prevClose, item.source]
+        )
+      }
+      await client.query('COMMIT')
+      return res.json({ code: 0, message: 'daily bars persisted', data: { accepted: parsed.length } })
+    } catch (error) {
+      await client.query('ROLLBACK')
+      console.error('Persist daily bars error:', error)
+      return res.status(500).json({ code: 500, message: 'daily bar persistence failed', data: null })
+    } finally {
+      client.release()
+    }
+  })
 
   router.post('/prediction-runs', quantInternalOnly, async (req, res) => {
     const body = req.body as UnknownRecord

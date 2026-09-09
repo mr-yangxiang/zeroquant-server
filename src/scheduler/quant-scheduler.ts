@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
+import { refreshEntityProfiles } from '../profiles/entity-profile-engine.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -52,6 +53,41 @@ const taskMetrics: Record<string, TaskMetric> = {
     totalRuns: 0,
     totalErrors: 0,
   },
+  entityProfileRefresh: {
+    name: '18:25 机构与活跃席位画像滚动更新',
+    cronExpr: '25 18 * * 1-5',
+    lastRunAt: null,
+    lastDurationMs: 0,
+    status: 'IDLE',
+    lastError: null,
+    totalRuns: 0,
+    totalErrors: 0,
+  },
+}
+
+async function executeEntityProfileRefresh() {
+  const metric = taskMetrics.entityProfileRefresh
+  if (metric.status === 'RUNNING') {
+    console.warn('[QuantScheduler] ⚠️ 画像更新任务上一次运行尚未完成，跳过本次触发。')
+    return
+  }
+  const startedAt = Date.now()
+  metric.status = 'RUNNING'
+  metric.lastRunAt = new Date().toISOString()
+  metric.lastError = null
+  metric.totalRuns++
+  try {
+    const result = await refreshEntityProfiles(new Date())
+    metric.status = 'SUCCESS'
+    console.log(`[QuantScheduler] 画像更新完成：${result.entityCount} 个公开交易实体，${result.evidenceCount} 条证据。`)
+  } catch (error) {
+    metric.status = 'ERROR'
+    metric.totalErrors++
+    metric.lastError = error instanceof Error ? error.message : String(error)
+    console.error('[QuantScheduler] ❌ 画像更新失败:', error)
+  } finally {
+    metric.lastDurationMs = Date.now() - startedAt
+  }
 }
 
 // 运行 Python 算法脚本 (基于多线程并发隔离与超时熔断控制)
@@ -200,7 +236,14 @@ export function startQuantInternalScheduler() {
     { timezone: 'Asia/Shanghai' }
   )
 
-  console.log('🚀 [QuantScheduler] ZeroQuant 概率量化调度已激活 (3 项受控任务)')
+  // 4. 收盘数据落库后重算画像；画像按日期快照保存，盘前和盘中只读取当时可见版本。
+  cron.schedule(
+    taskMetrics.entityProfileRefresh.cronExpr,
+    executeEntityProfileRefresh,
+    { timezone: 'Asia/Shanghai' }
+  )
+
+  console.log('🚀 [QuantScheduler] ZeroQuant 概率量化调度已激活 (4 项受控任务)')
 }
 
 /**

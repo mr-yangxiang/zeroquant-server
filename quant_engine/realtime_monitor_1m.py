@@ -21,6 +21,7 @@ from zeroquant.config import STOCKS, Settings, StockSpec
 from zeroquant.curve import build_forward_rolling_curve
 from zeroquant.models import ForecastRun, QuoteSnapshot
 from zeroquant.news import AnnouncementClient
+from zeroquant.entity_profiles import EntityProfileClient
 from zeroquant.pipeline import ForecastPipeline
 from zeroquant.providers import (
     DailyHistoryProvider,
@@ -53,6 +54,7 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
     daily = DailyHistoryProvider(transport)
     news = AnnouncementClient(transport, settings.state_dir / "news", settings.news_cache_seconds)
     pipeline = ForecastPipeline(settings)
+    entity_profiles = EntityProfileClient(settings)
     sink = PredictionSink(settings)
     try:
         quotes = market.fetch_quotes(STOCKS)
@@ -99,6 +101,13 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             flags.append("intraday_minute_source_unavailable")
         events, news_flags = news.fetch(stock.code, now)
         flags.extend(news_flags)
+        if persist:
+            try:
+                sink.persist_news_events(events)
+            except Exception as exc:
+                print(f"{stock.code}: news warehouse sync failed: {exc}", file=sys.stderr)
+        profile = entity_profiles.fetch(stock.code, now)
+        flags.extend(profile.flags)
         if abs((now - quote.timestamp).total_seconds()) > 10 * 60:
             flags.append("stale_quote_over_10_minutes")
         return pipeline.run(
@@ -109,6 +118,9 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             minute_bars=minutes,
             news_events=events,
             source_flags=flags,
+            entity_profile_signal=profile.signal,
+            entity_profile_confidence=profile.confidence,
+            entity_profile_snapshot_as_of=profile.snapshot_as_of,
         )
 
     runs: list[ForecastRun] = []
