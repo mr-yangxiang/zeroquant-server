@@ -9,9 +9,9 @@
 | `system.entities.ts` | 1 | 数据库迁移版本 |
 | `application.entities.ts` | 14 | 用户、股票、持仓、成交、对话和预测运行 |
 | `market-data.entities.ts` | 15 | 行情、委托流、新闻、公告、股东与龙虎榜 |
-| `research.entities.ts` | 8 | 数据质量、特征标签、模型评估和影子交易 |
+| `research.entities.ts` | 13 | 数据质量、特征标签、模型评估、影子交易、原始版本、数据集、实验与批准证据 |
 | `profile.entities.ts` | 4 | 机构/活跃席位身份、画像、股票关联与刷新审计 |
-| 合计 | 42 | `public` schema 全部预期表 |
+| 合计 | 47 | `public` schema 全部预期表 |
 
 每张表都定义：
 

@@ -1,4 +1,6 @@
 node_modules
+.venv-research/
+quant_engine/research_artifacts/
 dist
 .env
 .env.*

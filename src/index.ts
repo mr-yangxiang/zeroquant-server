@@ -626,7 +626,7 @@ app.post('/api/v1/chat/send', async (req, res) => {
 
     const { rows: quantRows } = await pool.query(
       `SELECT r.run_id as "runId", r.as_of as "asOf", r.model_version as "modelVersion",
-              r.model_state as "modelState", r.regime, r.features, r.news_events as "newsEvents", r.warnings,
+              r.model_state as "modelState", r.model_calibrated as "modelCalibrated", r.mode, r.regime, r.features, r.news_events as "newsEvents", r.warnings,
               f.p_up as "pUp", f.p_flat as "pFlat", f.p_down as "pDown",
               f.q10_return_pct as "q10ReturnPct", f.q50_return_pct as "q50ReturnPct",
               f.q90_return_pct as "q90ReturnPct", f.confidence, f.actionable, f.reasons
@@ -643,14 +643,10 @@ app.post('/api/v1/chat/send', async (req, res) => {
     } catch (error) {
       console.warn('Entity profile context unavailable for chat:', error)
     }
-    const quantActionable = Boolean(quantForecast?.actionable)
-    const quantModelStateLabel = quantForecast?.modelState === 'untrained_bootstrap'
-      ? '基础试运行模型（尚未训练）'
-      : quantForecast?.modelState === 'shadow'
-        ? '影子验证中'
-        : quantForecast?.modelState === 'champion'
-          ? '已通过生产门槛'
-          : '状态待确认'
+    const gate = await import('./research-production.js')
+    const quantActionable = quantForecast?.actionable === true && gate.forecastSignalEligible(quantForecast)
+      && await gate.productionApproved(quantForecast.modelVersion, quantForecast.asOf)
+    const quantModelStateLabel = gate.localizeModelState(quantForecast?.modelState, quantActionable).label
 
     // 5. 保存用户消息
     await pool.query(
@@ -787,7 +783,7 @@ ${entityProfileText}
 4. 结合用户持仓说明 T+1、成本、滑点和最大损失，但不替用户作出确定性买卖决定。`
 
         const apiKey = process.env.CPA_API_KEY || ''
-        if (apiKey) {
+        if (apiKey && quantActionable) {
           const cpaRes = await fetch('http://127.0.0.1:8317/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -821,6 +817,14 @@ ${entityProfileText}
       }
     }
 
+    // Unverified models get controlled research text. Slow responses cannot
+    // retain authority from a signal that expired while the LLM was answering.
+    if (!tradeResult.isTradeAction && (!quantActionable || !gate.forecastSignalEligible(quantForecast))) {
+      const label = gate.localizeModelState(quantForecast?.modelState, false)
+      reply = `### 研究观察——${stock.name} (${stock.code})\n\n当前状态：**${label.label}**。${label.explanation}\n\n`
+        + `数据快照时间：${quantForecast?.asOf ? new Date(quantForecast.asOf).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '暂无'}（北京时间）。当前没有通过核验的可执行买卖信号，因此不提供确定买卖价或收益承诺。\n\n`
+        + `复盘时请对照原始预测与实际轨迹，检查行情延迟、新闻首次可见时间和含成本的偏差；历史机构画像不代表其今天正在交易。`
+    }
     // 7. 保存 Assistant 回复
     const { rows: replyRows } = await pool.query(
       `INSERT INTO user_chat_messages (user_id, stock_code, role, content, created_at)

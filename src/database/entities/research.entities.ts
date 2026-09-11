@@ -2,6 +2,43 @@ import { bigserialId, column, timestamptz, varchar, type TableEntity } from './t
 
 export const researchEntities: TableEntity[] = [
   {
+    name: 'research_raw_records', description: '不可变原始研究数据与可用时间证据', primaryKey: ['record_hash'],
+    indexes: [{ name: 'idx_research_raw_lookup', columns: ['kind', 'stock_code', 'event_at'] }],
+    columns: {
+      record_hash: varchar(64), kind: varchar(30), stock_code: varchar(20), source: varchar(100),
+      event_at: timestamptz(false), available_at: timestamptz(false), ingested_at: timestamptz(false, 'now'),
+      pit_certified: column('boolean', false, {default:false}), payload: column('jsonb', false),
+    },
+  },
+  {
+    name: 'research_datasets', description: '数据集版本与质量清单', primaryKey: ['dataset_id'],
+    columns: {
+      dataset_id: varchar(100), feature_version: varchar(50), horizon_minutes: column('integer', false),
+      row_count: column('integer', false), content_hash: varchar(64), manifest: column('jsonb', false),
+      created_at: timestamptz(false, 'now'),
+    },
+  },
+  {
+    name: 'research_runs', description: '训练和验证执行结果', primaryKey: ['run_id'],
+    foreignKeys: [{columns:['dataset_id'], referencesTable:'research_datasets', referencesColumns:['dataset_id']}],
+    columns: {
+      run_id: column('uuid', false), dataset_id: varchar(100, true), status: varchar(30),
+      report: column('jsonb', false), created_at: timestamptz(false, 'now'),
+    },
+  },
+  {
+    name: 'research_shadow_state', description: '可恢复的影子交易账本', primaryKey: ['model_id'],
+    foreignKeys: [{columns:['model_id'], referencesTable:'model_artifacts', referencesColumns:['model_id']}],
+    columns: {model_id:varchar(100), state:column('jsonb', false), updated_at:timestamptz(false, 'now')},
+  },
+  {
+    name: 'model_promotions', description: '生产晋级证据及撤销记录', primaryKey: ['model_id'],
+    foreignKeys: [{columns:['model_id'], referencesTable:'model_artifacts', referencesColumns:['model_id']}],
+    columns: {
+      model_id:varchar(100), evidence:column('jsonb', false), approved_at:timestamptz(false, 'now'), revoked_at:timestamptz(true),
+    },
+  },
+  {
     name: 'data_quality_incidents', description: '数据质量和未来函数事件', primaryKey: ['id'],
     columns: {
       id: bigserialId(), incident_time: timestamptz(false, 'now'), stock_code: varchar(20, true), incident_type: varchar(80),

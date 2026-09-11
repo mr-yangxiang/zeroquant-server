@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { createHash } from 'node:crypto'
 import { pool } from './db.js'
 import { getStockEntityProfiles, refreshEntityProfiles } from './profiles/entity-profile-engine.js'
+import { forecastSignalEligible, localizeModelState, productionApproved, SIGNAL_MAX_AGE_MS } from './research-production.js'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -37,19 +38,6 @@ export function quantInternalOnly(req: Request, res: Response, next: NextFunctio
 function validateProbability(value: unknown): number | null {
   const parsed = finiteNumber(value)
   return parsed !== null && parsed >= 0 && parsed <= 1 ? parsed : null
-}
-
-function localizeModelState(value: unknown) {
-  const state = String(value || '')
-  if (state === 'untrained_bootstrap') {
-    return {
-      label: '尚未完成训练，仅供观察',
-      explanation: '当前只是验证数据管道和页面的初始规则权重，尚未用多年历史样本训练，也未通过样本外回测和概率校准，不能据此证明预测准确率。',
-    }
-  }
-  if (state === 'shadow') return { label: '影子验证中', explanation: '模型已训练，正在模拟成交中验证滑点、延迟和成本后的表现。' }
-  if (state === 'champion') return { label: '已通过生产门槛', explanation: '模型已通过既定样本外、校准和影子交易门槛，仍受实时数据质量与风控约束。' }
-  return { label: '状态待确认', explanation: '当前模型状态没有对应的中文说明。' }
 }
 
 export function createQuantRouter() {
@@ -314,6 +302,8 @@ export function createQuantRouter() {
       parsedHorizons.push(item)
     }
 
+    const verifiedProduction = forecastSignalEligible(body)
+      && await productionApproved(String(body.modelVersion || ''), asOf)
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
@@ -328,7 +318,7 @@ export function createQuantRouter() {
           `INSERT INTO quant_horizon_forecasts
             (run_id, horizon_minutes, p_up, p_flat, p_down, expected_return_pct, q10_return_pct, q50_return_pct, q90_return_pct, confidence, actionable, reasons)
            VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)`,
-          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), modelState === 'champion' && modelCalibrated && !hasHardRisk && Boolean(item.actionable), JSON.stringify(item.reasons || [])]
+          [runId, finiteNumber(item.horizonMinutes), validateProbability(item.pUp), validateProbability(item.pFlat), validateProbability(item.pDown), finiteNumber(item.expectedReturnPct), finiteNumber(item.q10ReturnPct), finiteNumber(item.q50ReturnPct), finiteNumber(item.q90ReturnPct), validateProbability(item.confidence), verifiedProduction && modelState === 'champion' && modelCalibrated && !hasHardRisk && Boolean(item.actionable), JSON.stringify(item.reasons || [])]
         )
       }
 
@@ -400,15 +390,20 @@ export function createQuantRouter() {
          FROM quant_horizon_forecasts WHERE run_id = $1::uuid ORDER BY horizon_minutes`,
         [runRows[0].runId]
       )
-      const localized = localizeModelState(runRows[0].modelState)
+      const run = runRows[0]
+      const approved = forecastSignalEligible(run) && await productionApproved(run.modelVersion, run.asOf)
+      const localized = localizeModelState(run.modelState, approved)
+      res.set('Cache-Control', 'no-store, max-age=0')
       return res.json({
         code: 0,
         message: 'ok',
         data: {
           ...runRows[0],
+          productionApproved: approved,
+          signalExpiresAt: approved ? new Date(Math.min(new Date(run.asOf).getTime(), new Date(run.features.observedAt).getTime()) + SIGNAL_MAX_AGE_MS).toISOString() : null,
           modelStateLabel: localized.label,
           modelStateExplanation: localized.explanation,
-          horizons: forecasts,
+          horizons: forecasts.map(item => ({ ...item, actionable: approved && item.actionable === true })),
         },
       })
     } catch (error) {

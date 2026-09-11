@@ -119,7 +119,7 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
     }
 
     // 启动多进程/多线程隔离沙盒 (4C6G 环境最大分配 4 线程并发)
-    const pythonProc = spawn('python3', [scriptPath, ...args], {
+    const pythonProc = spawn(process.env.ZEROQUANT_PYTHON || 'python3', [scriptPath, ...args], {
       cwd: QUANT_ENGINE_DIR,
       env: {
         ...process.env,
@@ -243,7 +243,22 @@ export function startQuantInternalScheduler() {
     { timezone: 'Asia/Shanghai' }
   )
 
-  console.log('🚀 [QuantScheduler] ZeroQuant 概率量化调度已激活 (4 项受控任务)')
+  if (process.env.ZEROQUANT_RESEARCH_SHADOW_ENABLED === 'true') {
+    const artifact = process.env.ZEROQUANT_RESEARCH_ARTIFACT_DIR
+    if (!artifact) throw new Error('影子交易已启用，但缺少 ZEROQUANT_RESEARCH_ARTIFACT_DIR')
+    taskMetrics.researchShadow = {
+      name: '已训练候选模型的实时影子交易', cronExpr: '* * * * *',
+      lastRunAt: null, lastDurationMs: 0, status: 'IDLE', lastError: null, totalRuns: 0, totalErrors: 0,
+    }
+    const shadowArgs = ['shadow', '--database', '--artifact', artifact,
+      '--output', path.join(QUANT_ENGINE_DIR, 'research_artifacts', 'shadow')]
+    if (process.env.ZEROQUANT_RESEARCH_COSTS_PATH) shadowArgs.push('--costs', process.env.ZEROQUANT_RESEARCH_COSTS_PATH)
+    cron.schedule('* * * * *', async () => {
+      try { await executeQuantScript('researchShadow', 'research_pipeline.py', shadowArgs) }
+      catch { /* executeQuantScript records the failure in task metrics */ }
+    }, { timezone: 'Asia/Shanghai' })
+  }
+  console.log('[QuantScheduler] 已激活 ' + Object.keys(taskMetrics).length + ' 项受控任务')
 }
 
 /**

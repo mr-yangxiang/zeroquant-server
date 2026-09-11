@@ -90,7 +90,6 @@ export const migration005: Migration = {
       DROP TABLE IF EXISTS stock_entity_profile_links CASCADE;
       DROP TABLE IF EXISTS entity_behavior_profiles CASCADE;
       DROP TABLE IF EXISTS market_entities CASCADE;
-      ALTER TABLE stock_l2_orders DROP COLUMN IF EXISTS created_at;
       ALTER TABLE news_stock_relations DROP COLUMN IF EXISTS ingested_at;
       ALTER TABLE dragon_tiger_seats DROP COLUMN IF EXISTS ingested_at;
     `)

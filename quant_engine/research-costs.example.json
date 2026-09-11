@@ -1,0 +1,10 @@
+{
+  "commission_rate": 0.00025,
+  "minimum_commission": 5,
+  "spread_bps": 2,
+  "slippage_bps": 3,
+  "impact_bps_at_full_participation": 20,
+  "max_participation": 0.01,
+  "broker_verified": false,
+  "evidence_reference": ""
+}
