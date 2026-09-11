@@ -44,7 +44,13 @@ def review(target_date: str | None = None) -> dict:
     run_path = settings.audit_dir / "prediction_runs" / f"{target.isoformat()}.jsonl"
     runs = _load_daily_runs(run_path)
     if not runs:
-        raise RuntimeError(f"no daily forecast run found for {target.isoformat()}")
+        summary = {
+            "status": "SKIPPED",
+            "tradeDate": target.isoformat(),
+            "reason": f"no daily forecast run found for {target.isoformat()}",
+        }
+        print(json.dumps(summary, ensure_ascii=False))
+        return summary
 
     provider = DailyHistoryProvider(HttpTransport(settings.request_timeout_seconds))
     rows: list[dict] = []
