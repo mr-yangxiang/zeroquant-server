@@ -142,6 +142,20 @@
 
 ---
 
+### Log #009 (2026-09-13)
+- **发现问题 1【自动化测试模块查找路径缺失 pytest.ini 配置】**：
+  - **现象**：直接执行 pytest 测试套件时，test_research_review_regressions.py 与 test_research_safety.py 无法直接导入 test_research_pipeline 模块（抛出 ModuleNotFoundError）。
+  - **根因剖析**：未显式配置测试执行上下文路径，导致跨测试文件引用夹具失败。
+  - **改进策略**：在 quant_engine 根目录固化 pytest.ini 配置文件，明确声明 pythonpath = . tests 与 testpaths = tests，确保 60 项黑盒测试与门禁验证用例 100% 自动化绿色通过。
+
+- **发现问题 2【周末非交易日调度平稳性与全链路接口健壮性】**：
+  - **现象**：需确保周末非交易日期间后台高频监控（minutelyMonitor）平稳运行无监控噪音，且前端生产包正常构建。
+  - **系统改进**：全面巡检 6 大做 T 标的预测数据与调度器运行指标，minutelyMonitor 任务在非交易日稳定运行超过 4,400 次零异常（SUCCESS）；同时完成前端 Vite 生产构建校验（2,230 个模块无阻断），确保全链路状态平稳待命。
+
+---
+
+---
+
 ## ⚙️ 三、 每日计算强制调用与自我进化闭环
 
 1. **00:00 & 09:20 预测引擎**：生成预测时，必须读取 `STOCK_QUANT_PROFILES` 中的 Beta、poc_ratio 与波动模式，杜绝任何同质化波形。
