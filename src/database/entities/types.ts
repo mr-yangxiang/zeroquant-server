@@ -5,6 +5,8 @@ export interface ColumnEntity {
   nullable: boolean
   maxLength?: number
   default?: DefaultValue
+  /** Explicit legacy metadata exception; verifier must retain a warning. */
+  legacyType?: { type: string; reason: string }
 }
 
 export interface ForeignKeyEntity {

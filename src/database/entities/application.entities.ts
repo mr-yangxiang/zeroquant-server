@@ -1,17 +1,24 @@
 import { bigserialId, column, serialId, timestamp, timestamptz, varchar, type TableEntity } from './types.js'
 
+const textId = () => column('text', false, { default: 'gen_random_uuid()' })
+const legacyCreatedAt = () => column('timestamp with time zone', true, {
+  default: 'now', legacyType: { type: 'timestamp without time zone',
+    reason: '旧 created_at 的历史时区未确认，保留原值；不得用它认证历史 PIT，可用时间应使用明确时区的运行证据。' },
+})
+
 export const applicationEntities: TableEntity[] = [
   {
     name: 'users', description: '登录用户', primaryKey: ['id'], unique: [['phone']],
     columns: {
-      id: serialId(), username: varchar(100, false, '管理员'), phone: varchar(50), password: varchar(255),
+      id: textId(), username: column('text', false, { default: '管理员' }), phone: column('text', false), password: column('text', false),
       avatar: column('text', true), created_at: timestamp(true, 'now'),
+      updated_at: timestamp(true, 'now'),
     },
   },
   {
     name: 'stocks', description: '前端关注股票与最新行情摘要', primaryKey: ['code'],
     columns: {
-      code: varchar(20), full_code: varchar(20), name: varchar(100),
+      code: column('text', false), full_code: column('text', false), name: column('text', false),
       current_price: column('double precision', true, { default: 0 }),
       yesterday_price: column('double precision', true, { default: 0 }),
       high_price: column('double precision', true, { default: 0 }),
@@ -24,18 +31,20 @@ export const applicationEntities: TableEntity[] = [
     name: 'stock_price_histories', description: '实盘价格与当时预测点历史', primaryKey: ['id'],
     foreignKeys: [{ columns: ['stock_code'], referencesTable: 'stocks', referencesColumns: ['code'], onDelete: 'CASCADE' }],
     columns: {
-      id: serialId(), stock_code: varchar(20, true), timestamp: timestamptz(true, 'now'),
+      id: textId(), stock_code: column('text', true), timestamp: timestamptz(true, 'now'),
       real_price: column('double precision', false), predicted_price: column('double precision', false),
       deviation_pct: column('double precision', true, { default: 0 }),
+      trade_date: column('date', true),
     },
   },
   {
     name: 'stock_t_analyses', description: '旧版股票做T分析文本', primaryKey: ['id'],
     foreignKeys: [{ columns: ['stock_code'], referencesTable: 'stocks', referencesColumns: ['code'], onDelete: 'CASCADE' }],
     columns: {
-      id: serialId(), stock_code: varchar(20, true), chip_analysis: column('text', false), host_style: column('text', false),
+      id: textId(), stock_code: column('text', true), chip_analysis: column('text', false), host_style: column('text', false),
       scenario_1: column('text', false), scenario_2: column('text', false), scenario_3: column('text', false), scenario_4: column('text', false),
       updated_at: timestamp(true, 'now'),
+      do_reasons: column('text', true), dont_reasons: column('text', true), realtime_advice: column('text', true),
     },
   },
   {
@@ -85,7 +94,7 @@ export const applicationEntities: TableEntity[] = [
       id: bigserialId(), stock_code: varchar(20), predict_date: column('date', false), version: column('integer', false, { default: 1 }),
       is_base: column('boolean', false, { default: false }), time_points: column('jsonb', false, { default: '[]' }), direction: varchar(40, true),
       target_pct: column('double precision', true), metadata: column('jsonb', false, { default: '{}' }),
-      probability_bands: column('jsonb', false, { default: '[]' }), created_at: timestamptz(false, 'now'),
+      probability_bands: column('jsonb', false, { default: '[]' }), created_at: legacyCreatedAt(),
     },
   },
   {
@@ -95,15 +104,15 @@ export const applicationEntities: TableEntity[] = [
       { name: 'idx_rolling_forecast_snapshot', columns: ['stock_code', 'predict_date', 'forecast_at'] },
     ],
     columns: {
-      id: bigserialId(), stock_code: varchar(20), predict_date: column('date', false), target_time: varchar(5),
+      id: bigserialId(), stock_code: varchar(20), predict_date: column('date', false), target_time: varchar(10),
       predicted_price: column('double precision', false), run_id: column('uuid', true), forecast_at: timestamptz(true),
-      target_at: timestamptz(true), lead_minutes: column('integer', true), created_at: timestamptz(false, 'now'),
+      target_at: timestamptz(true), lead_minutes: column('integer', true), created_at: legacyCreatedAt(),
     },
   },
   {
     name: 'stock_l2_orders', description: '公开逐笔大额成交代理数据', primaryKey: ['id'],
     columns: {
-      id: bigserialId(), stock_code: varchar(20), trade_date: column('date', false), time_str: varchar(8), type: varchar(80),
+      id: bigserialId(), stock_code: varchar(20), trade_date: column('date', false), time_str: varchar(10), type: column('text', false),
       price: column('double precision', false), volume_lots: column('double precision', false), note: column('text', true), created_at: timestamptz(false, 'now'),
     },
   },

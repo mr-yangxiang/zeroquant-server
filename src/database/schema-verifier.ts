@@ -1,4 +1,6 @@
 import type { Pool } from 'pg'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { DATABASE_ENTITIES, DATABASE_SCHEMA_NAME } from './entities/index.js'
 
 let databasePool: Pool | null = null
@@ -12,7 +14,7 @@ type Severity = 'ERROR' | 'WARNING'
 type DifferenceKind =
   | 'MISSING_TABLE' | 'UNEXPECTED_TABLE'
   | 'MISSING_COLUMN' | 'UNEXPECTED_COLUMN' | 'COLUMN_TYPE' | 'COLUMN_NULLABLE' | 'COLUMN_LENGTH' | 'COLUMN_DEFAULT'
-  | 'PRIMARY_KEY' | 'MISSING_UNIQUE' | 'MISSING_FOREIGN_KEY' | 'MISSING_INDEX' | 'INDEX_COLUMNS'
+  | 'PRIMARY_KEY' | 'MISSING_UNIQUE' | 'MISSING_FOREIGN_KEY' | 'MISSING_INDEX' | 'INDEX_COLUMNS' | 'LEGACY_COLUMN_TYPE'
 
 interface Difference {
   severity: Severity
@@ -40,6 +42,7 @@ function normalizeDefault(value: string | null, dataType: string): unknown {
   if (/^nextval\(/i.test(normalized)) return 'sequence'
   if (/^(now\(\)|CURRENT_TIMESTAMP)$/i.test(normalized)) return 'now'
   normalized = normalized.replace(/::[a-zA-Z0-9_\s\[\]"]+$/u, '').trim()
+  if (/^\(?gen_random_uuid\(\)\)?$/i.test(normalized)) return 'gen_random_uuid()'
   if (normalized.startsWith("'") && normalized.endsWith("'")) {
     normalized = normalized.slice(1, -1).replace(/''/g, "'")
   }
@@ -59,8 +62,8 @@ function setKey(columns: string[]) {
   return [...columns].sort().join('|')
 }
 
-async function loadActualSchema() {
-  const pool = await getDatabasePool()
+async function loadActualSchema(poolOverride?: Pick<Pool, 'connect'>) {
+  const pool = poolOverride || await getDatabasePool()
   const client = await pool.connect()
   try {
     await client.query('BEGIN READ ONLY')
@@ -101,7 +104,11 @@ async function loadActualSchema() {
     )
     const indexResult = await client.query(
       `SELECT tbl.relname AS table_name, idx.relname AS index_name,
-              ARRAY_AGG(att.attname::text ORDER BY key_column.ordinality) FILTER (WHERE att.attname IS NOT NULL) AS columns
+              definition.indisunique AS is_unique, definition.indisvalid AS is_valid,
+              definition.indisready AS is_ready, definition.indpred IS NULL AS is_full,
+              definition.indexprs IS NULL AS is_plain,
+              ARRAY_AGG(att.attname::text ORDER BY key_column.ordinality)
+                FILTER (WHERE att.attname IS NOT NULL AND key_column.ordinality <= definition.indnkeyatts) AS columns
        FROM pg_index definition
        JOIN pg_class tbl ON tbl.oid = definition.indrelid
        JOIN pg_class idx ON idx.oid = definition.indexrelid
@@ -109,7 +116,8 @@ async function loadActualSchema() {
        CROSS JOIN LATERAL UNNEST(definition.indkey) WITH ORDINALITY AS key_column(attnum, ordinality)
        LEFT JOIN pg_attribute att ON att.attrelid = tbl.oid AND att.attnum = key_column.attnum
        WHERE ns.nspname = $1
-       GROUP BY tbl.relname, idx.relname
+       GROUP BY tbl.relname, idx.relname, definition.indisunique, definition.indisvalid,
+                definition.indisready, (definition.indpred IS NULL), (definition.indexprs IS NULL)
        ORDER BY tbl.relname, idx.relname`,
       [DATABASE_SCHEMA_NAME]
     )
@@ -157,8 +165,15 @@ async function loadActualSchema() {
     for (const row of indexResult.rows) {
       const table = String(row.table_name)
       const tableIndexes = indexes.get(table) || new Map<string, string[]>()
-      tableIndexes.set(String(row.index_name), Array.isArray(row.columns) ? row.columns.map(String) : [])
+      if (row.is_valid && row.is_ready && row.is_full && row.is_plain) {
+        tableIndexes.set(String(row.index_name), Array.isArray(row.columns) ? row.columns.map(String) : [])
+      }
       indexes.set(table, tableIndexes)
+      if (row.is_unique && row.is_valid && row.is_ready && row.is_full && row.is_plain && row.columns?.length) {
+        const tableUniques = uniques.get(table) || new Map<string, string[]>()
+        tableUniques.set(String(row.index_name), row.columns.map(String))
+        uniques.set(table, tableUniques)
+      }
     }
     return { tables, columns, primaryKeys, uniques, foreignKeys, indexes }
   } catch (error) {
@@ -169,8 +184,8 @@ async function loadActualSchema() {
   }
 }
 
-async function verifySchema(): Promise<Difference[]> {
-  const actual = await loadActualSchema()
+export async function verifySchema(poolOverride?: Pick<Pool, 'connect'>): Promise<Difference[]> {
+  const actual = await loadActualSchema(poolOverride)
   const expectedTableNames = new Set(DATABASE_ENTITIES.map((entity) => entity.name))
   const differences: Difference[] = []
   const push = (difference: Difference) => differences.push(difference)
@@ -190,8 +205,10 @@ async function verifySchema(): Promise<Difference[]> {
         continue
       }
       if (actualColumn.type !== expected.type) {
-        push({ severity: 'ERROR', kind: 'COLUMN_TYPE', table: entity.name, object: columnName,
-          expected: expected.type, actual: actualColumn.type, message: `表 ${entity.name}.${columnName} 类型不一致` })
+        const legacy = expected.legacyType?.type === actualColumn.type
+        push({ severity: legacy ? 'WARNING' : 'ERROR', kind: legacy ? 'LEGACY_COLUMN_TYPE' : 'COLUMN_TYPE', table: entity.name, object: columnName,
+          expected: expected.type, actual: actualColumn.type,
+          message: legacy ? `${entity.name}.${columnName}: ${expected.legacyType!.reason}` : `表 ${entity.name}.${columnName} 类型不一致` })
       }
       if (actualColumn.nullable !== expected.nullable) {
         push({ severity: 'ERROR', kind: 'COLUMN_NULLABLE', table: entity.name, object: columnName,
@@ -266,7 +283,7 @@ function printExpectedSchema() {
   console.log(JSON.stringify({ schema: DATABASE_SCHEMA_NAME, tableCount: DATABASE_ENTITIES.length, tables: DATABASE_ENTITIES }, null, 2))
 }
 
-async function main() {
+export async function main() {
   if (process.argv.includes('--expected')) {
     printExpectedSchema()
     return
@@ -293,4 +310,4 @@ async function main() {
   }
 }
 
-main()
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) void main()

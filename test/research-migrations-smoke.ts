@@ -49,7 +49,7 @@ try {
   // Reproduce an old installation: 001..005 recorded, but 005's late-added
   // column never ran. Only unapplied migrations may repair it.
   await db.exec('BEGIN')
-  await db.exec("DELETE FROM schema_migrations WHERE version IN ('006','007')")
+  await db.exec("DELETE FROM schema_migrations WHERE version IN ('006','007','008')")
   await db.exec('ALTER TABLE stock_l2_orders DROP COLUMN created_at')
   const applied = (await db.query('SELECT version FROM schema_migrations')).rows.map((r: any) => r.version)
   const executed: string[] = []
@@ -59,7 +59,7 @@ try {
     await db.query('INSERT INTO schema_migrations(version,name) VALUES ($1,$2)', [migration.version, migration.name])
     executed.push(migration.version)
   }
-  assert.deepEqual(executed, ['006', '007'])
+  assert.deepEqual(executed, ['006', '007', '008'])
   const repaired = await db.query("SELECT data_type,is_nullable FROM information_schema.columns WHERE table_name='stock_l2_orders' AND column_name='created_at'")
   assert.deepEqual(repaired.rows, [{data_type:'timestamp with time zone',is_nullable:'NO'}])
   const upgradedRow = (await db.query('SELECT * FROM stock_l2_orders')).rows[0]
