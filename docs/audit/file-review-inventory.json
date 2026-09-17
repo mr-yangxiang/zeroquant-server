@@ -1,0 +1,3961 @@
+{
+  "date": "2026-09-17",
+  "scope": "Git tracked + untracked, excluding ignored dependencies/runtime/secrets",
+  "roots": {
+    "server": "/Users/yx/mine/project/zeroquant-server",
+    "web": "/Users/yx/mine/project/zeroquant-web"
+  },
+  "counts": {
+    "通读审查": 137,
+    "元数据登记，未通读": 43,
+    "审查工件": 13,
+    "静态扫描，未通读": 62,
+    "局部审查": 9
+  },
+  "files": [
+    {
+      "repository": "server",
+      "path": ".dockerignore",
+      "location": "/Users/yx/mine/project/zeroquant-server/.dockerignore:1",
+      "signals": {},
+      "sha256": "298b04fcc4cc6fad8699c35e3456b108e94c60bf87f38012723cad1c5ecbc6a4",
+      "lines": 15,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "server",
+      "path": ".env.example",
+      "location": "/Users/yx/mine/project/zeroquant-server/.env.example:1",
+      "signals": {},
+      "sha256": "723fbf1637e0c389b75893a5c3d7a8471198534631bced3f1f550515c4504675",
+      "lines": 56,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "server",
+      "path": ".env.test.example",
+      "location": "/Users/yx/mine/project/zeroquant-server/.env.test.example:1",
+      "signals": {},
+      "sha256": "0b0da981a97dc518ec81a3047ff0b82147779849a5e2342e1dd2f3473c8d8db9",
+      "lines": 11,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": ".github/workflows/deploy.yml",
+      "location": "/Users/yx/mine/project/zeroquant-server/.github/workflows/deploy.yml:1",
+      "signals": {},
+      "sha256": "08feac348cf57efd9dcf8d4469cd05bc3005877da2ad945bf20d7a3a37876368",
+      "lines": 50,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "server",
+      "path": ".gitignore",
+      "location": "/Users/yx/mine/project/zeroquant-server/.gitignore:1",
+      "signals": {},
+      "sha256": "47186b23fbf2346881d2c8a4c9ed342eb40b3ac1f5758c247640aabc37677b5d",
+      "lines": 18,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "server",
+      "path": "Dockerfile",
+      "location": "/Users/yx/mine/project/zeroquant-server/Dockerfile:1",
+      "signals": {},
+      "sha256": "08a14e02463f3137299b99a4fbb02b11056e9b6b1735d69b3410ba6a2bd5f592",
+      "lines": 29,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "server",
+      "path": "README.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/README.md:1",
+      "signals": {},
+      "sha256": "2b411cc215733e28a73543c7a779926d2485cfaddd08884a4ccd1565ec1ca3ed",
+      "lines": 112,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/80-point-evidence.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/80-point-evidence.json:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/80-point-evidence.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/80-point-evidence.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/README.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/README.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/chat-idempotency-2026-09-16.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/chat-idempotency-2026-09-16.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/file-review-checklist.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/file-review-checklist.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/file-review-inventory.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/file-review-inventory.json:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/findings.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/findings.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/ingestion-2026-09-16.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/ingestion-2026-09-16.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/manual-review.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/manual-review.json:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/market-sync-2026-09-17.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/market-sync-2026-09-17.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/prediction-replay-2026-09-17.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/prediction-replay-2026-09-17.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/research-chat-2026-09-16.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/research-chat-2026-09-16.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/audit/verification.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/verification.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
+      "path": "docs/compatibility-008-status-2026-09-13.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/compatibility-008-status-2026-09-13.md:1",
+      "signals": {},
+      "sha256": "61085ee728aa024e68c675a2a25660f0c29bcc68f7c9379b2e175253e0af246d",
+      "lines": 38,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/entity-behavior-profiling.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/entity-behavior-profiling.md:1",
+      "signals": {},
+      "sha256": "f14a4522ec55e58fe8eb2139764830fa0ff1c8f9b64fd5e75cad2479541e4303",
+      "lines": 66,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/global-architecture-review-2026-09-15.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/global-architecture-review-2026-09-15.md:1",
+      "signals": {},
+      "sha256": "ac8456e1a83d67d1d77ea33c3a20f27fdd6e414ef469426ff9f316201ca4d68a",
+      "lines": 137,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/global-news-pipeline.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/global-news-pipeline.md:1",
+      "signals": {},
+      "sha256": "2d00374928e9c6c48ccf1f446ce440324dd4b2dca578b5fe6cb246da7850d17b",
+      "lines": 55,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/python-domain-architecture.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/python-domain-architecture.md:1",
+      "signals": {},
+      "sha256": "2353dd3f61d8d5a3904d23e6f71b6cac218d95b1888e975010ff4bb044621d65",
+      "lines": 93,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/research-fixes-2026-09-11.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/research-fixes-2026-09-11.md:1",
+      "signals": {},
+      "sha256": "4771e1d4ba8c512eac15895921426f719225feb2a299c6cc94b56bf7735cceeb",
+      "lines": 42,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/research-pipeline.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/research-pipeline.md:1",
+      "signals": {},
+      "sha256": "241baa0d6804eae5ae37c88ae6b04c28a504148ec07f98e6dd152f79d57680b2",
+      "lines": 224,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "docs/research-readiness-2026-09-10.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/research-readiness-2026-09-10.md:1",
+      "signals": {},
+      "sha256": "a8a530696b0a9c92f2feecc4e4f3947f238b7996dd5e8fba7a723c25fd35b5c5",
+      "lines": 50,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "package-lock.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/package-lock.json:1",
+      "signals": {},
+      "sha256": "567b51214ef648bb045c15feeeaf088e7fb17fa0d2e6e4c0ff3853b24fcfc938",
+      "lines": 1862,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "package.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/package.json:1",
+      "signals": {},
+      "sha256": "9b4f5d176c11343fa6f67458b5b915947ee6b09999af764225e2ceff8dc6b848",
+      "lines": 44,
+      "level": "通读审查",
+      "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+      "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/alert_cooldown.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/alert_cooldown.json:1",
+      "signals": {},
+      "sha256": "9791d8b225fbf51f331f8fbc4c6a2c6a029be086ef8c38dd6468b40dba6a6da5",
+      "lines": 8,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/expansion_state.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/expansion_state.json:1",
+      "signals": {},
+      "sha256": "392ce87291b781d5ad340878785c1f79e15951351f0dcee47e75cf592b874762",
+      "lines": 31,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/generate_daily_predictions.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/generate_daily_predictions.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          62,
+          95,
+          101
+        ],
+        "异常输出（需人工核对脱敏）": [
+          82,
+          91,
+          100,
+          126,
+          135
+        ]
+      },
+      "sha256": "4a3b727676d9748704353db23fa51fb21238d4b75923080771ce0fb61dc2abd4",
+      "lines": 168,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/knowledge_base.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/knowledge_base.md:1",
+      "signals": {},
+      "sha256": "85cdf63d3c0ba0053f9c3089be8d8295daebbf4c5467d1b42463137ad3957621",
+      "lines": 184,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/knowledge_base.legacy.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/knowledge_base.legacy.md:1",
+      "signals": {},
+      "sha256": "faef19e551e4cafc4978364519353cf7d74a52488e100f2e468fd6707cc94944",
+      "lines": 133,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/analysis_--help.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_--help.md:1",
+      "signals": {},
+      "sha256": "d5ae9f11fa0c2a3fb3b57645aa124d7c4bc4ab980357da11efdf4764406e9949",
+      "lines": 48,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-01.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-01.md:1",
+      "signals": {},
+      "sha256": "e2432d952c2c30d508c86f20c38230ba0310a129a2a802ae20ab4d0828d45e1e",
+      "lines": 48,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-02.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-02.md:1",
+      "signals": {},
+      "sha256": "b2e97cbf21717aefcb6504db6739776dee34ffa397cfe526130651463af572f7",
+      "lines": 48,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-03.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-03.md:1",
+      "signals": {},
+      "sha256": "fa2e3deffd760a529a2f6324b92915e966856782a7b8375a9c8235930242bd64",
+      "lines": 48,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-04.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_2026-09-04.md:1",
+      "signals": {},
+      "sha256": "177cf4450dd2b067ada1dcbcf9259889d34eb9612ad483f7eefa3606331a903c",
+      "lines": 48,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-04.jsonl",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-04.jsonl:1",
+      "signals": {},
+      "sha256": "42a250d557a412114e1cecd5355a7c57682e4c189a9efb8c61a4aa25a86a5962",
+      "lines": 36,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-06.jsonl",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-06.jsonl:1",
+      "signals": {},
+      "sha256": "0134766812bcbd2cc7ac86e90f5460a4cd3604c039806295849d47201e5003f2",
+      "lines": 6,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-07.jsonl",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/prediction_runs/2026-09-07.jsonl:1",
+      "signals": {},
+      "sha256": "8a262aada9ce9b3f299764479ec887295c50c68b36340e57aabe30c023c37c69",
+      "lines": 1506,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/probability_analysis_2026-09-04.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/probability_analysis_2026-09-04.md:1",
+      "signals": {},
+      "sha256": "4c07fec1eff4f93b319f0133289f885773fb7a4a761c0345e1cf308b7ce83003",
+      "lines": 91,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/probability_analysis_2026-09-07.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/probability_analysis_2026-09-07.md:1",
+      "signals": {},
+      "sha256": "9069b9893a30e236224e44285303a380f252562aa55fbfd8fa05b046078eac94",
+      "lines": 92,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-04.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-04.json:1",
+      "signals": {},
+      "sha256": "54cd338768f1f90b528e18c1526237894bd051e08a517278b8a19da3c210994f",
+      "lines": 91,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-04.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-04.md:1",
+      "signals": {},
+      "sha256": "4bd0effd095367332eae7d5c5b654c8fa807ae9bfe232211e372055b029f27cb",
+      "lines": 18,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-07.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-07.json:1",
+      "signals": {},
+      "sha256": "c5e9545f44d1aa005948e36dcf3e5a72ec7725289b8b63cdb1af5bf84169b14a",
+      "lines": 91,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-07.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/reviews/review_2026-09-07.md:1",
+      "signals": {},
+      "sha256": "fc078fb1f93108599f044077b7d4434f82c1d154517a2cff8c287745e3de09d7",
+      "lines": 18,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/analyze_full_year.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/analyze_full_year.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          16
+        ]
+      },
+      "sha256": "462391ddd72dd3e33b98908546c1697bfc8da4e17f1ec0f9a2843e1eeee43157",
+      "lines": 58,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/analyze_hosts.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/analyze_hosts.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          18
+        ]
+      },
+      "sha256": "5d26463a8d87b72b4d4944a6203f55414f2572c4f689f5f2c79ebf2b1b475285",
+      "lines": 73,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/backtest_simulator.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/backtest_simulator.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          25
+        ]
+      },
+      "sha256": "dc9a05a8426f6a3ea722db88fa1018a267b6ad0cf5718eb7e156f6999214a5b6",
+      "lines": 70,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/deep_research.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/deep_research.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          25,
+          32
+        ]
+      },
+      "sha256": "15dfd6d75a5e3a8530c786fa05e91d8be2eb6bdab3d118591ebdc208cf10cce7",
+      "lines": 41,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/generate_opening_baseline_0920.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/generate_opening_baseline_0920.py:1",
+      "signals": {},
+      "sha256": "a22f3a6c6b451559984152cc9449ef34b90eaf4ae49831a5c9c0270ef95b2320",
+      "lines": 14,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/get_realtime_stocks.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/get_realtime_stocks.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          8
+        ]
+      },
+      "sha256": "114d94ac5ce89bd3572b91830edfd93d96b13d81e031b6fbd7b7aa36a1cc231c",
+      "lines": 40,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/historical_expander.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/historical_expander.py:1",
+      "signals": {},
+      "sha256": "6bc313219d4c9d137a1660219aa84a937b78002aaf2e72b34537c4c635a69845",
+      "lines": 19,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/hourly_verifier.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/hourly_verifier.py:1",
+      "signals": {},
+      "sha256": "3475693edb57c401e40bb1c7f29a3c17c8962c4fe9bed45dd1e43f36833a02b4",
+      "lines": 25,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/midnight_audit_and_predict.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/midnight_audit_and_predict.py:1",
+      "signals": {},
+      "sha256": "b6e4af2aa49249e8d5affa6699b9e36c684f7192efee2496d4948a2823d9b046",
+      "lines": 24,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/sampling_verifier.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/sampling_verifier.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          23
+        ]
+      },
+      "sha256": "9da664998c3950978105e88fc88ed20e064ec55aac786579543a1bec9c55bb76",
+      "lines": 47,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/send_stock_email.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/send_stock_email.py:1",
+      "signals": {},
+      "sha256": "da8d2c151e5295a1b1e0f466ec45dc7d0c901f739cf66c0a389b21896f9d57f8",
+      "lines": 36,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/stock_report_engine.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/stock_report_engine.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          30
+        ]
+      },
+      "sha256": "b56dbe90f6e52fd1cc1bcbd8c2f1e112d44bd83474d09ac60a52583c19452a88",
+      "lines": 391,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/legacy/scripts/sync_official_l2.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/scripts/sync_official_l2.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          61
+        ],
+        "异常输出（需人工核对脱敏）": [
+          69
+        ]
+      },
+      "sha256": "abc002d0f5ccf20af549da638416a455542f4802514a18450e1f7afd562ca702",
+      "lines": 80,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/models/bootstrap_probability_v1.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/models/bootstrap_probability_v1.json:1",
+      "signals": {},
+      "sha256": "b93f05cbfb9e45823df1b8997d443766b208cc59f927615769a4f65f307380ad",
+      "lines": 24,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/nightly_review.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/nightly_review.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          55
+        ],
+        "异常输出（需人工核对脱敏）": [
+          65
+        ]
+      },
+      "sha256": "7641d353a7e1c4b6220be3cdb81448f14fd0a37f2aba9521dd9840c705488bc8",
+      "lines": 154,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/pytest.ini",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/pytest.ini:1",
+      "signals": {},
+      "sha256": "14fb28fdf4ca5b427455c60b5740884eef6403b53448330af8c9e66c497f69de",
+      "lines": 3,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/__init__.py:1",
+      "signals": {},
+      "sha256": "45f18c74877a494c2c92673a13d158dcbd0f5bed71e37a6274e79861f18885d7",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/api/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/api/__init__.py:1",
+      "signals": {},
+      "sha256": "1b804d810293a5293fef47e8010e3441224ba24be90e98196b6459771dde1dad",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/api/dependencies.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/api/dependencies.py:1",
+      "signals": {},
+      "sha256": "e62b741ae78353fa19b8ef910615e6c7c41bdfdfbb2e76dfe70c8841b189f687",
+      "lines": 33,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/api/router.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/api/router.py:1",
+      "signals": {},
+      "sha256": "e92fc9f0480585d9e7088563303759fb6686093872bdac2369426c4631aecc15",
+      "lines": 23,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/app.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/app.py:1",
+      "signals": {},
+      "sha256": "961d634a8eede508bc87e805330e24fd90927d49e6c2dda381224e952aac33e5",
+      "lines": 62,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/__init__.py:1",
+      "signals": {},
+      "sha256": "3f0341db5db49a197eb73164fc613e8409decccfc00ee9ae0c4079c3a35b6db8",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/model_registry/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/model_registry/__init__.py:1",
+      "signals": {},
+      "sha256": "27747433a9cafd60c5f811244f34ba1b9095a83c83aa56046efceedec2f66991",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/model_registry/entities.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/model_registry/entities.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          4,
+          26
+        ]
+      },
+      "sha256": "e2333c829e3926e8514a6f2c3937348ee86aa7b1ca28b88115235ce44bbc6be6",
+      "lines": 32,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/model_registry/repository.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/model_registry/repository.py:1",
+      "signals": {},
+      "sha256": "6ccb70fed1d482392baf23cb55aafa6290ecc5c4e04998b842b15f50c7c246f1",
+      "lines": 23,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/model_registry/schemas.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/model_registry/schemas.py:1",
+      "signals": {},
+      "sha256": "87e911512ae5816fa1ef8a4c4b9b61fcdb2d08fb891f6585e350b718aa8f8f6e",
+      "lines": 29,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/model_registry/service.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/model_registry/service.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          3,
+          9
+        ]
+      },
+      "sha256": "0c76e63900359609be55f078634a3f15afbfeee2430ff7c3aa055a047f8d4376",
+      "lines": 28,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/research/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/research/__init__.py:1",
+      "signals": {},
+      "sha256": "51505808b132da05b78ceddacc78881fbdcf71de0c1010ab1ce3145c5e9a918c",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/research/repository.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/research/repository.py:1",
+      "signals": {},
+      "sha256": "7b635e7678ad80733161b1e0520c6f5dd01aecfb691068add5f0f6582e7d5e07",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/research/schemas.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/research/schemas.py:1",
+      "signals": {},
+      "sha256": "dfbf47cda4ffd034d2f777589245dafce97cdece5ab771720f2f89933651e828",
+      "lines": 36,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/domains/research/service.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/domains/research/service.py:1",
+      "signals": {},
+      "sha256": "c7b883a313b903619b4428ad3195b5101e01ef10ced8b407748a12723307d5ea",
+      "lines": 52,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/shared/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/__init__.py:1",
+      "signals": {},
+      "sha256": "35bfadc1f3ad26a8145cc2e794269f9558b8b84dd6740b89af0739765087fdf8",
+      "lines": 1,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/shared/cache.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/cache.py:1",
+      "signals": {},
+      "sha256": "8e3d6029936a25581a0e89b2422a04192e280c88121f4e9aecf26368fdd0cc1b",
+      "lines": 50,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/shared/contracts.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/contracts.py:1",
+      "signals": {},
+      "sha256": "91f441bf01f8d5fa35f06349c6f745a9343caa0bd90a9e64a4c0872b34131aea",
+      "lines": 16,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/shared/database.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/database.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          50
+        ]
+      },
+      "sha256": "0b4ebc3570264cf9b9c120e88a8504b5d433a5f9f78923c791b91a854d1716ce",
+      "lines": 54,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/quant_api/shared/settings.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/settings.py:1",
+      "signals": {},
+      "sha256": "b45dc894b04ee597198eea1b7782d0164956732a3ff69c07eef11a75c0f69013",
+      "lines": 57,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+      "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/realtime_monitor_1m.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/realtime_monitor_1m.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          16,
+          93
+        ],
+        "网络调用（需核对超时/来源）": [
+          52,
+          111,
+          118
+        ],
+        "异常输出（需人工核对脱敏）": [
+          71,
+          117,
+          144,
+          178
+        ]
+      },
+      "sha256": "159992d968f5f6fbe2ce5cf37d6667eaedb5b1cb1a4beff6e45844cca20da976",
+      "lines": 203,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/requirements-research.txt",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-research.txt:1",
+      "signals": {},
+      "sha256": "865443e80b0e83ab4734e3f7d29702e6071be1c511789db5b60dea1ce4b4c194",
+      "lines": 7,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/requirements-service-test.txt",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-service-test.txt:1",
+      "signals": {},
+      "sha256": "f1533de414ec15a321874461510cb8461ff79dd898b282761c7a7e815b9da2b2",
+      "lines": 2,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/requirements-service.txt",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-service.txt:1",
+      "signals": {},
+      "sha256": "af62fa8855d1cdcfd9aef9deee39c014cb45c0da4abf40a5ce82b0eb6cd574be",
+      "lines": 7,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/research-contracts.example.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/research-contracts.example.json:1",
+      "signals": {},
+      "sha256": "fc619d3a442a61dbd47327f55e648268603597517e22b07b95b907247acb36d3",
+      "lines": 14,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/research-costs.example.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/research-costs.example.json:1",
+      "signals": {},
+      "sha256": "5ee0a1be0058973126b6825d5fe942c6080813a73cc9312cd231b2ebaf6fa8ea",
+      "lines": 10,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/research_pipeline.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/research_pipeline.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          165
+        ],
+        "宽类型（不等于缺陷）": [
+          50
+        ],
+        "异常输出（需人工核对脱敏）": [
+          184
+        ]
+      },
+      "sha256": "1dc5b9b0215001cb041619ed149fc8b3715b0b3dc095a5f63b636326f79596c3",
+      "lines": 196,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；CLI 分支、显式数据库、训练/影子/晋升检查及退出路径通读；Python 回归 63 项通过",
+      "remaining": "G04/G08：CLI 仍直接 SQL，ValueError 原文输出与任意本地输入路径需进一步审查；未逐命令真实运行"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/service_tests/test_layered_api.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/service_tests/test_layered_api.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          54,
+          55,
+          56,
+          155,
+          177,
+          181
+        ],
+        "宽类型（不等于缺陷）": [
+          197
+        ]
+      },
+      "sha256": "43148dd14ca10939f9ab649b339260b925374ff866c94fcacfafbb2a9226a82a",
+      "lines": 211,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/service_tests/test_schema_contract.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/service_tests/test_schema_contract.py:1",
+      "signals": {
+        "子进程/动态执行": [
+          16
+        ]
+      },
+      "sha256": "77e197e15af0ccb3d3f960fb3f560e33a58bf86ff5abac9b0e1e9e46d60da34d",
+      "lines": 41,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/service_tests/test_server_smoke.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/service_tests/test_server_smoke.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          37,
+          45,
+          49
+        ],
+        "子进程/动态执行": [
+          28
+        ]
+      },
+      "sha256": "df49ae84279c7fcdf8fb2d3f138747b2c3a7dcde6e9170e4b5d53f3a482fa75d",
+      "lines": 61,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/__init__.py:1",
+      "signals": {},
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines": 0,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_entity_profiles.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_entity_profiles.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          54,
+          69
+        ]
+      },
+      "sha256": "e6cf3a4984151f52de80871b3a3c1adb89d904b0761756b8b5f7121f40608d30",
+      "lines": 78,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_global_review.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_global_review.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          50
+        ],
+        "网络调用（需核对超时/来源）": [
+          22
+        ]
+      },
+      "sha256": "6979fee23efb6ce7d5276a010f4a4e07940415b29049a7a491a8f645a1cb997c",
+      "lines": 57,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；新增3项：坏时间、私密 URL/异常、outbox；Python 63 项通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+      "remaining": "测试使用替身；不连接供应商/真实数据库"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_news.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_news.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          127
+        ],
+        "网络调用（需核对超时/来源）": [
+          96,
+          97,
+          117,
+          118,
+          139
+        ]
+      },
+      "sha256": "7bce10aa5e0547e0cef2943a7d27af08923d7a10749ec1d4176a09707c9d83f4",
+      "lines": 158,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_probability_core.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_probability_core.py:1",
+      "signals": {},
+      "sha256": "0a83b557217ed3a9539533278ac87d4e4dcd7ec8e80dd39aae6e360cb5c16446",
+      "lines": 190,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_research_pipeline.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_research_pipeline.py:1",
+      "signals": {},
+      "sha256": "02018fbe4bf29d4ea5df65176e76a42ba2704e30ba6faedfa7074bba0c2c15ca",
+      "lines": 186,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_research_review_regressions.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_research_review_regressions.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          65,
+          126,
+          167,
+          172,
+          175,
+          186,
+          202,
+          215,
+          221
+        ]
+      },
+      "sha256": "b9cf3cbed6c23b5b824790cdec0d26f79549f7b7c7e762463ede4b9a55c982ba",
+      "lines": 225,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/tests/test_research_safety.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/tests/test_research_safety.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          48,
+          105
+        ]
+      },
+      "sha256": "56209c84a59d82c5955a82f9e38fb180755a173c98e3f0da83617a5a3daed178",
+      "lines": 109,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/__init__.py:1",
+      "signals": {},
+      "sha256": "0882614463f524d39a3ae85c845a542336824ae9b95746194156a10657d05d81",
+      "lines": 10,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/audit.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/audit.py:1",
+      "signals": {},
+      "sha256": "ffef40513242635c0f1b0a8c5ae7e51044e1e0332782c8fa08fdb7c0c8e8dd6e",
+      "lines": 56,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/config.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/config.py:1",
+      "signals": {},
+      "sha256": "19bde196ccd2e634dbbd0f65947ce25a11f3a6d0a87d87aa1ba5721cd9a803e2",
+      "lines": 107,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；环境变量来源、默认路径、配置解析全文通读",
+      "remaining": "G04/G08：数值范围/URL/TLS 配置未统一验证，异常路径仍需测试"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/curve.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/curve.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          5,
+          75,
+          76
+        ]
+      },
+      "sha256": "2764597cf71efdc8c2800490ecaf37180a0567d62c00a6c61906651115aef2e4",
+      "lines": 157,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/entity_profiles.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/entity_profiles.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          27,
+          35
+        ]
+      },
+      "sha256": "78d2a857d4ec1adf458201c1e1a7bdfa7dd3ae6fbd8ebedcda215314375c817c",
+      "lines": 60,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/features.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/features.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          141
+        ]
+      },
+      "sha256": "e3f516f5525f088324182ebd434afdde35751f50b72a8db81ada444520b8ad70",
+      "lines": 150,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/forecast.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/forecast.py:1",
+      "signals": {},
+      "sha256": "67a84c03b42f9751df4c171816958c0973e2ab1b15e4776885e2832afcd8e54c",
+      "lines": 150,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/models.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/models.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          5,
+          64,
+          119,
+          121
+        ]
+      },
+      "sha256": "c333b6e5b975b285faa6f4428ccc0099ff06e70f216ae47ce5434cf468e64ddf",
+      "lines": 161,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/news.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/news.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          15,
+          143,
+          159,
+          174,
+          247,
+          263,
+          269,
+          283,
+          301,
+          306,
+          326,
+          339,
+          369,
+          370,
+          373,
+          481
+        ],
+        "网络调用（需核对超时/来源）": [
+          181,
+          397,
+          463,
+          464,
+          467
+        ]
+      },
+      "sha256": "b6f459125cb3ab03a0964c71294b762ae8f74f136de347a828641a0889e3af78",
+      "lines": 503,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/pipeline.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/pipeline.py:1",
+      "signals": {},
+      "sha256": "1d9df5c8cc70f0dc3dba94b042166965c78d99852c75f10501b15b1ca80f3c43",
+      "lines": 143,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；特征→分布→硬门禁→版本化输出编排与输入摘要通读；Python 63 项通过",
+      "remaining": "G12：仍是研究流程，真实数据/预测效果未验证"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/providers.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/providers.py:1",
+      "signals": {
+        "网络调用（需核对超时/来源）": [
+          61
+        ]
+      },
+      "sha256": "81e97bc8f090180cf761baeef8388e421187193be2dac6a3b88e61e297be6a77",
+      "lines": 179,
+      "level": "局部审查",
+      "verification": "Python AST 解析通过；HttpTransport、供应商时间与报价路径审查；F08/F09；Python 63 项通过",
+      "remaining": "G12：分钟/日线解析尚未全部通读，HTTP 源与首次可见时间合同未核验"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/regime.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/regime.py:1",
+      "signals": {},
+      "sha256": "c72de98c64a649da140d318ccadef106006e0515afe1285e8f8377618869b64a",
+      "lines": 37,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/__init__.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/__init__.py:1",
+      "signals": {},
+      "sha256": "d9052650d6b61229ae415a1aa766b24a79b50fa669df5512667e72d118175cf4",
+      "lines": 1,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/backtest.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/backtest.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          22
+        ]
+      },
+      "sha256": "f6b1849142fc0ba79a0f9be13eeb074798295c8f6c533e6f74df0bc587834d22",
+      "lines": 94,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/data.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/data.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          243,
+          245,
+          249,
+          261,
+          270,
+          275,
+          279,
+          282,
+          351
+        ]
+      },
+      "sha256": "4198268ee5f3e81e51ca77c8174e33f8d053d2fee593eb1bfb462c9b06c0df82",
+      "lines": 418,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/execution.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/execution.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          184,
+          282,
+          346,
+          379,
+          386
+        ]
+      },
+      "sha256": "ad057bf306aeaed1cced6906e15e6502aeddecd3e713c42334edd129efdf60c3",
+      "lines": 413,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/ingestion.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/ingestion.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          100
+        ],
+        "网络调用（需核对超时/来源）": [
+          30,
+          148,
+          183
+        ],
+        "异常输出（需人工核对脱敏）": [
+          199
+        ]
+      },
+      "sha256": "cefc2d223727242de1050ca74d19877c4532d002f58a47fc937b2823c0ad4812",
+      "lines": 216,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/shadow.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/shadow.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          40,
+          41,
+          44,
+          50,
+          53,
+          58,
+          63,
+          64,
+          66
+        ],
+        "宽类型（不等于缺陷）": [
+          30
+        ]
+      },
+      "sha256": "e8805022c8880abbab4f217174364691935daa9aeef9252d9a435e52c110c797",
+      "lines": 70,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/training.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/training.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          143,
+          212,
+          237,
+          241
+        ],
+        "异常输出（需人工核对脱敏）": [
+          293
+        ]
+      },
+      "sha256": "5be470b2a33e7289e2d461ab40b064b6475940a6cb5a591d0eec825def04d3c0",
+      "lines": 354,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/research/warehouse.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/warehouse.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          32,
+          34,
+          46,
+          49,
+          59,
+          62,
+          76,
+          88,
+          91,
+          95,
+          100,
+          105,
+          114,
+          125,
+          142,
+          151,
+          153,
+          159,
+          164,
+          168,
+          175,
+          199,
+          201,
+          219,
+          227,
+          232,
+          249,
+          269,
+          276,
+          281,
+          288
+        ]
+      },
+      "sha256": "f461ff0bcb018569ff357b5e16cfde9fa8703f291c0b7e422f10df3d970336f9",
+      "lines": 292,
+      "level": "局部审查",
+      "verification": "Python AST 解析通过；连接与 audit/ingest/records/live_records、登记/对账关键段落审查；Python 63 项通过",
+      "remaining": "G04/G06：没有完整仓储端口分层与真实 PG 验收；SELECT * 和无参全量 records；未完整逐行通读"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/risk.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/risk.py:1",
+      "signals": {},
+      "sha256": "d06fe51c08ab53a23fa7f20ba71d1b39a5b9296a53c31ca5c5f5acc781296a38",
+      "lines": 27,
+      "level": "静态扫描，未通读",
+      "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "quant_engine/zeroquant/sink.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/sink.py:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          8,
+          18,
+          48,
+          54,
+          72,
+          76,
+          127
+        ],
+        "网络调用（需核对超时/来源）": [
+          28,
+          130
+        ]
+      },
+      "sha256": "fa999c6bb7db72c6d181d95a150958a5eae8d506eab4f16b3e3009983c858ae6",
+      "lines": 150,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；HTTP 写入、outbox 与失败路径通读；F09 outbox 脱敏测试通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+      "remaining": "G02/G03：多步骤写入及重试幂等未闭环；返回业务 code 未统一核验"
+    },
+    {
+      "repository": "server",
+      "path": "scripts/review_inventory.py",
+      "location": "/Users/yx/mine/project/zeroquant-server/scripts/review_inventory.py:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          26
+        ],
+        "宽类型（不等于缺陷）": [
+          27,
+          32
+        ],
+        "子进程/动态执行": [
+          36
+        ],
+        "HTML 注入入口（需核对转义）": [
+          31
+        ]
+      },
+      "sha256": "06686aec3a4e23d8744b61e1ac64018463f7bad770aba703f07d29e4dfe481ac",
+      "lines": 172,
+      "level": "通读审查",
+      "verification": "Python AST 解析通过；本轮编写并审查：只读扫描、不跟随符号链接、摘要失效检查与证据编号校验；2026-09-16 日期取证据表日期，生成与 --check 再验证",
+      "remaining": "只检测清单完整性，不是漏洞扫描器；人工审查元数据仍须可信维护"
+    },
+    {
+      "repository": "server",
+      "path": "src/app.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/app.ts:1",
+      "signals": {},
+      "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6",
+      "lines": 45,
+      "level": "通读审查",
+      "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+      "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+    },
+    {
+      "repository": "server",
+      "path": "src/config/auth.config.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/config/auth.config.ts:1",
+      "signals": {},
+      "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc",
+      "lines": 37,
+      "level": "通读审查",
+      "verification": "TTL/密钥/Origin/受邀注册配置；T-A 通过，F07 弱值检查追加后复跑通过",
+      "remaining": "G07：不能证明密钥随机性，未实现轮换；其他配置尚分散"
+    },
+    {
+      "repository": "server",
+      "path": "src/config/database.config.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/config/database.config.ts:1",
+      "signals": {},
+      "sha256": "febdc1294bf36ee74bb079de643b71b305aa046fe32fbf659801070721874beb",
+      "lines": 10,
+      "level": "通读审查",
+      "verification": "生产显式配置、池大小、连接/语句/锁超时；T-C 通过",
+      "remaining": "G06：真实 TLS/连接池容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/README.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/README.md:1",
+      "signals": {},
+      "sha256": "3ad04377401eb8ad873bfdefcda6a05ae162a7b3fe4fb8127a8e713824f85d9b",
+      "lines": 85,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/application.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/application.entities.ts:1",
+      "signals": {},
+      "sha256": "7d9f60583b956b22d9f3158809c17e3741cb1a5489c4604ce4448a81d0b02528",
+      "lines": 140,
+      "level": "局部审查",
+      "verification": "users 唯一性与主要行情表字段通读；T-M 目录检查通过",
+      "remaining": "G10：未通读所有表语义；不能把目录检查当历史数据正确性验证"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/auth.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/auth.entities.ts:1",
+      "signals": {},
+      "sha256": "1675d30015253739aa1f529e28c2f8a6cb384645f51ac49ce3563c55037a1ff0",
+      "lines": 15,
+      "level": "通读审查",
+      "verification": "认证表字段/FK/索引目录通读；T-M/T-B 与迁移一致",
+      "remaining": "实体目录不是运行时 ORM；G06 真实结构未核验"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/chat.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/chat.entities.ts:1",
+      "signals": {},
+      "sha256": "8e5b5c53c41e7ab61bcfe52ec21236cfe4215d71a0daedda147cd4969c51ba35",
+      "lines": 7,
+      "level": "通读审查",
+      "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+      "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/index.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/index.ts:1",
+      "signals": {},
+      "sha256": "fcaa995b79b190aa44898b26fbd41e31b1135b4b0b5b4ce6bc622dfe2ce330fe",
+      "lines": 32,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/market-data.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/market-data.entities.ts:1",
+      "signals": {},
+      "sha256": "270bfefdb51955f30f4bfbb7e8111f5c5de963e8e848cc68ce1791eda7b0f713",
+      "lines": 134,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/prediction.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/prediction.entities.ts:1",
+      "signals": {},
+      "sha256": "cfcefa6537cc5741742aa43b30efffa593014dc67d0fa732412cb55b5c615430",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/profile.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/profile.entities.ts:1",
+      "signals": {},
+      "sha256": "897d65d6c810c22b34aba3e7e2111aad278d9611fc145fddcdb115f20240f34a",
+      "lines": 43,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/research.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/research.entities.ts:1",
+      "signals": {},
+      "sha256": "1ea1d7fc5a77a9dffb95b548778538f29beedfb7bd041ddb152bef5bff19ba12",
+      "lines": 110,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/system.entities.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/system.entities.ts:1",
+      "signals": {},
+      "sha256": "e3a5176c3324ffdd87b02220d495a35e09394c68f8980316016f45485c62cece",
+      "lines": 10,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/entities/types.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/types.ts:1",
+      "signals": {},
+      "sha256": "4416f07852821a6345b75af10ace6d8f1c5e0e4dae908a8a94bb309bc4f5d2f6",
+      "lines": 50,
+      "level": "通读审查",
+      "verification": "列/索引/FK/默认值描述类型与工厂通读；构建通过",
+      "remaining": "非运行时值校验器；完整比较算法见 schema-verifier 待审部分"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/schema-catalog-check.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/schema-catalog-check.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10
+        ],
+        "异常输出（需人工核对脱敏）": [
+          23
+        ]
+      },
+      "sha256": "5107f2423bbfbfa3da42218d4903630b15aa339cb02523ac64e2c1c2984eaab9",
+      "lines": 33,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/database/schema-verifier.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/database/schema-verifier.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          72,
+          77,
+          83,
+          92,
+          107
+        ]
+      },
+      "sha256": "56ecf07f52dcca52748691678e378c7030dcf9a49b6633fe5c7c61a1d2a3879f",
+      "lines": 314,
+      "level": "局部审查",
+      "verification": "查询元数据入口、类型与差异模型、异常输出；F05 脱敏；隔离迁移测试调用核验器通过",
+      "remaining": "G10：未逐分支通读比较算法；G06 云库未核验"
+    },
+    {
+      "repository": "server",
+      "path": "src/db.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/db.ts:1",
+      "signals": {
+        "异常输出（需人工核对脱敏）": [
+          14
+        ]
+      },
+      "sha256": "3ae07d73aa8f5c76c74a628e2bd255a0d2f3eda0bee8514559ae2ecd9462890d",
+      "lines": 19,
+      "level": "通读审查",
+      "verification": "dotenv 优先级、Pool 配置及 idle 错误日志通读；构建通过",
+      "remaining": "G06：未连接真实目标 PostgreSQL"
+    },
+    {
+      "repository": "server",
+      "path": "src/index.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/index.ts:1",
+      "signals": {},
+      "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "启动先验配置、迁移、结构核验、监听与调度入口通读；构建通过",
+      "remaining": "G05：调度配置启动失败/进程生命周期与监听错误缺专门测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/legacy-routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/legacy-routes.ts:1",
+      "signals": {},
+      "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8",
+      "lines": 27,
+      "level": "局部审查",
+      "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+      "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/001_initial_baseline.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/001_initial_baseline.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          9,
+          18,
+          34,
+          43,
+          55,
+          66,
+          81,
+          93,
+          104,
+          115,
+          129,
+          142,
+          154,
+          173,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211
+        ]
+      },
+      "sha256": "788e2f2ad618533600f882c64fb149d4ccbafa3e352cd5fee683fa567f4b8086",
+      "lines": 214,
+      "level": "局部审查",
+      "verification": "users 唯一与逐笔表字段核对；T-M 迁移执行通过",
+      "remaining": "G10：未通读完整 baseline DDL/down 的每个语义；未执行线上 down"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/002_data_warehouse_core.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/002_data_warehouse_core.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          21,
+          35,
+          47,
+          68,
+          89,
+          100,
+          112,
+          126,
+          141,
+          150,
+          164,
+          181,
+          197,
+          211,
+          223,
+          235,
+          246,
+          260,
+          273,
+          290,
+          305,
+          319,
+          334,
+          335,
+          336,
+          337,
+          338,
+          339,
+          340,
+          341,
+          342,
+          343,
+          344,
+          345,
+          346,
+          347,
+          348,
+          349,
+          350,
+          351,
+          352,
+          353,
+          354,
+          355,
+          356
+        ]
+      },
+      "sha256": "d9bab8c95b534dbb1e8e80086d21fe1af8aab64d7e738c6bf60b5283be41047c",
+      "lines": 359,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/003_baseline_contract_fixes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/003_baseline_contract_fixes.ts:1",
+      "signals": {},
+      "sha256": "0463f967c19cffcedbfe518b65c8702d87f20b351d6b6c4d4f9ddc92b58acbc4",
+      "lines": 32,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/004_append_only_rolling_forecasts.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/004_append_only_rolling_forecasts.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          18
+        ]
+      },
+      "sha256": "de04ca110f6a7ca1acf92be4d95390e41acf6f0b7ce75e1823bd602d733dde61",
+      "lines": 43,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/005_entity_behavior_profiles.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/005_entity_behavior_profiles.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          16,
+          29,
+          52,
+          75,
+          89,
+          90,
+          91,
+          92
+        ]
+      },
+      "sha256": "60c1b4f5704e4990ce44c1ed19443d8aea0bec5d45d2f2b577594f418d314976",
+      "lines": 97,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/006_research_pipeline.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/006_research_pipeline.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          7,
+          19,
+          28,
+          35,
+          40
+        ]
+      },
+      "sha256": "752e5734fd47f03f75f4d8a386c28de8ca12a18d598e6a718b48ab670b5308a9",
+      "lines": 51,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/007_repair_l2_created_at.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/007_repair_l2_created_at.ts:1",
+      "signals": {},
+      "sha256": "4139162f5c8797e571dea0556a434e979116b0f0c9fd392a3b1b32f473be690b",
+      "lines": 16,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/008_legacy_schema_compatibility.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/008_legacy_schema_compatibility.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          13,
+          18,
+          23,
+          29,
+          38,
+          44,
+          55
+        ],
+        "宽类型（不等于缺陷）": [
+          53
+        ]
+      },
+      "sha256": "e3cd0a7ba89f88ea5ec5d02ebd079deb1ed05e099c4f585305f4da988d47d4df",
+      "lines": 97,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/009_auth_sessions.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/009_auth_sessions.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          7,
+          12,
+          17
+        ]
+      },
+      "sha256": "33afdc5fd4ef7a39d70f1c5bc6db16722fe627ca10a6dcef822b510f2af50974",
+      "lines": 24,
+      "level": "通读审查",
+      "verification": "三张表/FK/索引及拒绝自动 down 通读；T-M/T-B 结构通过",
+      "remaining": "G07：未加会话保留期/清理流程；G06 真实迁移未执行"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/010_chat_trade_requests.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/010_chat_trade_requests.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          6
+        ]
+      },
+      "sha256": "17e449c355c308a532da37a4cfdb136321ec2641a13251b607935175ef0b4a54",
+      "lines": 14,
+      "level": "通读审查",
+      "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+      "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/011_prediction_receipts.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/011_prediction_receipts.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          6
+        ]
+      },
+      "sha256": "a0ae6bdccf3c8c1a694200c918d3059511aecb22ff56a2f67cfcbe73787386bf",
+      "lines": 13,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/catalog.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/catalog.ts:1",
+      "signals": {},
+      "sha256": "003926f8a793c2b2bea3ca25538f36eaf0476e35a322f70e43eb6b515c2406d0",
+      "lines": 17,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/runner.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/runner.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          8,
+          17,
+          25,
+          34,
+          59,
+          76
+        ],
+        "异常输出（需人工核对脱敏）": [
+          117
+        ]
+      },
+      "sha256": "ffa56b5ea90dea6e44a59b91daf6f9648c9037ed9e764b48e3e4dad0496a51eb",
+      "lines": 125,
+      "level": "通读审查",
+      "verification": "up/down/status、事务/锁与生产 down 限制通读；构建通过",
+      "remaining": "status 会创建迁移表，不是严格只读；G06 真实库升级/权限验收未做"
+    },
+    {
+      "repository": "server",
+      "path": "src/migrations/types.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/types.ts:1",
+      "signals": {},
+      "sha256": "1088e56ce004bf22f43b10265c0ee3c04d852e0d89e74a8b2131dfdee183de03",
+      "lines": 8,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.controller.ts:1",
+      "signals": {},
+      "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb",
+      "lines": 34,
+      "level": "通读审查",
+      "verification": "HTTP/Cookie/DTO 边界；T-B 回环 HTTP 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.middleware.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.middleware.ts:1",
+      "signals": {},
+      "sha256": "d5aaefbce117be04f51dc68fddfeb4e6dbcf0ef5ac0b0a167805f0f20c770ea3",
+      "lines": 20,
+      "level": "通读审查",
+      "verification": "仅接受已验证 Bearer 会话，无 phone 回退；T-B HTTP 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.module.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.module.ts:1",
+      "signals": {},
+      "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde",
+      "lines": 16,
+      "level": "通读审查",
+      "verification": "依赖组装与事务生命周期；构建和领域回归通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.routes.ts:1",
+      "signals": {},
+      "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd",
+      "lines": 40,
+      "level": "通读审查",
+      "verification": "CSRF/限流与 Express 变体匹配；T-B HTTP 通过；F01",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.service.ts:1",
+      "signals": {},
+      "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56",
+      "lines": 81,
+      "level": "通读审查",
+      "verification": "注册原子性、刷新重放提交、会话身份与 DTO；T-B 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/auth.types.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.types.ts:1",
+      "signals": {},
+      "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6",
+      "lines": 29,
+      "level": "通读审查",
+      "verification": "领域数据契约与接口依赖；后端构建通过（接口无独立运行行为）",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/password.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/password.service.ts:1",
+      "signals": {},
+      "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "密码端口、虚拟哈希、每进程并发上限；T-A 真实 bcrypt 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/rate-limit.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/rate-limit.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          12,
+          13
+        ]
+      },
+      "sha256": "d968effa16f9da71542a2ff209d77d012602c34f016e3b2c799ade3d6380e5c4",
+      "lines": 18,
+      "level": "通读审查",
+      "verification": "HMAC 身份键、原子窗口更新与批量过期清理；T-B 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/register.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/register.schema.ts:1",
+      "signals": {},
+      "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6",
+      "lines": 35,
+      "level": "通读审查",
+      "verification": "账号规范化、昵称字符与密码字节边界；T-A 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/token.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/token.service.ts:1",
+      "signals": {},
+      "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa",
+      "lines": 26,
+      "level": "通读审查",
+      "verification": "最小 JWT 载荷、issuer/audience/算法/过期校验；T-B/T-D 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/auth/user.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/auth/user.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          9,
+          13,
+          18,
+          20,
+          32,
+          36,
+          40,
+          44,
+          47,
+          50,
+          53
+        ]
+      },
+      "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1",
+      "lines": 56,
+      "level": "通读审查",
+      "verification": "显式 SQL 字段、参数化、ON CONFLICT 与已知约束分类；T-A/T-B 通过",
+      "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-history.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-history.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          6,
+          13
+        ]
+      },
+      "sha256": "8293b6d6c91ed45abbb7a55541fdf48d411d83919099fe97e0d670dc5b15bb43",
+      "lines": 15,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-history.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-history.service.ts:1",
+      "signals": {},
+      "sha256": "d86946c185455af1ea8b646bde51de49e283deac0acc75c6904c0be3fdbccaf1",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-trade.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-trade.controller.ts:1",
+      "signals": {},
+      "sha256": "50cdcf9a61ccb78969af8080ac16b198688685371d96d51bdb682d6e13898b85",
+      "lines": 11,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-trade.module.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-trade.module.ts:1",
+      "signals": {},
+      "sha256": "9ddc9c30aa074b65d3c69cef44225ec8997f44ae5f9019a1f244df7abd7b2858",
+      "lines": 25,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-trade.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-trade.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          8,
+          11,
+          15,
+          19,
+          25
+        ]
+      },
+      "sha256": "f89ef8dd1e71d70fe0b3761450ef36d304ef65ee56d9ec56f38e2fa611917a9a",
+      "lines": 28,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-trade.routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-trade.routes.ts:1",
+      "signals": {},
+      "sha256": "2beb32f8757e543f298d61b021879dba870fc0a5f678dcc7bb605b2da4705f26",
+      "lines": 30,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat-trade.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat-trade.service.ts:1",
+      "signals": {},
+      "sha256": "648912e1d98fe34c43b97e6ae0d914345a528e53e85a8dd2a0476b84f8276f27",
+      "lines": 41,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat.schema.ts:1",
+      "signals": {},
+      "sha256": "29dce479e7f15ada00a91b32e34df18941ec3add463c54152bdd1534a0777575",
+      "lines": 12,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/chat.types.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/chat.types.ts:1",
+      "signals": {},
+      "sha256": "bff274e8dc8b6b92f133bbad0754c84d3989610645495a1ae51b9ca993e929f3",
+      "lines": 17,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/research-chat.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/research-chat.service.ts:1",
+      "signals": {},
+      "sha256": "0d105ad8db00b13ae0a4ed37a858d753568aca5824b7d43c402522cbec7c78e6",
+      "lines": 34,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/chat/research-reply.adapter.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/chat/research-reply.adapter.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          15,
+          20,
+          28,
+          67
+        ],
+        "宽类型（不等于缺陷）": [
+          80,
+          88,
+          90,
+          103,
+          141
+        ],
+        "网络调用（需核对超时/来源）": [
+          124
+        ]
+      },
+      "sha256": "b3ff437419db27eebd56cda908e7ba371d515ebe1eff0025fe7e59c658673062",
+      "lines": 168,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+      "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/daily-bars/daily-bars.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.controller.ts:1",
+      "signals": {},
+      "sha256": "63c763c331127b7f343e91a41cb5b241155b4d1a960e9483dfae189b5b9a7f61",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+      "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/daily-bars/daily-bars.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          13
+        ]
+      },
+      "sha256": "3c3fbd8237ced051300565d0d15f948687ac686830035a03129cdd7e5bcea4cc",
+      "lines": 19,
+      "level": "通读审查",
+      "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+      "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/daily-bars/daily-bars.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.schema.ts:1",
+      "signals": {},
+      "sha256": "138ebf8ed3eca3c8b7e91ec52db3b83dc8bf330c973ff12b49e0ab9aeca3fdcf",
+      "lines": 33,
+      "level": "通读审查",
+      "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+      "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/daily-bars/daily-bars.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.service.ts:1",
+      "signals": {},
+      "sha256": "e71bc528388d7ef548e72a8250109ea0f676413c3ba0cce0e82ae5f1f805097f",
+      "lines": 10,
+      "level": "通读审查",
+      "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+      "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market-sync/market-sync.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.controller.ts:1",
+      "signals": {},
+      "sha256": "52935683902add301dc15aca66adf12ff0acbb60bf57e66c3415a7b3454c18cd",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market-sync/market-sync.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          11,
+          13,
+          15,
+          19,
+          25,
+          29
+        ]
+      },
+      "sha256": "8cbbef2f88b21824b0b26e93a854d7b4ea6d3ba367d60dff230b4c3803ffafa3",
+      "lines": 36,
+      "level": "通读审查",
+      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market-sync/market-sync.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.schema.ts:1",
+      "signals": {},
+      "sha256": "076587ec8db9a571445f80beeb97a1d075663e9feb061de3613f5edf0ab92f2d",
+      "lines": 34,
+      "level": "通读审查",
+      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market-sync/market-sync.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.service.ts:1",
+      "signals": {},
+      "sha256": "5da996b8459f5a4c2e1000869f45e884fccae8823901eb84f076ef64978ea8f1",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market/market.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market/market.controller.ts:1",
+      "signals": {},
+      "sha256": "2376540c17d9288c6efea07fe9075b4097e7fb55158c8f5e2d67f0bfbec38ae9",
+      "lines": 21,
+      "level": "通读审查",
+      "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+      "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market/market.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market/market.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          44,
+          45,
+          51,
+          56,
+          62,
+          67,
+          86,
+          91,
+          95,
+          100,
+          102
+        ]
+      },
+      "sha256": "a3db8605e232cdc4c9f3c2e26392d8ff7d7fb87a2280d6606b6d11276836d3c8",
+      "lines": 105,
+      "level": "通读审查",
+      "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+      "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market/market.routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market/market.routes.ts:1",
+      "signals": {},
+      "sha256": "d608fbc2762ad5741a7ebc25554e81c3cefa4468bd3363fc1ac5065f216df434",
+      "lines": 14,
+      "level": "通读审查",
+      "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+      "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/market/market.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market/market.service.ts:1",
+      "signals": {},
+      "sha256": "aadf637f988006feba84bdc5eacdbbf688a72ddfd2daeba5bf0a53feb62816f7",
+      "lines": 47,
+      "level": "通读审查",
+      "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+      "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.controller.ts:1",
+      "signals": {},
+      "sha256": "dfeb052c14854ffc6bc759a78680bc997200a30d477abe9d8586abee62fbbc37",
+      "lines": 27,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.module.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.module.ts:1",
+      "signals": {},
+      "sha256": "0cc9eda5c0f9e09002bc89981f5e89da435016c6170056306924a75da85068e9",
+      "lines": 11,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          12,
+          15,
+          19,
+          20,
+          24,
+          32,
+          37,
+          40
+        ]
+      },
+      "sha256": "a5c4878a5aaaf66efaa7105c90fecbab83739245a881b809e2b84f1369cf88f7",
+      "lines": 41,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.routes.ts:1",
+      "signals": {},
+      "sha256": "4c80cc71a413c81e3029fa83666611333cd7eb3a5bed0dcd6f6eb2d8f4b9302f",
+      "lines": 15,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.schema.ts:1",
+      "signals": {},
+      "sha256": "03fc767b390c3a0877dfa1581343ed0260e99506c6c65cb4a0310803e6749fb3",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.service.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          30
+        ]
+      },
+      "sha256": "ee0e1b84b438f8de926e2bc4b92e701754175fa78282ba3ffb47db4c411b75ff",
+      "lines": 55,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/portfolio/portfolio.types.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/portfolio/portfolio.types.ts:1",
+      "signals": {},
+      "sha256": "6068177f9cae577c5ba34c76145ed24530e66848fd3928b3ca6b45c5476f048f",
+      "lines": 16,
+      "level": "通读审查",
+      "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+      "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction-query.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction-query.controller.ts:1",
+      "signals": {},
+      "sha256": "902eaa9076e92c631c9576400a54892299989991f4025f8b528975062483f512",
+      "lines": 10,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction-query.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction-query.schema.ts:1",
+      "signals": {},
+      "sha256": "785c54b54bf7628a30f7dc8340a1c7f30b9562eaf552f013e21e2d5b09dc4619",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction-query.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction-query.service.ts:1",
+      "signals": {},
+      "sha256": "205af657eb1ce91cd7432f05ddc904e5684c844aa46b3e730178ebb0fb5384a4",
+      "lines": 13,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction-reader.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction-reader.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          16,
+          24
+        ]
+      },
+      "sha256": "0e9111ab0c8a6e97cf25da9c7d6be67752b3efad82c1ac713c476475ac939edb",
+      "lines": 30,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction-receipt.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction-receipt.ts:1",
+      "signals": {},
+      "sha256": "c968d779548f69575a92e0018665380c31f4cdc0c1463030a032d87094f3a497",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction.controller.ts:1",
+      "signals": {},
+      "sha256": "38f9c44a0ac1e14a7fb4e812104213b1875705315b51b989b2ff89bedb26735c",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          20,
+          21,
+          24,
+          27,
+          29,
+          36,
+          46,
+          60,
+          62,
+          67,
+          71,
+          78,
+          88
+        ]
+      },
+      "sha256": "00a5e41a8754c88a601aa71600202317760bd9a9a3d57313ff5630ca154d8f2e",
+      "lines": 92,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction.schema.ts:1",
+      "signals": {},
+      "sha256": "d3b8f190eec443918ab350b3d63f9c05af22653ed4e8dfb694f0653cc0777617",
+      "lines": 58,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/predictions/prediction.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/predictions/prediction.service.ts:1",
+      "signals": {},
+      "sha256": "64d21ab08d235e863d003658decb727997e362d67f99f03554566279a673c632",
+      "lines": 16,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/profile-evidence/evidence.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/profile-evidence/evidence.controller.ts:1",
+      "signals": {},
+      "sha256": "d87e2ae5be37de9bb60e9ade0abef5222312e413eca3f1bc8068b9c55deb9a93",
+      "lines": 7,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/profile-evidence/evidence.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/profile-evidence/evidence.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          12,
+          15,
+          31,
+          34,
+          46,
+          48
+        ]
+      },
+      "sha256": "cdc9071ea8acf9334120e5a707fe093b47d570d8040a1292b0ab8fcdde2a8b5d",
+      "lines": 57,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/profile-evidence/evidence.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/profile-evidence/evidence.schema.ts:1",
+      "signals": {},
+      "sha256": "9bb90ddba85ce6c4ae22ca58b28d867ecd744f8878a277289a2697526812515c",
+      "lines": 78,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/profile-evidence/evidence.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/profile-evidence/evidence.service.ts:1",
+      "signals": {},
+      "sha256": "f14afd42e1f8e4619931e3f955e6a34f520c999331c7b4f35a3d9defa612b9dc",
+      "lines": 7,
+      "level": "通读审查",
+      "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+      "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/public-trades/public-trades.controller.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/public-trades/public-trades.controller.ts:1",
+      "signals": {},
+      "sha256": "554a57daf9e9bd5fdaaf5667705af37f6e20ddfc74f3520e928609281551113e",
+      "lines": 6,
+      "level": "通读审查",
+      "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+      "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/public-trades/public-trades.repository.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/public-trades/public-trades.repository.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          13,
+          16
+        ]
+      },
+      "sha256": "e2cd3ac4cab05481a9624b785ee2242d79c0c6d3477665c01e7aa491fb53e461",
+      "lines": 20,
+      "level": "通读审查",
+      "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+      "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/public-trades/public-trades.schema.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/public-trades/public-trades.schema.ts:1",
+      "signals": {},
+      "sha256": "4b0bfb96516279e2561991771b1aa9fd29ee8b52536a254f83e71dd474e784ff",
+      "lines": 29,
+      "level": "通读审查",
+      "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+      "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+    },
+    {
+      "repository": "server",
+      "path": "src/modules/public-trades/public-trades.service.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/modules/public-trades/public-trades.service.ts:1",
+      "signals": {},
+      "sha256": "c54dbb02bc91b49cd9dcf4a5c54d375e4201da0446978fdc813d7398ccea002f",
+      "lines": 11,
+      "level": "通读审查",
+      "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+      "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+    },
+    {
+      "repository": "server",
+      "path": "src/ownership.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/ownership.ts:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          106
+        ],
+        "网络调用（需核对超时/来源）": [
+          112
+        ]
+      },
+      "sha256": "29dc3b5dc9e759daa0d1596d4aa50450b2f231260f04bdda0c9581f528b60a8b",
+      "lines": 216,
+      "level": "通读审查",
+      "verification": "公开股东源、分页截至日、缓存及失败响应通读",
+      "remaining": "G12/G09：缓存无容量上限，失败响应包含外部异常文本；外部数据正确性/分页缺契约测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/profiles/entity-profile-engine.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/profiles/entity-profile-engine.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          279,
+          292,
+          307,
+          313,
+          332,
+          335,
+          343,
+          364,
+          376,
+          394,
+          397
+        ]
+      },
+      "sha256": "b97b04ce02a8eab5e9ba04d4a00d5882743af1e16f5b27e4699f582f00e70f13",
+      "lines": 425,
+      "level": "通读审查",
+      "verification": "事件/行情/新闻查询、PIT 过滤、评分与画像写入/查询通读；构建通过",
+      "remaining": "G04/G12：数值算法及统计可信度未逐条证明；结构仍混合，真实 PG 快照/并发与新闻关联修订需验证"
+    },
+    {
+      "repository": "server",
+      "path": "src/quant-routes.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/quant-routes.ts:1",
+      "signals": {},
+      "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66",
+      "lines": 104,
+      "level": "局部审查",
+      "verification": "复核三类导入迁出与生产批准组装；领域53项及门禁回归通过",
+      "remaining": "G02：最新预测读取、画像查询/刷新日期与时区及旧错误契约未闭环；仍保留局部审查口径"
+    },
+    {
+      "repository": "server",
+      "path": "src/research-production.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/research-production.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          54
+        ],
+        "宽类型（不等于缺陷）": [
+          16
+        ],
+        "异常输出（需人工核对脱敏）": [
+          69
+        ]
+      },
+      "sha256": "023372b919fe88c40faae291349c62308699a776b9abd51ca62b52e73ac760ee",
+      "lines": 72,
+      "level": "通读审查",
+      "verification": "实时/批准查询与固定策略版本，参数化 SQL 和故障拒绝；生产门禁测试通过",
+      "remaining": "G12：模型批准、真实数据与质量不是这组测试能证明的"
+    },
+    {
+      "repository": "server",
+      "path": "src/scheduler/quant-scheduler.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/scheduler/quant-scheduler.ts:1",
+      "signals": {
+        "子进程/动态执行": [
+          123
+        ],
+        "异常输出（需人工核对脱敏）": [
+          72,
+          99
+        ]
+      },
+      "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5",
+      "lines": 275,
+      "level": "通读审查",
+      "verification": "进程启动/超时/close/error/cron 全文审查；F05 日志与输出上限；构建通过",
+      "remaining": "G05：重复计数、跳过状态、固定期限与跨实例防重未关闭；无进程故障测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/seed.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/seed.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          11,
+          20,
+          36,
+          45,
+          57,
+          68,
+          83,
+          95,
+          106,
+          124,
+          126,
+          145,
+          146,
+          276,
+          278,
+          302,
+          304,
+          318,
+          330
+        ]
+      },
+      "sha256": "ce424ec12095d55d9288fa9513027421ae06e644777321577462f106f431133b",
+      "lines": 344,
+      "level": "局部审查",
+      "verification": "检查结尾异常处理与退出码；F05 修复原样日志；构建通过",
+      "remaining": "G10：种子数据/SQL 全文未通读；未执行 seed"
+    },
+    {
+      "repository": "server",
+      "path": "src/shared/errors.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/shared/errors.ts:1",
+      "signals": {},
+      "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4",
+      "lines": 27,
+      "level": "通读审查",
+      "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+      "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/shared/http.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/shared/http.ts:1",
+      "signals": {},
+      "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191",
+      "lines": 28,
+      "level": "通读审查",
+      "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+      "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/shared/logger.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/shared/logger.ts:1",
+      "signals": {
+        "异常输出（需人工核对脱敏）": [
+          4
+        ]
+      },
+      "sha256": "919ace9e746c031372807c05922f2bf9bc4ba166d3fa56adeaefd713c226dd3f",
+      "lines": 7,
+      "level": "通读审查",
+      "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+      "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/shared/transaction.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/shared/transaction.ts:1",
+      "signals": {},
+      "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+      "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+    },
+    {
+      "repository": "server",
+      "path": "src/voice-cleaner.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/voice-cleaner.ts:1",
+      "signals": {
+        "子进程/动态执行": [
+          26,
+          28,
+          29
+        ]
+      },
+      "sha256": "4dfbda0c7b42018419969ba82d32f317effbfb2d2edafb3cfc2a1dc3e51b3e34",
+      "lines": 48,
+      "level": "通读审查",
+      "verification": "F03：整句匹配，不猜价格/数量；T-D 正反例通过",
+      "remaining": "支持语法有意收紧；G01 幂等/聊天事务未完成"
+    },
+    {
+      "repository": "server",
+      "path": "test/architecture.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/architecture.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          18,
+          27
+        ]
+      },
+      "sha256": "0f8260d2b0b48a71420ed8f2d98c048cefa8df0608ac1fc236474401eeb06582",
+      "lines": 57,
+      "level": "通读审查",
+      "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+      "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+    },
+    {
+      "repository": "server",
+      "path": "test/auth-portfolio.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/auth-portfolio.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          69,
+          87,
+          90,
+          103,
+          107,
+          110,
+          118,
+          147,
+          165,
+          167,
+          212
+        ],
+        "网络调用（需核对超时/来源）": [
+          192,
+          199,
+          202,
+          204,
+          206,
+          208,
+          215
+        ],
+        "子进程/动态执行": [
+          69,
+          74,
+          75,
+          76,
+          87,
+          212
+        ]
+      },
+      "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0",
+      "lines": 222,
+      "level": "通读审查",
+      "verification": "审查用例前置条件、PGlite 排队边界与 HTTP 断言；完整领域 27 项/配置追加5项通过",
+      "remaining": "不是多连接压力测试；部分标题（旧令牌）原覆盖不足，现由全局回归补真实 JWT 负例"
+    },
+    {
+      "repository": "server",
+      "path": "test/chat-trade.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/chat-trade.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          24,
+          25,
+          26,
+          39,
+          40,
+          41,
+          42,
+          43,
+          47,
+          50,
+          52,
+          53,
+          103,
+          104,
+          153
+        ],
+        "网络调用（需核对超时/来源）": [
+          188,
+          189,
+          190,
+          191,
+          195,
+          196,
+          198,
+          200
+        ],
+        "子进程/动态执行": [
+          26,
+          47,
+          53
+        ]
+      },
+      "sha256": "028baff542172541a6962e7d7c0bad92e7ccb6d19fbb1c67c9ae6393eccedc21",
+      "lines": 205,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "test/e2e_baseline.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/e2e_baseline.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          88,
+          114,
+          129,
+          137,
+          141,
+          144,
+          176,
+          182,
+          183,
+          199,
+          205,
+          233,
+          257
+        ],
+        "宽类型（不等于缺陷）": [
+          97,
+          120,
+          186
+        ],
+        "网络调用（需核对超时/来源）": [
+          30
+        ],
+        "异常输出（需人工核对脱敏）": [
+          270
+        ]
+      },
+      "sha256": "3d3167f412de1f4a9ed9f12813136258f4212cb26301d739a7034e5e25991678",
+      "lines": 275,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "test/global-review-regressions.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/global-review-regressions.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          61,
+          66,
+          69,
+          95,
+          98,
+          123,
+          127,
+          132
+        ],
+        "子进程/动态执行": [
+          61,
+          127
+        ]
+      },
+      "sha256": "b2958221796bf39e31b4e6da79f38ba4e2baa97f0c891b6065164b07c3d5ca12",
+      "lines": 146,
+      "level": "通读审查",
+      "verification": "本轮新增 6 项测试全文审查并通过；F13 日线迁移/校验/回滚增量复核，领域44项通过",
+      "remaining": "真实库/浏览器/供应商验收见 G06/G12"
+    },
+    {
+      "repository": "server",
+      "path": "test/ingestion.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/ingestion.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          79,
+          82,
+          83,
+          92,
+          94,
+          96,
+          98,
+          99,
+          100,
+          102,
+          105,
+          109,
+          112,
+          115,
+          117,
+          118,
+          121,
+          122,
+          125,
+          126,
+          127,
+          129,
+          134,
+          136,
+          138,
+          149,
+          154,
+          156,
+          159,
+          161,
+          170,
+          178,
+          182,
+          184,
+          188,
+          190,
+          194,
+          204,
+          210
+        ],
+        "网络调用（需核对超时/来源）": [
+          224,
+          225,
+          226,
+          227,
+          229,
+          230,
+          231
+        ],
+        "子进程/动态执行": [
+          82,
+          92
+        ]
+      },
+      "sha256": "1bb2bf6f3749651df99fdbe2341fbaac3753a9c574c39c3aa15e4b802df423cf",
+      "lines": 235,
+      "level": "通读审查",
+      "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+      "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+    },
+    {
+      "repository": "server",
+      "path": "test/market-sync.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/market-sync.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          25,
+          26,
+          29,
+          32,
+          42,
+          46
+        ],
+        "子进程/动态执行": [
+          26,
+          32
+        ]
+      },
+      "sha256": "2ea158eba2cffa5cdf38d1d3a1c01dabe0c30fa189a532f794417df322415e99",
+      "lines": 50,
+      "level": "通读审查",
+      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+    },
+    {
+      "repository": "server",
+      "path": "test/research-migrations-smoke.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/research-migrations-smoke.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          17,
+          21,
+          25,
+          27,
+          29,
+          30,
+          46,
+          48,
+          52,
+          54,
+          59,
+          63,
+          65,
+          71,
+          75
+        ],
+        "宽类型（不等于缺陷）": [
+          16,
+          33,
+          36,
+          54
+        ],
+        "子进程/动态执行": [
+          16,
+          17,
+          19,
+          22,
+          45,
+          47,
+          51,
+          52,
+          53,
+          76
+        ]
+      },
+      "sha256": "631185ea794235aa35bbceb6c9225fd881fec3500c2857d7a8518c5adadfbf46",
+      "lines": 79,
+      "level": "通读审查",
+      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+    },
+    {
+      "repository": "server",
+      "path": "test/research-production.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/research-production.test.ts:1",
+      "signals": {},
+      "sha256": "b7bc80bd994f75f60eb6d4362751977fe19171123525f474f8860cda9706de28",
+      "lines": 25,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "test/schema-compatibility.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/schema-compatibility.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          13,
+          18,
+          21,
+          22,
+          23,
+          24,
+          26,
+          28,
+          32,
+          33,
+          34,
+          35,
+          36,
+          39,
+          61,
+          65,
+          66,
+          70
+        ],
+        "宽类型（不等于缺陷）": [
+          15,
+          16
+        ],
+        "子进程/动态执行": [
+          13,
+          18,
+          21,
+          29,
+          31,
+          46,
+          55,
+          58,
+          61,
+          62,
+          64,
+          66,
+          67,
+          69
+        ]
+      },
+      "sha256": "aaa31f5eba4230846fcadfb5bdb3343bf94cf244d8281b6089d0362b93376aaa",
+      "lines": 72,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "tsconfig.json",
+      "location": "/Users/yx/mine/project/zeroquant-server/tsconfig.json:1",
+      "signals": {},
+      "sha256": "0c01342bde94787ca17748901ea775ba3df7e65fb872c4c757a6af5f08f1f073",
+      "lines": 22,
+      "level": "通读审查",
+      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+    },
+    {
+      "repository": "web",
+      "path": ".dockerignore",
+      "location": "/Users/yx/mine/project/zeroquant-web/.dockerignore:1",
+      "signals": {},
+      "sha256": "b24e17497085720d82e6de501307348e2240a92fe18deaae39e3ee70ed59c992",
+      "lines": 5,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    },
+    {
+      "repository": "web",
+      "path": ".github/workflows/deploy.yml",
+      "location": "/Users/yx/mine/project/zeroquant-web/.github/workflows/deploy.yml:1",
+      "signals": {},
+      "sha256": "6f39fa8396e031f3ad11bd3bd08aa6ae4778fdc282507bf68264eca80d0ca24f",
+      "lines": 25,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": ".gitignore",
+      "location": "/Users/yx/mine/project/zeroquant-web/.gitignore:1",
+      "signals": {},
+      "sha256": "877c8d36f5cd89e476c871a393f3a3d6e7e31dad722a6ad719a90cb6df001e9e",
+      "lines": 3,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": "Dockerfile",
+      "location": "/Users/yx/mine/project/zeroquant-web/Dockerfile:1",
+      "signals": {},
+      "sha256": "f0674ddb317a98047a8bcf40c083a30ad38c39427ba36850729c219b27411e87",
+      "lines": 5,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    },
+    {
+      "repository": "web",
+      "path": "README.md",
+      "location": "/Users/yx/mine/project/zeroquant-web/README.md:1",
+      "signals": {},
+      "sha256": "d01f2973a14594994a5792ebf4e855a9e613766c1ef542972f8041b82399fe9b",
+      "lines": 27,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": "index.html",
+      "location": "/Users/yx/mine/project/zeroquant-web/index.html:1",
+      "signals": {},
+      "sha256": "1ae32c85fed7c4b4c1caa4b3a84e519299c607b14647d39e361c3eb3addc8058",
+      "lines": 17,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": "nginx.conf",
+      "location": "/Users/yx/mine/project/zeroquant-web/nginx.conf:1",
+      "signals": {},
+      "sha256": "dc596fd83459a939f0af7df90ab1c6f3dc54084e45aef3e8e617f8ebde5d5396",
+      "lines": 23,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    },
+    {
+      "repository": "web",
+      "path": "package-lock.json",
+      "location": "/Users/yx/mine/project/zeroquant-web/package-lock.json:1",
+      "signals": {},
+      "sha256": "373e10bcea36b5f08171ee33a91b0e8526d0590e0255f95970c5eaf03d34eb8f",
+      "lines": 3053,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": "package.json",
+      "location": "/Users/yx/mine/project/zeroquant-web/package.json:1",
+      "signals": {},
+      "sha256": "eb0fb64d171f750327f8246b5d2365e202d3ab8be03947798e6b173eed272cb5",
+      "lines": 32,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    },
+    {
+      "repository": "web",
+      "path": "postcss.config.js",
+      "location": "/Users/yx/mine/project/zeroquant-web/postcss.config.js:1",
+      "signals": {},
+      "sha256": "190c877db466995bf1482f4a16abd06e04a89ede3119341e2a86ff96e1737b27",
+      "lines": 6,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "web",
+      "path": "src/App.vue",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/App.vue:1",
+      "signals": {},
+      "sha256": "b51bc18573219cae0c44aaf3e846c543026ed2c0aa8f83738fbfe8daab3da018",
+      "lines": 9,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/api/chat-requests.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/api/chat-requests.ts:1",
+      "signals": {},
+      "sha256": "da2bd6ce3fca4088477b7a39d4a4653754e8f8b3c0717773cb0ae563067d50c6",
+      "lines": 45,
+      "level": "通读审查",
+      "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+      "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+    },
+    {
+      "repository": "web",
+      "path": "src/api/index.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/api/index.ts:1",
+      "signals": {},
+      "sha256": "1be31227509429eb4ef0804417449a7ac2ff6b88b1962bae5f2082b607cb73ae",
+      "lines": 46,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/api/session.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/api/session.ts:1",
+      "signals": {},
+      "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6",
+      "lines": 39,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/env.d.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/env.d.ts:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          5
+        ]
+      },
+      "sha256": "cb3a8a70a87f0b1872244cd0bbe5bb5ddd602d820b7766a4d515b04eab8c40c7",
+      "lines": 7,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "web",
+      "path": "src/main.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/main.ts:1",
+      "signals": {},
+      "sha256": "49c64632e5081a7f35cb685c977cd84812c3cbfd0dd57e683ab905c003f9b73f",
+      "lines": 21,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/router/index.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/router/index.ts:1",
+      "signals": {},
+      "sha256": "fe5bd1a1dcdeeb460fe494e1a3005a757afd5e5685372829495009432c76bfbc",
+      "lines": 31,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/style.css",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/style.css:1",
+      "signals": {},
+      "sha256": "202d1f4d516b393740c9591f4811f765c9909ef4ddbf51803432fea695081fac",
+      "lines": 42,
+      "level": "元数据登记，未通读",
+      "verification": "文件摘要及行数",
+      "remaining": "G10：配置、文档或数据内容仍待逐项核验"
+    },
+    {
+      "repository": "web",
+      "path": "src/utils/markdown.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/utils/markdown.ts:1",
+      "signals": {},
+      "sha256": "5663b5bb7028d366dae1319008134ec9d5d630ff5499a1434957561aabc4ca63",
+      "lines": 10,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "src/views/Dashboard.vue",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/views/Dashboard.vue:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          396,
+          643,
+          644,
+          650,
+          655,
+          656,
+          659,
+          660,
+          663,
+          667,
+          671,
+          676,
+          681,
+          682,
+          799,
+          802,
+          813,
+          847,
+          870,
+          893,
+          899,
+          935,
+          940,
+          951,
+          954,
+          964,
+          965,
+          966,
+          973,
+          986,
+          987,
+          1001,
+          1017,
+          1152,
+          1169,
+          1193,
+          1209,
+          1317,
+          1322,
+          1359,
+          1385,
+          1395,
+          1408,
+          1433,
+          1436,
+          1459,
+          1518,
+          1567
+        ],
+        "HTML 注入入口（需核对转义）": [
+          554
+        ],
+        "异常 any": [
+          1169,
+          1193,
+          1209,
+          1408,
+          1567
+        ]
+      },
+      "sha256": "2e77cf86827c14b72a7d95fa384492c34dd39a5b1b379361882acd16d836c726",
+      "lines": 1627,
+      "level": "局部审查",
+      "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过",
+      "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+    },
+    {
+      "repository": "web",
+      "path": "src/views/Login.vue",
+      "location": "/Users/yx/mine/project/zeroquant-web/src/views/Login.vue:1",
+      "signals": {
+        "宽类型（不等于缺陷）": [
+          107
+        ]
+      },
+      "sha256": "b5a9f09609a9c83235bc0cfd9e700427ca1eea55a60319bf0688e44dae757ea4",
+      "lines": 133,
+      "level": "通读审查",
+      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+    },
+    {
+      "repository": "web",
+      "path": "tailwind.config.js",
+      "location": "/Users/yx/mine/project/zeroquant-web/tailwind.config.js:1",
+      "signals": {},
+      "sha256": "966b06b253de04ed18e67f55bc442b32a93966442b2dd2363f974b365e25d0ac",
+      "lines": 23,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "web",
+      "path": "test/frontend-security.test.mjs",
+      "location": "/Users/yx/mine/project/zeroquant-web/test/frontend-security.test.mjs:1",
+      "signals": {},
+      "sha256": "1283744ad4e01cb477284c69d246583cbb87422a10b8bed154082011caba8e56",
+      "lines": 179,
+      "level": "通读审查",
+      "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过",
+      "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+    },
+    {
+      "repository": "web",
+      "path": "tsconfig.json",
+      "location": "/Users/yx/mine/project/zeroquant-web/tsconfig.json:1",
+      "signals": {},
+      "sha256": "5254683df46e7fc9e277d3e4cce916f8382019e5a80fdeedd76b948c56ddfce3",
+      "lines": 25,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    },
+    {
+      "repository": "web",
+      "path": "vite.config.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/vite.config.ts:1",
+      "signals": {},
+      "sha256": "21be8232821034281ec0bb9ce3e827f783af729ecd11f829ee224be9bad720c1",
+      "lines": 17,
+      "level": "通读审查",
+      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { logError } from './shared/logger.js'
 import { pool } from './db.js'
 import bcrypt from 'bcryptjs'
 import dayjs from 'dayjs'
@@ -339,5 +340,5 @@ async function seed() {
 }
 
 seed()
-  .catch((e) => console.error(e))
+  .catch((e: unknown) => { logError('seed.failed', e); process.exitCode = 1 })
   .finally(() => pool.end())

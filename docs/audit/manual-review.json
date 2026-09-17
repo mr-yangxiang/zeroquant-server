@@ -1,0 +1,878 @@
+{
+  "server:src/modules/auth/auth.controller.ts": {
+    "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb",
+    "level": "通读审查",
+    "verification": "HTTP/Cookie/DTO 边界；T-B 回环 HTTP 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/auth.middleware.ts": {
+    "sha256": "d5aaefbce117be04f51dc68fddfeb4e6dbcf0ef5ac0b0a167805f0f20c770ea3",
+    "level": "通读审查",
+    "verification": "仅接受已验证 Bearer 会话，无 phone 回退；T-B HTTP 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/auth.module.ts": {
+    "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde",
+    "level": "通读审查",
+    "verification": "依赖组装与事务生命周期；构建和领域回归通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/auth.routes.ts": {
+    "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd",
+    "level": "通读审查",
+    "verification": "CSRF/限流与 Express 变体匹配；T-B HTTP 通过；F01",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/auth.service.ts": {
+    "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56",
+    "level": "通读审查",
+    "verification": "注册原子性、刷新重放提交、会话身份与 DTO；T-B 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/auth.types.ts": {
+    "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6",
+    "level": "通读审查",
+    "verification": "领域数据契约与接口依赖；后端构建通过（接口无独立运行行为）",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/password.service.ts": {
+    "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300",
+    "level": "通读审查",
+    "verification": "密码端口、虚拟哈希、每进程并发上限；T-A 真实 bcrypt 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/rate-limit.repository.ts": {
+    "sha256": "d968effa16f9da71542a2ff209d77d012602c34f016e3b2c799ade3d6380e5c4",
+    "level": "通读审查",
+    "verification": "HMAC 身份键、原子窗口更新与批量过期清理；T-B 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/register.schema.ts": {
+    "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6",
+    "level": "通读审查",
+    "verification": "账号规范化、昵称字符与密码字节边界；T-A 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/token.service.ts": {
+    "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa",
+    "level": "通读审查",
+    "verification": "最小 JWT 载荷、issuer/audience/算法/过期校验；T-B/T-D 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/auth/user.repository.ts": {
+    "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1",
+    "level": "通读审查",
+    "verification": "显式 SQL 字段、参数化、ON CONFLICT 与已知约束分类；T-A/T-B 通过",
+    "remaining": "G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成"
+  },
+  "server:src/modules/market/market.controller.ts": {
+    "sha256": "2376540c17d9288c6efea07fe9075b4097e7fb55158c8f5e2d67f0bfbec38ae9",
+    "level": "通读审查",
+    "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+    "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+  },
+  "server:src/modules/market/market.repository.ts": {
+    "sha256": "a3db8605e232cdc4c9f3c2e26392d8ff7d7fb87a2280d6606b6d11276836d3c8",
+    "level": "通读审查",
+    "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+    "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+  },
+  "server:src/modules/market/market.routes.ts": {
+    "sha256": "d608fbc2762ad5741a7ebc25554e81c3cefa4468bd3363fc1ac5065f216df434",
+    "level": "通读审查",
+    "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+    "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+  },
+  "server:src/modules/market/market.service.ts": {
+    "sha256": "aadf637f988006feba84bdc5eacdbbf688a72ddfd2daeba5bf0a53feb62816f7",
+    "level": "通读审查",
+    "verification": "查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过",
+    "remaining": "G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖"
+  },
+  "server:src/modules/portfolio/portfolio.controller.ts": {
+    "sha256": "dfeb052c14854ffc6bc759a78680bc997200a30d477abe9d8586abee62fbbc37",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.module.ts": {
+    "sha256": "0cc9eda5c0f9e09002bc89981f5e89da435016c6170056306924a75da85068e9",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.repository.ts": {
+    "sha256": "a5c4878a5aaaf66efaa7105c90fecbab83739245a881b809e2b84f1369cf88f7",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.routes.ts": {
+    "sha256": "4c80cc71a413c81e3029fa83666611333cd7eb3a5bed0dcd6f6eb2d8f4b9302f",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.schema.ts": {
+    "sha256": "03fc767b390c3a0877dfa1581343ed0260e99506c6c65cb4a0310803e6749fb3",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.service.ts": {
+    "sha256": "ee0e1b84b438f8de926e2bc4b92e701754175fa78282ba3ffb47db4c411b75ff",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/portfolio/portfolio.types.ts": {
+    "sha256": "6068177f9cae577c5ba34c76145ed24530e66848fd3928b3ca6b45c5476f048f",
+    "level": "通读审查",
+    "verification": "持仓/成交输入、统一锁序、结果快照与事务边界逐文件通读；构建及 T-B 对应领域回归通过",
+    "remaining": "G06：真实并发验收；G01：聊天跨步骤幂等；并非每个类型文件有独立测试"
+  },
+  "server:src/modules/public-trades/public-trades.controller.ts": {
+    "sha256": "554a57daf9e9bd5fdaaf5667705af37f6e20ddfc74f3520e928609281551113e",
+    "level": "通读审查",
+    "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+    "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+  },
+  "server:src/modules/public-trades/public-trades.repository.ts": {
+    "sha256": "e2cd3ac4cab05481a9624b785ee2242d79c0c6d3477665c01e7aa491fb53e461",
+    "level": "通读审查",
+    "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+    "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+  },
+  "server:src/modules/public-trades/public-trades.schema.ts": {
+    "sha256": "4b0bfb96516279e2561991771b1aa9fd29ee8b52536a254f83e71dd474e784ff",
+    "level": "通读审查",
+    "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+    "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+  },
+  "server:src/modules/public-trades/public-trades.service.ts": {
+    "sha256": "c54dbb02bc91b49cd9dcf4a5c54d375e4201da0446978fdc813d7398ccea002f",
+    "level": "通读审查",
+    "verification": "本轮新增 F02；整批校验、仓储边界、事务锁序与失败回滚；T-C/T-D 通过",
+    "remaining": "G06：真实多连接验收；快照替换不是不可变逐笔历史"
+  },
+  "server:src/shared/errors.ts": {
+    "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4",
+    "level": "通读审查",
+    "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+    "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+  },
+  "server:src/shared/http.ts": {
+    "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191",
+    "level": "通读审查",
+    "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+    "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+  },
+  "server:src/shared/logger.ts": {
+    "sha256": "919ace9e746c031372807c05922f2bf9bc4ba166d3fa56adeaefd713c226dd3f",
+    "level": "通读审查",
+    "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+    "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+  },
+  "server:src/shared/transaction.ts": {
+    "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10",
+    "level": "通读审查",
+    "verification": "异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过",
+    "remaining": "G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试"
+  },
+  "server:src/config/auth.config.ts": {
+    "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc",
+    "level": "通读审查",
+    "verification": "TTL/密钥/Origin/受邀注册配置；T-A 通过，F07 弱值检查追加后复跑通过",
+    "remaining": "G07：不能证明密钥随机性，未实现轮换；其他配置尚分散"
+  },
+  "server:src/config/database.config.ts": {
+    "sha256": "febdc1294bf36ee74bb079de643b71b305aa046fe32fbf659801070721874beb",
+    "level": "通读审查",
+    "verification": "生产显式配置、池大小、连接/语句/锁超时；T-C 通过",
+    "remaining": "G06：真实 TLS/连接池容量未验收"
+  },
+  "server:src/app.ts": {
+    "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6",
+    "level": "通读审查",
+    "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+    "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+  },
+  "server:src/index.ts": {
+    "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac",
+    "level": "通读审查",
+    "verification": "启动先验配置、迁移、结构核验、监听与调度入口通读；构建通过",
+    "remaining": "G05：调度配置启动失败/进程生命周期与监听错误缺专门测试"
+  },
+  "server:src/db.ts": {
+    "sha256": "3ae07d73aa8f5c76c74a628e2bd255a0d2f3eda0bee8514559ae2ecd9462890d",
+    "level": "通读审查",
+    "verification": "dotenv 优先级、Pool 配置及 idle 错误日志通读；构建通过",
+    "remaining": "G06：未连接真实目标 PostgreSQL"
+  },
+  "server:src/voice-cleaner.ts": {
+    "sha256": "4dfbda0c7b42018419969ba82d32f317effbfb2d2edafb3cfc2a1dc3e51b3e34",
+    "level": "通读审查",
+    "verification": "F03：整句匹配，不猜价格/数量；T-D 正反例通过",
+    "remaining": "支持语法有意收紧；G01 幂等/聊天事务未完成"
+  },
+  "server:src/research-production.ts": {
+    "sha256": "023372b919fe88c40faae291349c62308699a776b9abd51ca62b52e73ac760ee",
+    "level": "通读审查",
+    "verification": "实时/批准查询与固定策略版本，参数化 SQL 和故障拒绝；生产门禁测试通过",
+    "remaining": "G12：模型批准、真实数据与质量不是这组测试能证明的"
+  },
+  "server:src/legacy-routes.ts": {
+    "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8",
+    "level": "局部审查",
+    "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+    "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+  },
+  "server:src/quant-routes.ts": {
+    "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66",
+    "level": "局部审查",
+    "verification": "复核三类导入迁出与生产批准组装；领域53项及门禁回归通过",
+    "remaining": "G02：最新预测读取、画像查询/刷新日期与时区及旧错误契约未闭环；仍保留局部审查口径"
+  },
+  "server:src/ownership.ts": {
+    "sha256": "29dc3b5dc9e759daa0d1596d4aa50450b2f231260f04bdda0c9581f528b60a8b",
+    "level": "通读审查",
+    "verification": "公开股东源、分页截至日、缓存及失败响应通读",
+    "remaining": "G12/G09：缓存无容量上限，失败响应包含外部异常文本；外部数据正确性/分页缺契约测试"
+  },
+  "server:src/scheduler/quant-scheduler.ts": {
+    "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5",
+    "level": "通读审查",
+    "verification": "进程启动/超时/close/error/cron 全文审查；F05 日志与输出上限；构建通过",
+    "remaining": "G05：重复计数、跳过状态、固定期限与跨实例防重未关闭；无进程故障测试"
+  },
+  "server:src/profiles/entity-profile-engine.ts": {
+    "sha256": "b97b04ce02a8eab5e9ba04d4a00d5882743af1e16f5b27e4699f582f00e70f13",
+    "level": "通读审查",
+    "verification": "事件/行情/新闻查询、PIT 过滤、评分与画像写入/查询通读；构建通过",
+    "remaining": "G04/G12：数值算法及统计可信度未逐条证明；结构仍混合，真实 PG 快照/并发与新闻关联修订需验证"
+  },
+  "server:src/seed.ts": {
+    "sha256": "ce424ec12095d55d9288fa9513027421ae06e644777321577462f106f431133b",
+    "level": "局部审查",
+    "verification": "检查结尾异常处理与退出码；F05 修复原样日志；构建通过",
+    "remaining": "G10：种子数据/SQL 全文未通读；未执行 seed"
+  },
+  "server:src/database/schema-verifier.ts": {
+    "sha256": "56ecf07f52dcca52748691678e378c7030dcf9a49b6633fe5c7c61a1d2a3879f",
+    "level": "局部审查",
+    "verification": "查询元数据入口、类型与差异模型、异常输出；F05 脱敏；隔离迁移测试调用核验器通过",
+    "remaining": "G10：未逐分支通读比较算法；G06 云库未核验"
+  },
+  "server:src/migrations/runner.ts": {
+    "sha256": "ffa56b5ea90dea6e44a59b91daf6f9648c9037ed9e764b48e3e4dad0496a51eb",
+    "level": "通读审查",
+    "verification": "up/down/status、事务/锁与生产 down 限制通读；构建通过",
+    "remaining": "status 会创建迁移表，不是严格只读；G06 真实库升级/权限验收未做"
+  },
+  "server:src/migrations/009_auth_sessions.ts": {
+    "sha256": "33afdc5fd4ef7a39d70f1c5bc6db16722fe627ca10a6dcef822b510f2af50974",
+    "level": "通读审查",
+    "verification": "三张表/FK/索引及拒绝自动 down 通读；T-M/T-B 结构通过",
+    "remaining": "G07：未加会话保留期/清理流程；G06 真实迁移未执行"
+  },
+  "server:src/database/entities/auth.entities.ts": {
+    "sha256": "1675d30015253739aa1f529e28c2f8a6cb384645f51ac49ce3563c55037a1ff0",
+    "level": "通读审查",
+    "verification": "认证表字段/FK/索引目录通读；T-M/T-B 与迁移一致",
+    "remaining": "实体目录不是运行时 ORM；G06 真实结构未核验"
+  },
+  "server:src/database/entities/types.ts": {
+    "sha256": "4416f07852821a6345b75af10ace6d8f1c5e0e4dae908a8a94bb309bc4f5d2f6",
+    "level": "通读审查",
+    "verification": "列/索引/FK/默认值描述类型与工厂通读；构建通过",
+    "remaining": "非运行时值校验器；完整比较算法见 schema-verifier 待审部分"
+  },
+  "server:src/database/entities/application.entities.ts": {
+    "sha256": "7d9f60583b956b22d9f3158809c17e3741cb1a5489c4604ce4448a81d0b02528",
+    "level": "局部审查",
+    "verification": "users 唯一性与主要行情表字段通读；T-M 目录检查通过",
+    "remaining": "G10：未通读所有表语义；不能把目录检查当历史数据正确性验证"
+  },
+  "server:src/migrations/001_initial_baseline.ts": {
+    "sha256": "788e2f2ad618533600f882c64fb149d4ccbafa3e352cd5fee683fa567f4b8086",
+    "level": "局部审查",
+    "verification": "users 唯一与逐笔表字段核对；T-M 迁移执行通过",
+    "remaining": "G10：未通读完整 baseline DDL/down 的每个语义；未执行线上 down"
+  },
+  "server:quant_engine/quant_api/__init__.py": {
+    "sha256": "45f18c74877a494c2c92673a13d158dcbd0f5bed71e37a6274e79861f18885d7",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/api/__init__.py": {
+    "sha256": "1b804d810293a5293fef47e8010e3441224ba24be90e98196b6459771dde1dad",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/api/dependencies.py": {
+    "sha256": "e62b741ae78353fa19b8ef910615e6c7c41bdfdfbb2e76dfe70c8841b189f687",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/api/router.py": {
+    "sha256": "e92fc9f0480585d9e7088563303759fb6686093872bdac2369426c4631aecc15",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/app.py": {
+    "sha256": "961d634a8eede508bc87e805330e24fd90927d49e6c2dda381224e952aac33e5",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/__init__.py": {
+    "sha256": "3f0341db5db49a197eb73164fc613e8409decccfc00ee9ae0c4079c3a35b6db8",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/model_registry/__init__.py": {
+    "sha256": "27747433a9cafd60c5f811244f34ba1b9095a83c83aa56046efceedec2f66991",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/model_registry/entities.py": {
+    "sha256": "e2333c829e3926e8514a6f2c3937348ee86aa7b1ca28b88115235ce44bbc6be6",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/model_registry/repository.py": {
+    "sha256": "6ccb70fed1d482392baf23cb55aafa6290ecc5c4e04998b842b15f50c7c246f1",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/model_registry/schemas.py": {
+    "sha256": "87e911512ae5816fa1ef8a4c4b9b61fcdb2d08fb891f6585e350b718aa8f8f6e",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/model_registry/service.py": {
+    "sha256": "0c76e63900359609be55f078634a3f15afbfeee2430ff7c3aa055a047f8d4376",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/research/__init__.py": {
+    "sha256": "51505808b132da05b78ceddacc78881fbdcf71de0c1010ab1ce3145c5e9a918c",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/research/repository.py": {
+    "sha256": "7b635e7678ad80733161b1e0520c6f5dd01aecfb691068add5f0f6582e7d5e07",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/research/schemas.py": {
+    "sha256": "dfbf47cda4ffd034d2f777589245dafce97cdece5ab771720f2f89933651e828",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/domains/research/service.py": {
+    "sha256": "c7b883a313b903619b4428ad3195b5101e01ef10ced8b407748a12723307d5ea",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/shared/__init__.py": {
+    "sha256": "35bfadc1f3ad26a8145cc2e794269f9558b8b84dd6740b89af0739765087fdf8",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/shared/cache.py": {
+    "sha256": "8e3d6029936a25581a0e89b2422a04192e280c88121f4e9aecf26368fdd0cc1b",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/shared/contracts.py": {
+    "sha256": "91f441bf01f8d5fa35f06349c6f745a9343caa0bd90a9e64a4c0872b34131aea",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/shared/database.py": {
+    "sha256": "0b4ebc3570264cf9b9c120e88a8504b5d433a5f9f78923c791b91a854d1716ce",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/quant_api/shared/settings.py": {
+    "sha256": "b45dc894b04ee597198eea1b7782d0164956732a3ff69c07eef11a75c0f69013",
+    "level": "通读审查",
+    "verification": "内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过",
+    "remaining": "G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM"
+  },
+  "server:quant_engine/zeroquant/config.py": {
+    "sha256": "19bde196ccd2e634dbbd0f65947ce25a11f3a6d0a87d87aa1ba5721cd9a803e2",
+    "level": "通读审查",
+    "verification": "环境变量来源、默认路径、配置解析全文通读",
+    "remaining": "G04/G08：数值范围/URL/TLS 配置未统一验证，异常路径仍需测试"
+  },
+  "server:quant_engine/zeroquant/sink.py": {
+    "sha256": "fa999c6bb7db72c6d181d95a150958a5eae8d506eab4f16b3e3009983c858ae6",
+    "level": "通读审查",
+    "verification": "HTTP 写入、outbox 与失败路径通读；F09 outbox 脱敏测试通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+    "remaining": "G02/G03：多步骤写入及重试幂等未闭环；返回业务 code 未统一核验"
+  },
+  "server:quant_engine/zeroquant/providers.py": {
+    "sha256": "81e97bc8f090180cf761baeef8388e421187193be2dac6a3b88e61e297be6a77",
+    "level": "局部审查",
+    "verification": "HttpTransport、供应商时间与报价路径审查；F08/F09；Python 63 项通过",
+    "remaining": "G12：分钟/日线解析尚未全部通读，HTTP 源与首次可见时间合同未核验"
+  },
+  "server:quant_engine/zeroquant/pipeline.py": {
+    "sha256": "1d9df5c8cc70f0dc3dba94b042166965c78d99852c75f10501b15b1ca80f3c43",
+    "level": "通读审查",
+    "verification": "特征→分布→硬门禁→版本化输出编排与输入摘要通读；Python 63 项通过",
+    "remaining": "G12：仍是研究流程，真实数据/预测效果未验证"
+  },
+  "server:quant_engine/research_pipeline.py": {
+    "sha256": "1dc5b9b0215001cb041619ed149fc8b3715b0b3dc095a5f63b636326f79596c3",
+    "level": "通读审查",
+    "verification": "CLI 分支、显式数据库、训练/影子/晋升检查及退出路径通读；Python 回归 63 项通过",
+    "remaining": "G04/G08：CLI 仍直接 SQL，ValueError 原文输出与任意本地输入路径需进一步审查；未逐命令真实运行"
+  },
+  "server:quant_engine/zeroquant/research/warehouse.py": {
+    "sha256": "f461ff0bcb018569ff357b5e16cfde9fa8703f291c0b7e422f10df3d970336f9",
+    "level": "局部审查",
+    "verification": "连接与 audit/ingest/records/live_records、登记/对账关键段落审查；Python 63 项通过",
+    "remaining": "G04/G06：没有完整仓储端口分层与真实 PG 验收；SELECT * 和无参全量 records；未完整逐行通读"
+  },
+  "server:test/auth-portfolio.test.ts": {
+    "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0",
+    "level": "通读审查",
+    "verification": "审查用例前置条件、PGlite 排队边界与 HTTP 断言；完整领域 27 项/配置追加5项通过",
+    "remaining": "不是多连接压力测试；部分标题（旧令牌）原覆盖不足，现由全局回归补真实 JWT 负例"
+  },
+  "server:test/architecture.test.ts": {
+    "sha256": "0f8260d2b0b48a71420ed8f2d98c048cefa8df0608ac1fc236474401eeb06582",
+    "level": "通读审查",
+    "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+    "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+  },
+  "server:test/global-review-regressions.test.ts": {
+    "sha256": "b2958221796bf39e31b4e6da79f38ba4e2baa97f0c891b6065164b07c3d5ca12",
+    "level": "通读审查",
+    "verification": "本轮新增 6 项测试全文审查并通过；F13 日线迁移/校验/回滚增量复核，领域44项通过",
+    "remaining": "真实库/浏览器/供应商验收见 G06/G12"
+  },
+  "server:quant_engine/tests/test_global_review.py": {
+    "sha256": "6979fee23efb6ce7d5276a010f4a4e07940415b29049a7a491a8f645a1cb997c",
+    "level": "通读审查",
+    "verification": "新增3项：坏时间、私密 URL/异常、outbox；Python 63 项通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过",
+    "remaining": "测试使用替身；不连接供应商/真实数据库"
+  },
+  "server:Dockerfile": {
+    "sha256": "08a14e02463f3137299b99a4fbb02b11056e9b6b1735d69b3410ba6a2bd5f592",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:.dockerignore": {
+    "sha256": "298b04fcc4cc6fad8699c35e3456b108e94c60bf87f38012723cad1c5ecbc6a4",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:.github/workflows/deploy.yml": {
+    "sha256": "08feac348cf57efd9dcf8d4469cd05bc3005877da2ad945bf20d7a3a37876368",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:.gitignore": {
+    "sha256": "47186b23fbf2346881d2c8a4c9ed342eb40b3ac1f5758c247640aabc37677b5d",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:package.json": {
+    "sha256": "9b4f5d176c11343fa6f67458b5b915947ee6b09999af764225e2ceff8dc6b848",
+    "level": "通读审查",
+    "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+    "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+  },
+  "server:tsconfig.json": {
+    "sha256": "0c01342bde94787ca17748901ea775ba3df7e65fb872c4c757a6af5f08f1f073",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:.env.example": {
+    "sha256": "723fbf1637e0c389b75893a5c3d7a8471198534631bced3f1f550515c4504675",
+    "level": "通读审查",
+    "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
+    "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+  },
+  "server:scripts/review_inventory.py": {
+    "sha256": "06686aec3a4e23d8744b61e1ac64018463f7bad770aba703f07d29e4dfe481ac",
+    "level": "通读审查",
+    "verification": "本轮编写并审查：只读扫描、不跟随符号链接、摘要失效检查与证据编号校验；2026-09-16 日期取证据表日期，生成与 --check 再验证",
+    "remaining": "只检测清单完整性，不是漏洞扫描器；人工审查元数据仍须可信维护"
+  },
+  "web:src/api/index.ts": {
+    "sha256": "1be31227509429eb4ef0804417449a7ac2ff6b88b1962bae5f2082b607cb73ae",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/api/session.ts": {
+    "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/router/index.ts": {
+    "sha256": "fe5bd1a1dcdeeb460fe494e1a3005a757afd5e5685372829495009432c76bfbc",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/views/Login.vue": {
+    "sha256": "b5a9f09609a9c83235bc0cfd9e700427ca1eea55a60319bf0688e44dae757ea4",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/utils/markdown.ts": {
+    "sha256": "5663b5bb7028d366dae1319008134ec9d5d630ff5499a1434957561aabc4ca63",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/main.ts": {
+    "sha256": "49c64632e5081a7f35cb685c977cd84812c3cbfd0dd57e683ab905c003f9b73f",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/App.vue": {
+    "sha256": "b51bc18573219cae0c44aaf3e846c543026ed2c0aa8f83738fbfe8daab3da018",
+    "level": "通读审查",
+    "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
+    "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+  },
+  "web:src/views/Dashboard.vue": {
+    "sha256": "2e77cf86827c14b72a7d95fa384492c34dd39a5b1b379361882acd16d836c726",
+    "level": "局部审查",
+    "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过",
+    "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+  },
+  "web:nginx.conf": {
+    "sha256": "dc596fd83459a939f0af7df90ab1c6f3dc54084e45aef3e8e617f8ebde5d5396",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:Dockerfile": {
+    "sha256": "f0674ddb317a98047a8bcf40c083a30ad38c39427ba36850729c219b27411e87",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:.dockerignore": {
+    "sha256": "b24e17497085720d82e6de501307348e2240a92fe18deaae39e3ee70ed59c992",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:vite.config.ts": {
+    "sha256": "21be8232821034281ec0bb9ce3e827f783af729ecd11f829ee224be9bad720c1",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:tsconfig.json": {
+    "sha256": "5254683df46e7fc9e277d3e4cce916f8382019e5a80fdeedd76b948c56ddfce3",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:package.json": {
+    "sha256": "eb0fb64d171f750327f8246b5d2365e202d3ab8be03947798e6b173eed272cb5",
+    "level": "通读审查",
+    "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
+    "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+  },
+  "web:test/frontend-security.test.mjs": {
+    "sha256": "1283744ad4e01cb477284c69d246583cbb87422a10b8bed154082011caba8e56",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过",
+    "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+  },
+  "server:src/database/entities/index.ts": {
+    "sha256": "fcaa995b79b190aa44898b26fbd41e31b1135b4b0b5b4ce6bc622dfe2ce330fe",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:src/migrations/catalog.ts": {
+    "sha256": "003926f8a793c2b2bea3ca25538f36eaf0476e35a322f70e43eb6b515c2406d0",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:src/migrations/010_chat_trade_requests.ts": {
+    "sha256": "17e449c355c308a532da37a4cfdb136321ec2641a13251b607935175ef0b4a54",
+    "level": "通读审查",
+    "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+    "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+  },
+  "server:src/database/entities/chat.entities.ts": {
+    "sha256": "8e5b5c53c41e7ab61bcfe52ec21236cfe4215d71a0daedda147cd4969c51ba35",
+    "level": "通读审查",
+    "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+    "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+  },
+  "server:test/chat-trade.test.ts": {
+    "sha256": "028baff542172541a6962e7d7c0bad92e7ccb6d19fbb1c67c9ae6393eccedc21",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:test/research-migrations-smoke.ts": {
+    "sha256": "631185ea794235aa35bbceb6c9225fd881fec3500c2857d7a8518c5adadfbf46",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:src/modules/chat/chat.types.ts": {
+    "sha256": "bff274e8dc8b6b92f133bbad0754c84d3989610645495a1ae51b9ca993e929f3",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-trade.repository.ts": {
+    "sha256": "f89ef8dd1e71d70fe0b3761450ef36d304ef65ee56d9ec56f38e2fa611917a9a",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-trade.controller.ts": {
+    "sha256": "50cdcf9a61ccb78969af8080ac16b198688685371d96d51bdb682d6e13898b85",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat.schema.ts": {
+    "sha256": "29dce479e7f15ada00a91b32e34df18941ec3add463c54152bdd1534a0777575",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-trade.routes.ts": {
+    "sha256": "2beb32f8757e543f298d61b021879dba870fc0a5f678dcc7bb605b2da4705f26",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-trade.module.ts": {
+    "sha256": "9ddc9c30aa074b65d3c69cef44225ec8997f44ae5f9019a1f244df7abd7b2858",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-trade.service.ts": {
+    "sha256": "648912e1d98fe34c43b97e6ae0d914345a528e53e85a8dd2a0476b84f8276f27",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "web:src/api/chat-requests.ts": {
+    "sha256": "da2bd6ce3fca4088477b7a39d4a4653754e8f8b3c0717773cb0ae563067d50c6",
+    "level": "通读审查",
+    "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
+    "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+  },
+  "server:src/modules/chat/chat-history.repository.ts": {
+    "sha256": "8293b6d6c91ed45abbb7a55541fdf48d411d83919099fe97e0d670dc5b15bb43",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/chat-history.service.ts": {
+    "sha256": "d86946c185455af1ea8b646bde51de49e283deac0acc75c6904c0be3fdbccaf1",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/research-chat.service.ts": {
+    "sha256": "0d105ad8db00b13ae0a4ed37a858d753568aca5824b7d43c402522cbec7c78e6",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/chat/research-reply.adapter.ts": {
+    "sha256": "b3ff437419db27eebd56cda908e7ba371d515ebe1eff0025fe7e59c658673062",
+    "level": "通读审查",
+    "verification": "2026-09-16 普通聊天事务/回执/分页审查；领域42项通过。研究适配器仅静态核对迁移前后行为，未调用真实模型",
+    "remaining": "G01/G06：适配器SQL/提示词进一步拆分，真实多连接/浏览器/容量未验收"
+  },
+  "server:src/modules/daily-bars/daily-bars.controller.ts": {
+    "sha256": "63c763c331127b7f343e91a41cb5b241155b4d1a960e9483dfae189b5b9a7f61",
+    "level": "通读审查",
+    "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+    "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+  },
+  "server:src/modules/daily-bars/daily-bars.service.ts": {
+    "sha256": "e71bc528388d7ef548e72a8250109ea0f676413c3ba0cce0e82ae5f1f805097f",
+    "level": "通读审查",
+    "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+    "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+  },
+  "server:src/modules/daily-bars/daily-bars.repository.ts": {
+    "sha256": "3c3fbd8237ced051300565d0d15f948687ac686830035a03129cdd7e5bcea4cc",
+    "level": "通读审查",
+    "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+    "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+  },
+  "server:src/modules/daily-bars/daily-bars.schema.ts": {
+    "sha256": "138ebf8ed3eca3c8b7e91ec52db3b83dc8bf330c973ff12b49e0ab9aeca3fdcf",
+    "level": "通读审查",
+    "verification": "F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过",
+    "remaining": "G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收"
+  },
+  "server:src/modules/profile-evidence/evidence.repository.ts": {
+    "sha256": "cdc9071ea8acf9334120e5a707fe093b47d570d8040a1292b0ab8fcdde2a8b5d",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/profile-evidence/evidence.schema.ts": {
+    "sha256": "9bb90ddba85ce6c4ae22ca58b28d867ecd744f8878a277289a2697526812515c",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/profile-evidence/evidence.service.ts": {
+    "sha256": "f14afd42e1f8e4619931e3f955e6a34f520c999331c7b4f35a3d9defa612b9dc",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/profile-evidence/evidence.controller.ts": {
+    "sha256": "d87e2ae5be37de9bb60e9ade0abef5222312e413eca3f1bc8068b9c55deb9a93",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction.repository.ts": {
+    "sha256": "00a5e41a8754c88a601aa71600202317760bd9a9a3d57313ff5630ca154d8f2e",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction.schema.ts": {
+    "sha256": "d3b8f190eec443918ab350b3d63f9c05af22653ed4e8dfb694f0653cc0777617",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction.service.ts": {
+    "sha256": "64d21ab08d235e863d003658decb727997e362d67f99f03554566279a673c632",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction.controller.ts": {
+    "sha256": "38f9c44a0ac1e14a7fb4e812104213b1875705315b51b989b2ff89bedb26735c",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:test/ingestion.test.ts": {
+    "sha256": "1bb2bf6f3749651df99fdbe2341fbaac3753a9c574c39c3aa15e4b802df423cf",
+    "level": "通读审查",
+    "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
+    "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+  },
+  "server:src/migrations/011_prediction_receipts.ts": {
+    "sha256": "a0ae6bdccf3c8c1a694200c918d3059511aecb22ff56a2f67cfcbe73787386bf",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:src/database/entities/prediction.entities.ts": {
+    "sha256": "cfcefa6537cc5741742aa43b30efffa593014dc67d0fa732412cb55b5c615430",
+    "level": "通读审查",
+    "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
+    "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+  },
+  "server:src/modules/predictions/prediction-reader.repository.ts": {
+    "sha256": "0e9111ab0c8a6e97cf25da9c7d6be67752b3efad82c1ac713c476475ac939edb",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction-query.schema.ts": {
+    "sha256": "785c54b54bf7628a30f7dc8340a1c7f30b9562eaf552f013e21e2d5b09dc4619",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction-query.controller.ts": {
+    "sha256": "902eaa9076e92c631c9576400a54892299989991f4025f8b528975062483f512",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction-receipt.ts": {
+    "sha256": "c968d779548f69575a92e0018665380c31f4cdc0c1463030a032d87094f3a497",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/predictions/prediction-query.service.ts": {
+    "sha256": "205af657eb1ce91cd7432f05ddc904e5684c844aa46b3e730178ebb0fb5384a4",
+    "level": "通读审查",
+    "verification": "F14/F15 输入契约/服务/SQL事务/HTTP边界核对；领域53项、导入定向9项与生产门禁通过",
+    "remaining": "G02/G06：预测回执重放/迟到策略/嵌套快照/投影分层及真实并发未完成；详见增量证据"
+  },
+  "server:src/modules/market-sync/market-sync.controller.ts": {
+    "sha256": "52935683902add301dc15aca66adf12ff0acbb60bf57e66c3415a7b3454c18cd",
+    "level": "通读审查",
+    "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+    "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+  },
+  "server:src/modules/market-sync/market-sync.repository.ts": {
+    "sha256": "8cbbef2f88b21824b0b26e93a854d7b4ea6d3ba367d60dff230b4c3803ffafa3",
+    "level": "通读审查",
+    "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+    "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+  },
+  "server:src/modules/market-sync/market-sync.schema.ts": {
+    "sha256": "076587ec8db9a571445f80beeb97a1d075663e9feb061de3613f5edf0ab92f2d",
+    "level": "通读审查",
+    "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+    "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+  },
+  "server:src/modules/market-sync/market-sync.service.ts": {
+    "sha256": "5da996b8459f5a4c2e1000869f45e884fccae8823901eb84f076ef64978ea8f1",
+    "level": "通读审查",
+    "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+    "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+  },
+  "server:test/market-sync.test.ts": {
+    "sha256": "2ea158eba2cffa5cdf38d1d3a1c01dabe0c30fa189a532f794417df322415e99",
+    "level": "通读审查",
+    "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
+    "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+  }
+}

@@ -1,5 +1,7 @@
 # ZeroQuant Server
 
+Python 内部服务按 FastAPI → Service → Repository → SQLAlchemy 2.x 分层，已落地研究状态和模型登记两个只读领域模块，见 [Python 领域架构与启动说明](docs/python-domain-architecture.md)。这不是 Node.js 全量替换；旧量化脚本、研究 Warehouse 与任务调度仍需分阶段迁移。
+
 机构与活跃席位画像的计算口径、证据门槛与上线限制见 [行为画像算法说明](docs/entity-behavior-profiling.md)。
 
 全球新闻源、6 只固定股票的关联词典、时效与降级规则见 [全球实时新闻接入说明](docs/global-news-pipeline.md)。
@@ -43,7 +45,8 @@ ZeroQuant 是一个面向 A 股盘前与盘中研究的概率预测系统。当�
 - `quant_engine/realtime_monitor_1m.py`：连续竞价期间的一分钟增量预测。
 - `quant_engine/nightly_review.py`：收盘评估，只生成证据，不因单日结果修改模型。
 - `src/quant-routes.ts`：参数化持久化接口和最新概率查询。
-- `src/quant-schema.ts`：概率预测表结构。
+- `src/database/entities/`：完整数据库实体契约；`src/migrations/` 是唯一数据库迁移入口。
+- `quant_engine/quant_api/`：按业务领域分层的 Python 内部只读 API，不自动启动量化任务。
 
 ## 本地验证
 
@@ -101,3 +104,9 @@ npm run test:e2e
 7. 独立风险门禁、A 股 T+1 可卖库存和仓位约束验证通过。
 
 Markdown 知识库继续保留为人类可读的复盘档案，但不会直接成为模型参数。复盘结论先进入候选证据池，经验证后再转换为版本化特征、模型或硬规则。
+
+## Node 业务分层与认证安全改造（本地待发布）
+
+认证、持仓与行情读取已按领域拆分；新增 009 认证会话迁移。请先阅读 [全局审查、兼容变化与部署配置](docs/global-architecture-review-2026-09-15.md)，不能单独更新后端：旧 JWT 将失效，前端必须支持 Cookie 刷新。
+
+运行 `npm run test:domains` 与 `npm run test:migrations` 验证隔离契约；真实多连接 PostgreSQL 与页面端到端验收仍需完成。

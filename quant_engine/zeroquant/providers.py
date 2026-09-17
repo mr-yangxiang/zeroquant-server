@@ -33,7 +33,8 @@ def _parse_tencent_timestamp(value: str) -> datetime:
             return datetime.strptime(value, fmt).replace(tzinfo=SHANGHAI)
         except ValueError:
             continue
-    return datetime.now(SHANGHAI)
+    # 缺失或损坏的供应商时间不能伪装为“刚刚观察到”的实时行情。
+    raise MarketDataError('quote timestamp is missing or invalid')
 
 
 class HttpTransport:
@@ -67,15 +68,15 @@ class HttpTransport:
                 last_error = exc
                 if attempt < 2:
                     time.sleep(0.2 * (attempt + 1))
-        raise MarketDataError(f"market data request failed: {url}: {last_error}") from last_error
+        raise MarketDataError(f"market data request failed ({type(last_error).__name__})") from None
 
     def json(self, url: str, encoding: str = "utf-8") -> dict:
         try:
             value = json.loads(self.text(url, encoding=encoding))
         except json.JSONDecodeError as exc:
-            raise MarketDataError(f"invalid JSON response: {url}") from exc
+            raise MarketDataError("invalid JSON response") from None
         if not isinstance(value, dict):
-            raise MarketDataError(f"unexpected JSON response: {url}")
+            raise MarketDataError("unexpected JSON response")
         return value
 
 

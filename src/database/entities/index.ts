@@ -1,3 +1,6 @@
+import { predictionEntities } from './prediction.entities.js'
+import { chatEntities } from './chat.entities.js'
+import { authEntities } from './auth.entities.js'
 import { applicationEntities } from './application.entities.js'
 import { marketDataEntities } from './market-data.entities.js'
 import { profileEntities } from './profile.entities.js'
@@ -10,6 +13,9 @@ export const DATABASE_SCHEMA_NAME = 'public'
 export const DATABASE_ENTITIES: TableEntity[] = [
   ...systemEntities,
   ...applicationEntities,
+  ...authEntities,
+  ...chatEntities,
+  ...predictionEntities,
   ...marketDataEntities,
   ...researchEntities,
   ...profileEntities,

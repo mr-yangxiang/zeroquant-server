@@ -15,7 +15,9 @@
     "schema:catalog-check": "node --import tsx src/database/schema-catalog-check.ts",
     "schema:verify": "node --import tsx src/database/schema-verifier.ts",
     "schema:verify:json": "node --import tsx src/database/schema-verifier.ts --json",
-    "test:e2e": "node --import tsx test/e2e_baseline.test.ts"
+    "test:e2e": "node --import tsx test/e2e_baseline.test.ts",
+    "test:domains": "node --import tsx --test test/auth-portfolio.test.ts test/architecture.test.ts test/global-review-regressions.test.ts test/chat-trade.test.ts test/ingestion.test.ts test/market-sync.test.ts",
+    "test:migrations": "PGLITE_MODULE_PATH=./node_modules/@electric-sql/pglite/dist/index.js node --import tsx test/research-migrations-smoke.ts && PGLITE_MODULE_PATH=./node_modules/@electric-sql/pglite/dist/index.js node --import tsx test/schema-compatibility.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -28,6 +30,7 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",

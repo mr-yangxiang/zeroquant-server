@@ -29,7 +29,7 @@ function assertSafeEnvironment() {
 async function request(path: string, options: RequestInit = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: { 'Content-Type': 'application/json', 'X-ZeroQuant-Client': 'web', ...(options.headers || {}) },
   })
   const data = await response.json().catch(() => null)
   return { status: response.status, data }
@@ -97,16 +97,16 @@ async function runAllTests() {
     assert.ok(stocks.data.data.some((stock: any) => stock.code === STOCK_CODE), 'API 服务没有连接当前专用测试库')
 
     console.log('[2/21] 注册两个临时用户')
-    const regA = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ phone: phoneA, username: 'E2E用户A', password: 'Password123!' }) })
-    const regB = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ phone: phoneB, username: 'E2E用户B', password: 'Password123!' }) })
-    assert.equal(regA.status, 200)
-    assert.equal(regB.status, 200)
+    const regA = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ phone: phoneA, username: 'E2E用户A', password: 'Password123!long-passphrase' }) })
+    const regB = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ phone: phoneB, username: 'E2E用户B', password: 'Password123!long-passphrase' }) })
+    assert.equal(regA.status, 201)
+    assert.equal(regB.status, 201)
     tokenA = regA.data.data.token
     tokenB = regB.data.data.token
     userAId = String(regA.data.data.user.id)
 
     console.log('[3/21] 登录和未授权拦截')
-    assert.equal((await request('/api/v1/auth/login', { method: 'POST', body: JSON.stringify({ phone: phoneA, password: 'Password123!' }) })).status, 200)
+    assert.equal((await request('/api/v1/auth/login', { method: 'POST', body: JSON.stringify({ phone: phoneA, password: 'Password123!long-passphrase' }) })).status, 200)
     assert.equal((await request('/api/v1/user/position', { method: 'POST', body: '{}' })).status, 401)
 
     console.log('[4/21] 多租户聊天隔离')

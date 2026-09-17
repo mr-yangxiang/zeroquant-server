@@ -1,0 +1,2352 @@
+{
+  "date": "2026-09-17",
+  "rows": [
+    {
+      "id": 1,
+      "requirement": "Controller / Route 层职责过重（Fat Controller）",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/chat/research-chat.service.ts",
+          "anchor": "export class ResearchChatService",
+          "line": 6,
+          "sha256": "0d105ad8db00b13ae0a4ed37a858d753568aca5824b7d43c402522cbec7c78e6"
+        }
+      ],
+      "verification": "结构通读；T-C 分层护栏通过",
+      "remaining_gap": "研究回复适配器仍混合SQL与提示词；画像查询仍需迁移；最新预测已迁出，见 G01、G02；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 2,
+      "requirement": "业务逻辑直接写在路由层，难以复用",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/chat/research-chat.service.ts",
+          "anchor": "export class ResearchChatService",
+          "line": 6,
+          "sha256": "0d105ad8db00b13ae0a4ed37a858d753568aca5824b7d43c402522cbec7c78e6"
+        }
+      ],
+      "verification": "结构通读；T-C 通过",
+      "remaining_gap": "其他领域的范围见 G01、G02、G04；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 3,
+      "requirement": "Route 直接操作数据库，HTTP 与数据层耦合",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/chat/research-chat.service.ts",
+          "anchor": "export class ResearchChatService",
+          "line": 6,
+          "sha256": "0d105ad8db00b13ae0a4ed37a858d753568aca5824b7d43c402522cbec7c78e6"
+        }
+      ],
+      "verification": "结构通读；T-C 通过",
+      "remaining_gap": "限流基础设施在组合根注入；旧路由仍待迁出"
+    },
+    {
+      "id": 4,
+      "requirement": "SQL 与业务代码混杂",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/transaction.ts",
+          "line": 8,
+          "anchor": "export class PgUnitOfWork",
+          "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10"
+        }
+      ],
+      "verification": "结构通读；T-B 仓储/事务测试通过",
+      "remaining_gap": "G01、G02、G04 仍混合业务与 SQL；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 5,
+      "requirement": "使用 SELECT * 查询不必要字段",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "显式 userFields 与密码查询分离；T-B DTO 检查通过",
+      "remaining_gap": "全局扫描命中迁移 VALUES 的 SELECT * 属内部固定元组，不应机械删除"
+    },
+    {
+      "id": 6,
+      "requirement": "先查再插导致并发注册竞态",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 16,
+          "anchor": "async createUser",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/transaction.ts",
+          "line": 8,
+          "anchor": "export class PgUnitOfWork",
+          "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10"
+        }
+      ],
+      "verification": "INSERT ON CONFLICT；T-B 单连接排队竞争检查通过",
+      "remaining_gap": "G06：未验证真实 PostgreSQL 多连接竞争、锁等待与超时"
+    },
+    {
+      "id": 7,
+      "requirement": "phone 必须具有 UNIQUE 约束",
+      "status": "原有能力已核实",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/database/entities/application.entities.ts",
+          "line": 11,
+          "anchor": "name: 'users'",
+          "sha256": "7d9f60583b956b22d9f3158809c17e3741cb1a5489c4604ce4448a81d0b02528"
+        },
+        {
+          "repository": "server",
+          "path": "src/migrations/001_initial_baseline.ts",
+          "line": 9,
+          "anchor": "CREATE TABLE IF NOT EXISTS users",
+          "sha256": "788e2f2ad618533600f882c64fb149d4ccbafa3e352cd5fee683fa567f4b8086"
+        },
+        {
+          "repository": "server",
+          "path": "src/database/schema-verifier.ts",
+          "line": 188,
+          "anchor": "export async function verifySchema",
+          "sha256": "56ecf07f52dcca52748691678e378c7030dcf9a49b6633fe5c7c61a1d2a3879f"
+        }
+      ],
+      "verification": "原迁移已定义；T-M 隔离数据库唯一性/结构检查通过",
+      "remaining_gap": "未在本轮连接云库；不声称新增加了 phone 唯一约束"
+    },
+    {
+      "id": 8,
+      "requirement": "未处理 PostgreSQL 23505 唯一冲突",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 16,
+          "anchor": "async createUser",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        }
+      ],
+      "verification": "T-A 已知 phone 23505 映射及无关约束透传通过",
+      "remaining_gap": "ON CONFLICT(phone) 负责手机号所有匹配唯一索引；未知冲突仍按内部错误处理"
+    },
+    {
+      "id": 9,
+      "requirement": "参数校验只判断非空",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A 对 null、数组、对象、超限、空字符检查通过",
+      "remaining_gap": "Service 输入约定为已校验 DTO；新调用入口也须执行 Schema"
+    },
+    {
+      "id": 10,
+      "requirement": "未校验手机号格式",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A 账号规范化与非法对象拒绝通过；通读大陆手机号正则",
+      "remaining_gap": "仅支持中国大陆；不等于手机号所有权验证，见 G07"
+    },
+    {
+      "id": 11,
+      "requirement": "未校验 username 长度、格式、空白",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A 非法空白、规范化通过；正则限制 2～32 字符",
+      "remaining_gap": "合法 Unicode 字母/数字可用；不提供真实姓名认证"
+    },
+    {
+      "id": 12,
+      "requirement": "未校验密码长度与安全要求",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A 短口令、72 字节、空字符拒绝通过",
+      "remaining_gap": "G07：无泄露口令库、密码找回、MFA；长度策略不保证密码未泄露"
+    },
+    {
+      "id": 13,
+      "requirement": "缺少统一 trim / normalize",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A +86 规范化与密码不 trim 通过",
+      "remaining_gap": "既有账号数据未批量规范化，需单独迁移冲突评估"
+    },
+    {
+      "id": 14,
+      "requirement": "bcrypt cost 硬编码为 10",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "T-A 配置校验及真实 bcrypt 测试通过；成本由配置注入",
+      "remaining_gap": "默认 12，范围 10～14；生产压测见 G06"
+    },
+    {
+      "id": 15,
+      "requirement": "密码处理直接写在 Controller",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        }
+      ],
+      "verification": "T-C 禁止 Controller 引入 bcrypt；T-A 密码比较通过",
+      "remaining_gap": "算法实现仅在 PasswordService"
+    },
+    {
+      "id": 16,
+      "requirement": "JWT 生成直接写在 Controller",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        }
+      ],
+      "verification": "T-C 禁止 Controller 引入 JWT；T-B 签发通过",
+      "remaining_gap": "TokenService 为基础设施适配器"
+    },
+    {
+      "id": 17,
+      "requirement": "Controller 直接依赖 JWT_SECRET",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "通读 Controller 只读取 Cookie 配置，不读取 secret；T-C 通过",
+      "remaining_gap": "Controller 当前接收完整 AuthConfig 类型；可进一步缩窄为 CookieConfig"
+    },
+    {
+      "id": 18,
+      "requirement": "JWT expiresIn 30d 硬编码",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        }
+      ],
+      "verification": "T-B 检查 exp-iat 为 900；T-A 拒绝非法 TTL",
+      "remaining_gap": "支持配置 60～3600 秒；刷新上限单独管理"
+    },
+    {
+      "id": 19,
+      "requirement": "JWT Payload 包含 phone、username",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 18,
+          "anchor": "private response",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        }
+      ],
+      "verification": "T-B 解码 JWT 确认无手机号/昵称；T-D 错用途验证通过",
+      "remaining_gap": "载荷仍有用户 ID/会话 ID，不把 JWT 当加密容器"
+    },
+    {
+      "id": 20,
+      "requirement": "Access Token 30 天过长",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        }
+      ],
+      "verification": "T-B 900 秒声明检查；T-D 过期 JWT 拒绝通过",
+      "remaining_gap": "前后端须同步发布，旧令牌要求重新登录"
+    },
+    {
+      "id": 21,
+      "requirement": "没有 Access + Refresh 机制",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 40,
+          "anchor": "async refresh",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 10,
+          "anchor": "private cookieOptions",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "web",
+          "path": "src/api/session.ts",
+          "line": 17,
+          "anchor": "export function refreshSession",
+          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+        }
+      ],
+      "verification": "T-B HTTP Cookie、刷新轮换通过",
+      "remaining_gap": "真实浏览器 Cookie 与反代路径联调见 G06"
+    },
+    {
+      "id": 22,
+      "requirement": "缺少刷新、撤销、退出、多设备管理",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 40,
+          "anchor": "async refresh",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 72,
+          "anchor": "async logout",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 76,
+          "anchor": "async sessions",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "web",
+          "path": "src/api/session.ts",
+          "line": 17,
+          "anchor": "export function refreshSession",
+          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+        }
+      ],
+      "verification": "T-B 刷新重放、独立会话、跨用户撤销拒绝通过",
+      "remaining_gap": "G07：多设备管理 UI、会话清理与告警未完成；G06 浏览器验收"
+    },
+    {
+      "id": 23,
+      "requirement": "注册自动登录与 HTTP 耦合",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 10,
+          "anchor": "private async issue",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 16,
+          "anchor": "register =",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        }
+      ],
+      "verification": "T-B Service 注册自动建立会话并返回 DTO 通过",
+      "remaining_gap": "HTTP 仅设置 Cookie 与成功状态"
+    },
+    {
+      "id": 24,
+      "requirement": "没有 Service，业务无法独立复用",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        }
+      ],
+      "verification": "T-B 直接调用 Service，无 Express req/res",
+      "remaining_gap": "现有认证测试主要使用 PGlite；进一步纯端口替身测试见第 52 项"
+    },
+    {
+      "id": 25,
+      "requirement": "没有 Repository / DAO",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "T-B 实际仓储契约通过；T-A 异常替身通过",
+      "remaining_gap": "其他领域仓储拆分见 G01、G02、G04；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 26,
+      "requirement": "没有 DTO / Schema",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        }
+      ],
+      "verification": "T-A 运行时校验通过；TypeScript 构建通过",
+      "remaining_gap": "编译期 DTO 不代替入口运行时校验"
+    },
+    {
+      "id": 27,
+      "requirement": "req.body 缺少类型约束",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "unknown 进入 Schema，返回类型化 DTO；T-A 通过",
+      "remaining_gap": "旧量化 req.body 断言未全面移除，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 28,
+      "requirement": "catch(err:any) 失去类型安全",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "认证 catch 使用 unknown 或默认 unknown；构建通过",
+      "remaining_gap": "其他 any 与 Python Any 见逐文件扫描；扫描不自动证明类型错误"
+    },
+    {
+      "id": 29,
+      "requirement": "应使用 unknown 和类型判断",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "T-A 特定约束分类；T-D 脱敏日志通过",
+      "remaining_gap": "未知错误不读取任意 message/detail"
+    },
+    {
+      "id": 30,
+      "requirement": "所有异常统一返回 500",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "T-B 400/401/403/429 路径；错误目录通读",
+      "remaining_gap": "尚未逐状态建立 HTTP 表驱动测试；旧量化契约见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 31,
+      "requirement": "手机号重复可能误返回 500",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 16,
+          "anchor": "async createUser",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        }
+      ],
+      "verification": "T-A REGISTRATION_CONFLICT；T-B 同号注册只成功一次",
+      "remaining_gap": "本轮没有额外执行真实云库并发，见 G06"
+    },
+    {
+      "id": 32,
+      "requirement": "缺少统一业务异常体系",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        }
+      ],
+      "verification": "AppError 固定 key/code；T-A/T-B 通过",
+      "remaining_gap": "旧量化仍手写 code=HTTP 状态，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 33,
+      "requirement": "没有全局 Error Handler",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/app.ts",
+          "line": 24,
+          "anchor": "export function createApp",
+          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "T-B 非法 JSON 和请求链路通过",
+      "remaining_gap": "旧路由自身响应不自动变为新契约，见 G01/G02；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 34,
+      "requirement": "每个接口重复 try/catch",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 13,
+          "anchor": "export function asyncHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/legacy-routes.ts",
+          "line": 13,
+          "anchor": "export function registerLegacyRoutes",
+          "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8"
+        },
+        {
+          "repository": "server",
+          "path": "src/quant-routes.ts",
+          "line": 46,
+          "anchor": "export function createQuantRouter",
+          "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66"
+        }
+      ],
+      "verification": "认证使用 asyncHandler；T-C 通过",
+      "remaining_gap": "G01/G02：旧路由仍重复捕获、回滚和响应；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 35,
+      "requirement": "HTTP 状态与业务 code 不分离",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "T-B HTTP 400 对应业务 10001，通过",
+      "remaining_gap": "旧量化仍采用 400/500 同值，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 36,
+      "requirement": "注册成功应考虑 201 Created",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 16,
+          "anchor": "register =",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        }
+      ],
+      "verification": "T-B 真实 HTTP 注册 201，通过",
+      "remaining_gap": "保留现有成功 data.token/data.user 兼容字段"
+    },
+    {
+      "id": 37,
+      "requirement": "错误文案硬编码在 Controller",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "Controller 不构建业务错误文案；目录/Schema 通读",
+      "remaining_gap": "校验详细文案仍在 Schema，尚未做完整消息键目录"
+    },
+    {
+      "id": 38,
+      "requirement": "不利于国际化、多语言与统一提示",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "业务异常 key 已统一；结构通读",
+      "remaining_gap": "G08：未实现语言资源、语言协商，Schema 文案仍为中文"
+    },
+    {
+      "id": 39,
+      "requirement": "console.error 日志过于简单",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/logger.ts",
+          "line": 3,
+          "anchor": "export function logError",
+          "sha256": "919ace9e746c031372807c05922f2bf9bc4ba166d3fa56adeaefd713c226dd3f"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        },
+        {
+          "repository": "server",
+          "path": "src/scheduler/quant-scheduler.ts",
+          "line": 95,
+          "anchor": "function executeQuantScript",
+          "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5"
+        }
+      ],
+      "verification": "T-D 结构化日志脱敏通过；本轮修复 Node 旧异常输出",
+      "remaining_gap": "G08：Python、历史脚本未全面统一；无集中日志平台验收"
+    },
+    {
+      "id": 40,
+      "requirement": "没有结构化日志",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/logger.ts",
+          "line": 3,
+          "anchor": "export function logError",
+          "sha256": "919ace9e746c031372807c05922f2bf9bc4ba166d3fa56adeaefd713c226dd3f"
+        },
+        {
+          "repository": "server",
+          "path": "src/index.ts",
+          "line": 8,
+          "anchor": "async function startServer",
+          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+        }
+      ],
+      "verification": "JSON 分类日志通读；T-D 通过",
+      "remaining_gap": "G08：调度普通状态仍文本；Python 日志契约待统一"
+    },
+    {
+      "id": 41,
+      "requirement": "没有 requestId / traceId",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 6,
+          "anchor": "export const requestContext",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        }
+      ],
+      "verification": "T-B 响应 requestId 通过；T-D 日志 requestId 通过",
+      "remaining_gap": "G08：未贯穿 SQL、Python、LLM 和调度；无跨服务 trace"
+    },
+    {
+      "id": 42,
+      "requirement": "原样打印 err 暴露 SQL/堆栈",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/logger.ts",
+          "line": 3,
+          "anchor": "export function logError",
+          "sha256": "919ace9e746c031372807c05922f2bf9bc4ba166d3fa56adeaefd713c226dd3f"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 16,
+          "anchor": "export const errorHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        },
+        {
+          "repository": "server",
+          "path": "src/legacy-routes.ts",
+          "line": 13,
+          "anchor": "export function registerLegacyRoutes",
+          "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8"
+        },
+        {
+          "repository": "server",
+          "path": "src/scheduler/quant-scheduler.ts",
+          "line": 95,
+          "anchor": "function executeQuantScript",
+          "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5"
+        }
+      ],
+      "verification": "T-D 私密异常不输出通过；Node 已修复多处原样输出",
+      "remaining_gap": "G08：Python CLI/历史脚本残留需逐项脱敏；provider/outbox 本轮已修复"
+    },
+    {
+      "id": 43,
+      "requirement": "没有事务意识",
+      "status": "原有能力已核实",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/transaction.ts",
+          "line": 8,
+          "anchor": "export class PgUnitOfWork",
+          "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 10,
+          "anchor": "private async issue",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        }
+      ],
+      "verification": "原持仓已有事务；认证新增工作单元；T-B 回滚通过",
+      "remaining_gap": "不能把原代码已有事务说成本轮全部新建"
+    },
+    {
+      "id": 44,
+      "requirement": "扩展注册可能出现部分成功",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 10,
+          "anchor": "private async issue",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/transaction.ts",
+          "line": 8,
+          "anchor": "export class PgUnitOfWork",
+          "sha256": "723ad8d9480df45365840c501eff670ab7297ff108c87c3a735f0571d4a97f10"
+        }
+      ],
+      "verification": "T-B 签发失败时用户与会话一起回滚，通过",
+      "remaining_gap": "未来新增角色/资料写入必须纳入同一工作单元；外部副作用需独立设计"
+    },
+    {
+      "id": 45,
+      "requirement": "username 是否可重复不明确",
+      "status": "已明确设计决策",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/database/entities/application.entities.ts",
+          "line": 11,
+          "anchor": "name: 'users'",
+          "sha256": "7d9f60583b956b22d9f3158809c17e3741cb1a5489c4604ce4448a81d0b02528"
+        }
+      ],
+      "verification": "昵称允许重复；phone 为登录标识，代码/文档一致",
+      "remaining_gap": "这是当前设计，不代表真实姓名唯一性"
+    },
+    {
+      "id": 46,
+      "requirement": "若 username 唯一则需 DB 约束",
+      "status": "已明确设计决策",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/database/entities/application.entities.ts",
+          "line": 11,
+          "anchor": "name: 'users'",
+          "sha256": "7d9f60583b956b22d9f3158809c17e3741cb1a5489c4604ce4448a81d0b02528"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "当前允许重复，所以不添加 username UNIQUE",
+      "remaining_gap": "若产品改为唯一登录名，须新增审核后的迁移及冲突处理"
+    },
+    {
+      "id": 47,
+      "requirement": "未处理 INSERT RETURNING rows[0] 为空",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 16,
+          "anchor": "async createUser",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "通读空返回转 REGISTRATION_CONFLICT；T-B 同号冲突通过",
+      "remaining_gap": "其他旧插入（如新闻）仍直接 rows[0]，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 48,
+      "requirement": "API 返回直接依赖 SQL RETURNING",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 18,
+          "anchor": "private response",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "T-B DTO 不含密码；显式字段映射通读",
+      "remaining_gap": "不把数据库新增字段自动透传给客户端"
+    },
+    {
+      "id": 49,
+      "requirement": "数据库字段与 API Response 耦合",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 18,
+          "anchor": "private response",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "映射/端口通读；T-B DTO 通过",
+      "remaining_gap": "旧量化展开数据库行的契约仍需治理，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 50,
+      "requirement": "缺少 Entity → DTO → Response 映射",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 18,
+          "anchor": "private response",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        }
+      ],
+      "verification": "仓储实体→Service DTO→Controller Cookie/JSON 通读",
+      "remaining_gap": "不需要为每一步机械创建新类；认证响应映射已明确"
+    },
+    {
+      "id": 51,
+      "requirement": "改数据库字段直接影响 API",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 18,
+          "anchor": "private response",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "显式响应字段；构建和 T-B 通过",
+      "remaining_gap": "字段语义变化仍须契约测试，不能保证任意迁移无影响"
+    },
+    {
+      "id": 52,
+      "requirement": "缺 Repository，单测必须连真实 DB",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "test/auth-portfolio.test.ts",
+          "line": 32,
+          "anchor": "test('认证 Schema",
+          "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0"
+        }
+      ],
+      "verification": "T-A 注入 query 替身验证错误；其余认证使用隔离 PGlite",
+      "remaining_gap": "需补完整 AuthRepository 内存替身业务测试；目前无需云库但并非全部纯单测"
+    },
+    {
+      "id": 53,
+      "requirement": "缺 Service，业务测试需模拟 Express",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "test/auth-portfolio.test.ts",
+          "line": 66,
+          "anchor": "test('认证与持仓",
+          "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0"
+        }
+      ],
+      "verification": "T-B 直接调用 Service 验证注册/撤销，无 req/res",
+      "remaining_gap": "HTTP 专属行为另用真实回环 HTTP 测试"
+    },
+    {
+      "id": 54,
+      "requirement": "业务逻辑无法脱离 Express 测试",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "test/auth-portfolio.test.ts",
+          "line": 66,
+          "anchor": "test('认证与持仓",
+          "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0"
+        }
+      ],
+      "verification": "T-B Service 场景在 Express 外执行，通过",
+      "remaining_gap": "真实持仓并发仍需 G06"
+    },
+    {
+      "id": 55,
+      "requirement": "HTTP 层依赖 pg、bcrypt、JWT 等",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "T-C 禁止 Controller/Route 引入算法和数据库驱动，通过",
+      "remaining_gap": "组合根负责具体依赖；路由接收限流适配器"
+    },
+    {
+      "id": 56,
+      "requirement": "依赖复杂，不符合分层原则",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/legacy-routes.ts",
+          "line": 13,
+          "anchor": "export function registerLegacyRoutes",
+          "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8"
+        },
+        {
+          "repository": "server",
+          "path": "src/quant-routes.ts",
+          "line": 46,
+          "anchor": "export function createQuantRouter",
+          "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66"
+        }
+      ],
+      "verification": "认证/持仓/行情/公共逐笔有边界护栏",
+      "remaining_gap": "G01/G02/G04：未完成全站分层；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 57,
+      "requirement": "bcrypt 换 Argon2 要改接口",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "PasswordPort 与实现隔离，结构通读",
+      "remaining_gap": "未实际迁移算法；双哈希兼容和 rehash 需另做，不承诺零成本切换"
+    },
+    {
+      "id": 58,
+      "requirement": "JWT 换 Session 要改接口",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "web",
+          "path": "src/api/session.ts",
+          "line": 17,
+          "anchor": "export function refreshSession",
+          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+        }
+      ],
+      "verification": "TokenPort 隔离 JWT 实现；T-D JWT 验证通过",
+      "remaining_gap": "JWT 算法替换不动业务，但改成完全 Cookie Session 仍需前后端协议调整"
+    },
+    {
+      "id": 59,
+      "requirement": "PostgreSQL 查询变化要改 Controller",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        }
+      ],
+      "verification": "Controller 不含 SQL；T-C 通过",
+      "remaining_gap": "Repository 实现变化仍要契约测试"
+    },
+    {
+      "id": 60,
+      "requirement": "登录重复 pool.query/bcrypt/jwt.sign",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        }
+      ],
+      "verification": "register/login 共用 issue/密码/令牌端口；T-B 通过",
+      "remaining_gap": "登录与注册的业务差异保留，不强行合并"
+    },
+    {
+      "id": 61,
+      "requirement": "后续接口会复制粘贴",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/http.ts",
+          "line": 13,
+          "anchor": "export function asyncHandler",
+          "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        }
+      ],
+      "verification": "共享错误/异步包装/组合根已存在；T-C 通过",
+      "remaining_gap": "G01/G02 仍有重复代码；不能验证未来开发不会复制；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 62,
+      "requirement": "app.ts/server.ts 膨胀几千行",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/index.ts",
+          "line": 8,
+          "anchor": "async function startServer",
+          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+        },
+        {
+          "repository": "server",
+          "path": "src/app.ts",
+          "line": 24,
+          "anchor": "export function createApp",
+          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+        },
+        {
+          "repository": "server",
+          "path": "src/legacy-routes.ts",
+          "line": 13,
+          "anchor": "export function registerLegacyRoutes",
+          "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8"
+        },
+        {
+          "repository": "server",
+          "path": "src/quant-routes.ts",
+          "line": 46,
+          "anchor": "export function createQuantRouter",
+          "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66"
+        }
+      ],
+      "verification": "入口与组装已收敛；T-C 通过",
+      "remaining_gap": "旧复杂度仍在 legacy/quant，文件搬迁不等于业务已拆完"
+    },
+    {
+      "id": 63,
+      "requirement": "不利多人协作",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        }
+      ],
+      "verification": "领域目录和端口已建立；结构核对",
+      "remaining_gap": "组织收益无法用单元测试证明；需完成剩余领域和接口约定"
+    },
+    {
+      "id": 64,
+      "requirement": "不利审查与职责划分",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        }
+      ],
+      "verification": "本证据表与逐文件清单可追踪；T-C 通过",
+      "remaining_gap": "G10：未通读文件仍明确待审，不保证全局零遗漏"
+    },
+    {
+      "id": 65,
+      "requirement": "不利单元测试与 Mock",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "test/auth-portfolio.test.ts",
+          "line": 32,
+          "anchor": "test('认证 Schema",
+          "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0"
+        },
+        {
+          "repository": "server",
+          "path": "test/auth-portfolio.test.ts",
+          "line": 66,
+          "anchor": "test('认证与持仓",
+          "sha256": "4ab127e56715ef3d262c6d88b339bcac7591b192bebd5036f07f5bdc3f9ed6c0"
+        }
+      ],
+      "verification": "端口可替换，仓储异常替身和独立 Service 测试通过",
+      "remaining_gap": "同第 52 项；纯替身/多连接/浏览器三层验证仍有缺口"
+    },
+    {
+      "id": 66,
+      "requirement": "不利后续重构扩展",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        }
+      ],
+      "verification": "组合根/端口/护栏已实现",
+      "remaining_gap": "G01/G02/G04：尚有大模块；未来扩展不能只靠目录保证；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 67,
+      "requirement": "注册缺 IP/手机号限流",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/rate-limit.repository.ts",
+          "line": 5,
+          "anchor": "export class AuthRateLimiter",
+          "sha256": "d968effa16f9da71542a2ff209d77d012602c34f016e3b2c799ade3d6380e5c4"
+        }
+      ],
+      "verification": "T-B 原子计数/回源失败/大小写尾斜杠变体 21 次检查通过",
+      "remaining_gap": "G06：未压测真实多实例；15 分钟固定窗、代理配置需部署验收"
+    },
+    {
+      "id": 68,
+      "requirement": "公网注册缺验证码/人机验证",
+      "status": "未实现",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "web",
+          "path": "src/views/Login.vue",
+          "line": 95,
+          "anchor": "const handleSubmit",
+          "sha256": "b5a9f09609a9c83235bc0cfd9e700427ca1eea55a60319bf0688e44dae757ea4"
+        }
+      ],
+      "verification": "默认关闭注册；生产受邀门禁代码已核实",
+      "remaining_gap": "G07：邀请码不验证手机号，短信或人机验证仍未接入"
+    },
+    {
+      "id": 69,
+      "requirement": "批量注册与恶意请求风险",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/rate-limit.repository.ts",
+          "line": 5,
+          "anchor": "export class AuthRateLimiter",
+          "sha256": "d968effa16f9da71542a2ff209d77d012602c34f016e3b2c799ade3d6380e5c4"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        }
+      ],
+      "verification": "受邀注册、共享限流、每进程 bcrypt 并发上限已实现",
+      "remaining_gap": "G07/G06：无完整机器人防护、监控告警与容量验收"
+    },
+    {
+      "id": 70,
+      "requirement": "手机号存在性枚举",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 16,
+          "anchor": "async createUser",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        }
+      ],
+      "verification": "登录错误与不存在账号同错误；重复注册文案通用",
+      "remaining_gap": "409 与 201 仍可区分，未消除枚举；需匿名确认流程/产品策略"
+    },
+    {
+      "id": 71,
+      "requirement": "缺少字段最大长度",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        }
+      ],
+      "verification": "T-A 超长/字节边界通过；Schema 上限通读",
+      "remaining_gap": "旧导入字段校验不统一，见 G02；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    },
+    {
+      "id": 72,
+      "requirement": "超长 password 造成 CPU 浪费",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 14,
+          "anchor": "export function loginSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        }
+      ],
+      "verification": "进入 PasswordService 前拒绝 >72 UTF-8 字节；T-A 通过",
+      "remaining_gap": "Service 的新调用者必须遵守已校验 DTO 入口约定"
+    },
+    {
+      "id": 73,
+      "requirement": "bcrypt CPU 密集缺资源限制",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/rate-limit.repository.ts",
+          "line": 5,
+          "anchor": "export class AuthRateLimiter",
+          "sha256": "d968effa16f9da71542a2ff209d77d012602c34f016e3b2c799ade3d6380e5c4"
+        }
+      ],
+      "verification": "每进程最多 2 个昂贵操作；真实 bcrypt 测试通过",
+      "remaining_gap": "G06：没有多实例总 CPU 预算、负载压测或 worker 隔离验收"
+    },
+    {
+      "id": 74,
+      "requirement": "未集中管理认证配置",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "TTL、cost、secret 在配置模块统一注入；T-A 通过",
+      "remaining_gap": "其他供应商/调度配置见 G04/G05/G08"
+    },
+    {
+      "id": 75,
+      "requirement": "启动未检查 JWT_SECRET 强度",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/index.ts",
+          "line": 8,
+          "anchor": "async function startServer",
+          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+        }
+      ],
+      "verification": "T-A 缺失/短值/占位符/重复字符/空白值拒绝通过",
+      "remaining_gap": "程序无法证明随机来源；密钥生成、轮换和秘密管理部署验收见 G07"
+    },
+    {
+      "id": 76,
+      "requirement": "缺少统一配置模块",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/config/auth.config.ts",
+          "line": 12,
+          "anchor": "export function loadAuthConfig",
+          "sha256": "7213e808c30526056f858ff8c9f98c8b9842abfaaeba6e146d7b053571ce15dc"
+        },
+        {
+          "repository": "server",
+          "path": "src/app.ts",
+          "line": 24,
+          "anchor": "export function createApp",
+          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+        }
+      ],
+      "verification": "认证和 DB 配置已集中，T-A/T-C 通过",
+      "remaining_gap": "G04/G05/G08：LLM、调度、Python 环境配置仍分散"
+    },
+    {
+      "id": 77,
+      "requirement": "缺少统一认证模块",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/app.ts",
+          "line": 24,
+          "anchor": "export function createApp",
+          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+        }
+      ],
+      "verification": "createAuthModule 装配完整链路；T-B HTTP 通过",
+      "remaining_gap": "内部量化凭据是独立用途，不复用用户 JWT"
+    },
+    {
+      "id": 78,
+      "requirement": "缺少 PasswordService",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/password.service.ts",
+          "line": 5,
+          "anchor": "export class PasswordService",
+          "sha256": "28e31026e4f12ad299a99b8e20af305a05e84d468358639540607edb00f3a300"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "真实 bcrypt、错误密码、虚拟账号路径通过",
+      "remaining_gap": "算法迁移及密码生命周期管理见 G07"
+    },
+    {
+      "id": 79,
+      "requirement": "缺少 TokenService",
+      "status": "已闭环（认证）",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/token.service.ts",
+          "line": 7,
+          "anchor": "export class TokenService",
+          "sha256": "b01da9aad0b41fd39d91644b7c494d443f18e800b5479b222221b2218b9074fa"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.types.ts",
+          "line": 7,
+          "anchor": "export interface AuthRepository",
+          "sha256": "64a84d674421cd0e420cc518aae9a25e2d1066fb84c679d3245c041a84bfc5b6"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.module.ts",
+          "line": 11,
+          "anchor": "export function createAuthModule",
+          "sha256": "7a51f4e022dc3b19112fb0f81306d713123034ce87ec95037dda583c87998bde"
+        }
+      ],
+      "verification": "T-D 真实签名旧 JWT/算法/用途/过期/篡改拒绝通过",
+      "remaining_gap": "密钥轮换、多签名 key-id 尚未实现"
+    },
+    {
+      "id": 80,
+      "requirement": "Controller 同时承担多层职责",
+      "status": "部分完成",
+      "scope": "注册/登录为主；涉及全局时明确列出剩余领域",
+      "evidence": [
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.routes.ts",
+          "line": 10,
+          "anchor": "export function authRouter",
+          "sha256": "a66af3e36d6990f4347c8be2aa90f79a80aa23b839dbed702526e52a1ddc4abd"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.controller.ts",
+          "line": 8,
+          "anchor": "export class AuthController",
+          "sha256": "bbabbf7a1dfb673a12c38c2a38cc45e85ee2ce1a80c066472db4a2b3cec0bbbb"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/auth.service.ts",
+          "line": 7,
+          "anchor": "export class AuthService",
+          "sha256": "8fff9ff8d0050cd0b35fda15eadcc96dd544aa013642dd8ba4cb9345c8c07a56"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/user.repository.ts",
+          "line": 6,
+          "anchor": "export class UserRepository",
+          "sha256": "9723369d05fd19c237f08b93fdae4c96c9c1a8665d28431b8d2c6d15eded3dc1"
+        },
+        {
+          "repository": "server",
+          "path": "src/modules/auth/register.schema.ts",
+          "line": 24,
+          "anchor": "export function registerSchema",
+          "sha256": "d503417cb9c49876a2d6ed0299ca2833aed08ec2243e79b4c525040d1bada6c6"
+        },
+        {
+          "repository": "server",
+          "path": "src/shared/errors.ts",
+          "line": 2,
+          "anchor": "export const errors",
+          "sha256": "0ca53ee2b79d63be1e4e4ad859a1265e69864d8d0e4a086f2cbca231615c0bb4"
+        },
+        {
+          "repository": "server",
+          "path": "src/legacy-routes.ts",
+          "line": 13,
+          "anchor": "export function registerLegacyRoutes",
+          "sha256": "74376acfab48f4bd2310a77e5e6ee2c728e85bc6f2f7d1f3ae097493193a6ed8"
+        },
+        {
+          "repository": "server",
+          "path": "src/quant-routes.ts",
+          "line": 46,
+          "anchor": "export function createQuantRouter",
+          "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66"
+        }
+      ],
+      "verification": "认证按目标链路拆分；T-C 结构护栏通过",
+      "remaining_gap": "全项目仍有 G01/G02/G04；不能据认证完成声称全局全部修复；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { logError } from '../shared/logger.js'
 import cron from 'node-cron'
 import { spawn } from 'child_process'
 import path from 'path'
@@ -83,8 +84,8 @@ async function executeEntityProfileRefresh() {
   } catch (error) {
     metric.status = 'ERROR'
     metric.totalErrors++
-    metric.lastError = error instanceof Error ? error.message : String(error)
-    console.error('[QuantScheduler] ❌ 画像更新失败:', error)
+    metric.lastError = '画像刷新失败，详见服务端分类日志'
+    logError('scheduler.profile_refresh.failed', error)
   } finally {
     metric.lastDurationMs = Date.now() - startedAt
   }
@@ -134,11 +135,11 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
     let stderrData = ''
 
     pythonProc.stdout.on('data', (chunk) => {
-      stdoutData += chunk.toString()
+      stdoutData = (stdoutData + chunk.toString()).slice(-65536)
     })
 
     pythonProc.stderr.on('data', (chunk) => {
-      stderrData += chunk.toString()
+      stderrData = (stderrData + chunk.toString()).slice(-65536)
     })
 
     // 55 秒强制超时熔断机制，防止任务挂起阻塞系统
@@ -164,7 +165,7 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
           metric.status = 'SUCCESS'
         } else {
           metric.status = 'ERROR'
-          metric.lastError = stderrData || `Exit code ${code}`
+          metric.lastError = `子进程退出码 ${code}`
           metric.totalErrors++
         }
       }
@@ -172,8 +173,8 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
       if (code === 0) {
         resolve(stdoutData)
       } else {
-        console.error(`[QuantScheduler] ❌ ${taskKey} 执行异常:`, stderrData || stdoutData)
-        reject(new Error(stderrData || stdoutData || `Process exited with code ${code}`))
+        logError('scheduler.script.failed', new Error('child process failure'))
+        reject(new Error(`Process exited with code ${code}`))
       }
     })
 
@@ -181,7 +182,7 @@ function executeQuantScript(taskKey: string, scriptName: string, args: string[] 
       clearTimeout(timeout)
       if (metric) {
         metric.status = 'ERROR'
-        metric.lastError = err.message
+        metric.lastError = '无法启动子进程'
         metric.totalErrors++
       }
       reject(err)
@@ -201,7 +202,7 @@ export function startQuantInternalScheduler() {
     async () => {
       try {
         await executeQuantScript('minutelyMonitor', 'realtime_monitor_1m.py')
-      } catch (err: any) {
+      } catch {
         // 异常已记录在 metrics 中
       }
     },
@@ -215,7 +216,7 @@ export function startQuantInternalScheduler() {
       try {
         console.log('🎯 [QuantScheduler] 触发 09:20 概率基线生成...')
         await executeQuantScript('openingBaseline', 'generate_daily_predictions.py')
-      } catch (err: any) {
+      } catch {
         //
       }
     },
@@ -229,7 +230,7 @@ export function startQuantInternalScheduler() {
       try {
         console.log('📏 [QuantScheduler] 触发收盘后概率质量评估...')
         await executeQuantScript('nightlyReview', 'nightly_review.py')
-      } catch (err: any) {
+      } catch {
         //
       }
     },

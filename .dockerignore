@@ -1,0 +1,15 @@
+.git
+node_modules
+dist
+.env
+.env.*
+!.env.example
+!.env.test.example
+.venv*
+**/__pycache__
+**/*.pyc
+**/*.log
+quant_engine/state
+quant_engine/research_artifacts
+quant_engine/daily_analysis_logs
+quant_engine/legacy/logs

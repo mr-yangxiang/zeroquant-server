@@ -61,6 +61,7 @@ class PredictionSink:
             "lowPrice": low_price,
             "tradeDate": run.trade_date,
             "timestampStr": run.as_of.isoformat(),
+            "observedAt": run.features.observed_at.isoformat(),
             "targetTime": target_time,
             "runId": run.run_id,
         }
@@ -141,7 +142,8 @@ class PredictionSink:
         outbox.mkdir(parents=True, exist_ok=True)
         path = outbox / f"{run.run_id}.json"
         payload = run.to_dict()
-        payload["persistenceError"] = f"{type(error).__name__}: {error}"
+        # 异常可能携带带凭据 URL、请求体或 SQL；outbox 只记录类别。
+        payload["persistenceError"] = type(error).__name__
         tmp = path.with_suffix(".tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         tmp.replace(path)

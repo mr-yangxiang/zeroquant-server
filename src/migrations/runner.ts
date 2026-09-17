@@ -1,3 +1,4 @@
+import { logError } from '../shared/logger.js'
 import { pool } from '../db.js'
 import type { PoolClient } from 'pg'
 import { ALL_MIGRATIONS } from './catalog.js'
@@ -41,7 +42,7 @@ export async function runMigrationsUp() {
     await client.query('COMMIT')
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error('❌ [Migration UP] 迁移失败，已安全回滚:', error)
+    logError('❌ [Migration UP] 迁移失败，已安全回滚:', error)
     throw error
   } finally {
     client.release()
@@ -77,7 +78,7 @@ export async function runMigrationsDown() {
     console.log(`✅ [Migration DOWN] 迁移 ${targetMigration.version} 回滚成功！`)
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error('❌ [Migration DOWN] 回滚失败:', error)
+    logError('❌ [Migration DOWN] 回滚失败:', error)
     throw error
   } finally {
     client.release()
@@ -118,7 +119,7 @@ if (process.argv[1]?.endsWith('runner.ts') || process.argv[1]?.endsWith('runner.
     }
     process.exit(0)
   } catch (err) {
-    console.error('迁移运行器执行异常:', err)
+    logError('迁移运行器执行异常:', err)
     process.exit(1)
   }
 }

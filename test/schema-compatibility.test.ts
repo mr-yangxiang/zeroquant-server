@@ -16,7 +16,7 @@ const client = {
 const pool = { connect: async () => client } as any
 try {
   await db.exec('CREATE TABLE schema_migrations(version VARCHAR(50) PRIMARY KEY,name VARCHAR(255) NOT NULL,applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW())')
-  for (const migration of ALL_MIGRATIONS.filter(m => m.version !== '008')) await migration.up(client)
+  for (const migration of ALL_MIGRATIONS.filter(m => Number(m.version) < 8)) await migration.up(client)
   // Numeric IDs already referenced logically must retain their string identity.
   await db.exec(`INSERT INTO users(id,username,phone,password) VALUES (42,'ISOLATED','fixture','not-a-real-password');
     INSERT INTO user_positions(user_id,stock_code) VALUES ('42','000572');
@@ -37,6 +37,7 @@ try {
   assert.match(generated, /^[0-9a-f-]{36}$/)
   await migration008.up(client)
   assert.equal((await db.query("SELECT id FROM users WHERE phone='second'")).rows[0].id, generated)
+  for (const migration of ALL_MIGRATIONS.filter(m => Number(m.version) > 8)) await migration.up(client)
   const verified = await verifySchema(pool)
   assert.deepEqual(verified.filter(d => d.severity === 'ERROR'), [])
   assert.equal(verified.filter(d => d.kind === 'LEGACY_COLUMN_TYPE').length, 1)

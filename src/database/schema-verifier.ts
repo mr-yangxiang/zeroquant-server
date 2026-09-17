@@ -1,3 +1,4 @@
+import { logError } from '../shared/logger.js'
 import type { Pool } from 'pg'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -303,7 +304,7 @@ export async function main() {
     }
     if (errors.length) process.exitCode = 1
   } catch (error) {
-    console.error('❌ 无法核验数据库结构：', error instanceof Error ? error.message : error)
+    logError('schema.verification.failed', error)
     process.exitCode = 2
   } finally {
     if (databasePool) await databasePool.end()

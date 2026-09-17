@@ -1,0 +1,7 @@
+# Python 3.11; isolated from requirements-research.txt. Verified direct dependencies.
+fastapi==0.141.1
+pydantic==2.13.5
+SQLAlchemy==2.0.53
+redis==7.4.1
+uvicorn==0.53.0
+psycopg[binary]==3.3.5
