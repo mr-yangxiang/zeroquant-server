@@ -1,3 +1,4 @@
+import { migration012 } from './012_market_sync_receipts.js'
 import { migration011 } from './011_prediction_receipts.js'
 import { migration010 } from './010_chat_trade_requests.js'
 // Shared by the production runner and isolated upgrade tests; no DB connection.
@@ -13,5 +14,5 @@ import { migration009 } from './009_auth_sessions.js'
 import { migration008 } from './008_legacy_schema_compatibility.js'
 
 export const ALL_MIGRATIONS: Migration[] = [
-  migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011,
+  migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012,
 ]

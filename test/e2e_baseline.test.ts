@@ -47,7 +47,7 @@ function forecastPayload(overrides: Record<string, unknown> = {}) {
     modelCalibrated: false, inputHash: 'a'.repeat(64),
     regime: { name: 'range_bound', confidence: 0.5, reasons: [] },
     features: { qualityScore: 1, qualityFlags: [], observedAt: `${TEST_DATE}T09:20:00+08:00`, values: {} },
-    warnings: [],
+    warnings: [], newsEvents: [],
     horizons: [{
       horizonMinutes: 15, pUp: 0.4, pFlat: 0.35, pDown: 0.25,
       expectedReturnPct: 0.2, q10ReturnPct: -0.8, q50ReturnPct: 0.1,
@@ -69,6 +69,9 @@ async function cleanup() {
   await pool.query('DELETE FROM entity_profile_refresh_runs WHERE as_of_date = $1::date', [TEST_DATE])
   await pool.query('DELETE FROM dragon_tiger_seats WHERE stock_code = $1', [STOCK_CODE])
   await pool.query('DELETE FROM daily_bars WHERE stock_code = $1', [STOCK_CODE])
+  await pool.query('DELETE FROM prediction_ingestion_receipts WHERE run_id IN (SELECT run_id FROM quant_prediction_runs WHERE stock_code=$1)', [STOCK_CODE])
+  await pool.query('DELETE FROM market_sync_receipts WHERE stock_code=$1', [STOCK_CODE])
+  await pool.query('DELETE FROM market_sync_watermarks WHERE stock_code=$1', [STOCK_CODE])
   await pool.query('DELETE FROM quant_prediction_runs WHERE stock_code = $1', [STOCK_CODE])
   await pool.query('DELETE FROM stock_rolling_predictions WHERE stock_code = $1', [STOCK_CODE])
   await pool.query('DELETE FROM stock_day_predictions WHERE stock_code = $1', [STOCK_CODE])
@@ -198,10 +201,10 @@ async function runAllTests() {
     assert.equal((await request('/api/v1/quant/prediction-runs', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify(stale) })).status, 200)
     assert.equal((await pool.query('SELECT actionable FROM quant_horizon_forecasts WHERE run_id = $1', [staleRunId])).rows[0].actionable, false)
 
-    console.log('[17/21] 事务中途失败不残留父预测')
+    console.log('[17/21] 非法预测整批拒绝，不残留父预测')
     const badRunId = randomUUID()
     const badPayload = forecastPayload({ runId: badRunId, mode: 'realtime', legacyCurve: [{ time: 'TIME-TOO-LONG', price: 10 }] })
-    assert.equal((await request('/api/v1/quant/prediction-runs', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify(badPayload) })).status, 500)
+    assert.equal((await request('/api/v1/quant/prediction-runs', { method: 'POST', headers: { 'X-ZeroQuant-Internal-Token': INTERNAL_TOKEN }, body: JSON.stringify(badPayload) })).status, 400)
     assert.equal((await pool.query('SELECT COUNT(*) FROM quant_prediction_runs WHERE run_id = $1', [badRunId])).rows[0].count, '0')
 
     console.log('[18/21] 画像证据批量入库并拒绝非法批次')

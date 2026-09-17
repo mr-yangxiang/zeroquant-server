@@ -1,6 +1,8 @@
 import { logError } from '../shared/logger.js'
 import cron from 'node-cron'
-import { spawn } from 'child_process'
+import { runProcess } from './process-runner.js'
+import { pool } from '../db.js'
+import { withTaskLock } from './task-lock.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
@@ -16,8 +18,9 @@ interface TaskMetric {
   name: string
   cronExpr: string
   lastRunAt: string | null
+  lastSuccessAt?: string
   lastDurationMs: number
-  status: 'IDLE' | 'RUNNING' | 'SUCCESS' | 'ERROR'
+  status: 'IDLE' | 'RUNNING' | 'SUCCESS' | 'SKIPPED' | 'TIMEOUT' | 'ERROR'
   lastError: string | null
   totalRuns: number
   totalErrors: number
@@ -92,102 +95,33 @@ async function executeEntityProfileRefresh() {
 }
 
 // 运行 Python 算法脚本 (基于多线程并发隔离与超时熔断控制)
-function executeQuantScript(taskKey: string, scriptName: string, args: string[] = []): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const metric = taskMetrics[taskKey]
-    if (metric && metric.status === 'RUNNING') {
-      console.warn(`[QuantScheduler] ⚠️ 任务 ${taskKey} 上一次运行尚未完成，跳过本次触发防重叠！`)
-      return resolve('SKIPPED_OVERLAPPING')
-    }
-
-    const scriptPath = path.join(QUANT_ENGINE_DIR, scriptName)
-    if (!fs.existsSync(scriptPath)) {
-      const err = `[QuantScheduler] 脚本文件不存在: ${scriptPath}`
-      if (metric) {
-        metric.status = 'ERROR'
-        metric.lastError = err
-        metric.totalErrors++
-      }
-      return reject(new Error(err))
-    }
-
-    const startTime = Date.now()
-    if (metric) {
-      metric.status = 'RUNNING'
-      metric.lastRunAt = new Date().toISOString()
-      metric.lastError = null
-      metric.totalRuns++
-    }
-
-    // 启动多进程/多线程隔离沙盒 (4C6G 环境最大分配 4 线程并发)
-    const pythonProc = spawn(process.env.ZEROQUANT_PYTHON || 'python3', [scriptPath, ...args], {
-      cwd: QUANT_ENGINE_DIR,
-      env: {
-        ...process.env,
-        PYTHONUNBUFFERED: '1',
-        OMP_NUM_THREADS: '4',
-        OPENBLAS_NUM_THREADS: '4',
-        MKL_NUM_THREADS: '4',
-      },
-    })
-
-    let stdoutData = ''
-    let stderrData = ''
-
-    pythonProc.stdout.on('data', (chunk) => {
-      stdoutData = (stdoutData + chunk.toString()).slice(-65536)
-    })
-
-    pythonProc.stderr.on('data', (chunk) => {
-      stderrData = (stderrData + chunk.toString()).slice(-65536)
-    })
-
-    // 55 秒强制超时熔断机制，防止任务挂起阻塞系统
-    const timeout = setTimeout(() => {
-      try {
-        pythonProc.kill('SIGKILL')
-      } catch (_) {}
-      const errMsg = `任务 ${taskKey} 执行超时 (55s 熔断)`
-      if (metric) {
-        metric.status = 'ERROR'
-        metric.lastError = errMsg
-        metric.totalErrors++
-      }
-      reject(new Error(errMsg))
-    }, 55000)
-
-    pythonProc.on('close', (code) => {
-      clearTimeout(timeout)
-      const duration = Date.now() - startTime
-      if (metric) {
-        metric.lastDurationMs = duration
-        if (code === 0) {
-          metric.status = 'SUCCESS'
-        } else {
-          metric.status = 'ERROR'
-          metric.lastError = `子进程退出码 ${code}`
-          metric.totalErrors++
-        }
-      }
-
-      if (code === 0) {
-        resolve(stdoutData)
-      } else {
-        logError('scheduler.script.failed', new Error('child process failure'))
-        reject(new Error(`Process exited with code ${code}`))
-      }
-    })
-
-    pythonProc.on('error', (err) => {
-      clearTimeout(timeout)
-      if (metric) {
-        metric.status = 'ERROR'
-        metric.lastError = '无法启动子进程'
-        metric.totalErrors++
-      }
-      reject(err)
-    })
-  })
+async function executeQuantScript(taskKey: string, scriptName: string, args: string[] = []): Promise<void> {
+  const metric = taskMetrics[taskKey]
+  if (!metric || metric.status === 'RUNNING') return
+  const scriptPath = path.join(QUANT_ENGINE_DIR, scriptName)
+  if (!fs.existsSync(scriptPath)) {
+    metric.status = 'ERROR'; metric.lastError = '脚本文件不存在'; metric.totalErrors++
+    return
+  }
+  const defaults: Record<string, number> = { minutelyMonitor: 55, openingBaseline: 600, nightlyReview: 900, researchShadow: 55 }
+  const raw = process.env['ZEROQUANT_TASK_TIMEOUT_' + taskKey] ?? String(defaults[taskKey] ?? 300)
+  if (!/^\d+$/.test(raw) || Number(raw) < 1 || Number(raw) > 3600) throw new Error('任务期限配置无效: ' + taskKey)
+  metric.status = 'RUNNING'
+  metric.lastRunAt = new Date().toISOString()
+  metric.lastError = null
+  metric.totalRuns++
+  const result = await withTaskLock(pool, taskKey, signal => runProcess(process.env.ZEROQUANT_PYTHON || 'python3', [scriptPath, ...args], {
+    cwd: QUANT_ENGINE_DIR, timeoutMs: Number(raw) * 1000, signal,
+    env: { ...process.env, PYTHONUNBUFFERED: '1', OMP_NUM_THREADS: '4', OPENBLAS_NUM_THREADS: '4', MKL_NUM_THREADS: '4' },
+  })).catch(() => ({ status: 'ERROR' as const, durationMs: 0 })) ?? { status: 'SKIPPED' as const, durationMs: 0 }
+  metric.status = result.status
+  if (result.status === 'SUCCESS') metric.lastSuccessAt = new Date().toISOString()
+  metric.lastDurationMs = result.durationMs
+  if (result.status === 'TIMEOUT' || result.status === 'ERROR') {
+    metric.totalErrors++
+    metric.lastError = result.status === 'TIMEOUT' ? '任务超过配置期限' : '任务执行失败'
+    logError('scheduler.script.failed', new Error(metric.lastError))
+  }
 }
 
 /**

@@ -46,6 +46,7 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
     settings = Settings.from_env()
     now = datetime.now(SHANGHAI)
     if not debug and not is_continuous_auction(now):
+        print("ZEROQUANT_TASK_STATUS=SKIPPED")
         print(f"[{now.isoformat()}] outside continuous auction; no fetch and no write")
         return []
 
@@ -141,7 +142,7 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             try:
                 runs.append(future.result())
             except Exception as exc:
-                failures.append(f"{stock.code}:{type(exc).__name__}:{exc}")
+                failures.append(f"{stock.code}:{type(exc).__name__}")
     runs.sort(key=lambda item: item.stock_code)
 
     for run in runs:
@@ -175,7 +176,8 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
                 rolling_predictions=rolling_curve,
             )
         except Exception as exc:
-            print(f"{run.stock_code}: persistence failed: {exc}", file=sys.stderr)
+            failures.append(f"{run.stock_code}: persistence failed ({type(exc).__name__})")
+            print(f"{run.stock_code}: persistence failed ({type(exc).__name__})", file=sys.stderr)
 
     result = {
         "asOf": now.isoformat(),
@@ -186,8 +188,8 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
         "failures": failures,
     }
     print(json.dumps(result, ensure_ascii=False))
-    if not runs and failures:
-        raise RuntimeError("no realtime forecast could be produced")
+    if failures:
+        raise RuntimeError("realtime run incomplete; check structured failure summary")
     return runs
 
 

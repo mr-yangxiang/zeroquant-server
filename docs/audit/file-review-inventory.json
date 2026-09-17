@@ -6,11 +6,12 @@
     "web": "/Users/yx/mine/project/zeroquant-web"
   },
   "counts": {
-    "通读审查": 137,
+    "通读审查": 125,
     "元数据登记，未通读": 43,
-    "审查工件": 13,
-    "静态扫描，未通读": 62,
-    "局部审查": 9
+    "已变更待复核": 14,
+    "审查工件": 14,
+    "静态扫描，未通读": 71,
+    "局部审查": 7
   },
   "files": [
     {
@@ -51,11 +52,11 @@
       "path": ".github/workflows/deploy.yml",
       "location": "/Users/yx/mine/project/zeroquant-server/.github/workflows/deploy.yml:1",
       "signals": {},
-      "sha256": "08feac348cf57efd9dcf8d4469cd05bc3005877da2ad945bf20d7a3a37876368",
-      "lines": 50,
-      "level": "通读审查",
-      "verification": "配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行）",
-      "remaining": "G11：镜像/依赖审计与线上配置验收未做"
+      "sha256": "cb7406e8518bc774f6d41dd7d15fc674ab380edb2ab7d4f2ec6360b1b4e2c6d9",
+      "lines": 68,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -213,6 +214,17 @@
     },
     {
       "repository": "server",
+      "path": "docs/audit/production-hardening-2026-09-17.md",
+      "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/production-hardening-2026-09-17.md:1",
+      "signals": {},
+      "level": "审查工件",
+      "verification": "目录登记；证据由 --check 核验",
+      "remaining": "不属于被验证的业务代码",
+      "sha256": null,
+      "lines": null
+    },
+    {
+      "repository": "server",
       "path": "docs/audit/research-chat-2026-09-16.md",
       "location": "/Users/yx/mine/project/zeroquant-server/docs/audit/research-chat-2026-09-16.md:1",
       "signals": {},
@@ -337,11 +349,11 @@
       "path": "package.json",
       "location": "/Users/yx/mine/project/zeroquant-server/package.json:1",
       "signals": {},
-      "sha256": "9b4f5d176c11343fa6f67458b5b915947ee6b09999af764225e2ceff8dc6b848",
+      "sha256": "4a8fa1c55d9441a1e11f23326957ad5e90a88b27fd4e60d28b383c63e9c62231",
       "lines": 44,
-      "level": "通读审查",
-      "verification": "F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过",
-      "remaining": "G06：单连接/本机HTTP夹具不代表真实并发与供应商验收"
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -378,13 +390,11 @@
         "异常输出（需人工核对脱敏）": [
           82,
           91,
-          100,
-          126,
-          135
+          100
         ]
       },
-      "sha256": "4a3b727676d9748704353db23fa51fb21238d4b75923080771ce0fb61dc2abd4",
-      "lines": 168,
+      "sha256": "430b45aef59b62874ec38b65c255cffc6febd2f1946bf7602a44ee40f7cb4f8f",
+      "lines": 169,
       "level": "静态扫描，未通读",
       "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
       "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
@@ -1025,22 +1035,20 @@
       "signals": {
         "宽类型（不等于缺陷）": [
           16,
-          93
+          94
         ],
         "网络调用（需核对超时/来源）": [
-          52,
-          111,
-          118
+          53,
+          112,
+          119
         ],
         "异常输出（需人工核对脱敏）": [
-          71,
-          117,
-          144,
-          178
+          72,
+          118
         ]
       },
-      "sha256": "159992d968f5f6fbe2ce5cf37d6667eaedb5b1cb1a4beff6e45844cca20da976",
-      "lines": 203,
+      "sha256": "855dcd591a953857c74ce58c4344521c8730e9a7c05562620640e4d8a21ae07a",
+      "lines": 205,
       "level": "静态扫描，未通读",
       "verification": "Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射",
       "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
@@ -1474,11 +1482,11 @@
           61
         ]
       },
-      "sha256": "81e97bc8f090180cf761baeef8388e421187193be2dac6a3b88e61e297be6a77",
+      "sha256": "cb64208fe261e1879641d4b240de3827280ad49d0a512f909c26117bb53bb08f",
       "lines": 179,
-      "level": "局部审查",
-      "verification": "Python AST 解析通过；HttpTransport、供应商时间与报价路径审查；F08/F09；Python 63 项通过",
-      "remaining": "G12：分钟/日线解析尚未全部通读，HTTP 源与首次可见时间合同未核验"
+      "level": "已变更待复核",
+      "verification": "Python AST 解析通过；人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -1739,12 +1747,17 @@
       "repository": "server",
       "path": "src/app.ts",
       "location": "/Users/yx/mine/project/zeroquant-server/src/app.ts:1",
-      "signals": {},
-      "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6",
-      "lines": 45,
-      "level": "通读审查",
-      "verification": "2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据",
-      "remaining": "G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行"
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          40,
+          47
+        ]
+      },
+      "sha256": "0790459fdb4b2cabe16d74c949fb9e1efcd41028545b53953b499ff65e2f0221",
+      "lines": 65,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -1839,11 +1852,11 @@
       "path": "src/database/entities/prediction.entities.ts",
       "location": "/Users/yx/mine/project/zeroquant-server/src/database/entities/prediction.entities.ts:1",
       "signals": {},
-      "sha256": "cfcefa6537cc5741742aa43b30efffa593014dc67d0fa732412cb55b5c615430",
-      "lines": 6,
-      "level": "通读审查",
-      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
-      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+      "sha256": "33af20ebdf70cecd9d033799cf931927baa9ffd87585e0772257bbef6cf363c7",
+      "lines": 14,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -1943,14 +1956,25 @@
     },
     {
       "repository": "server",
+      "path": "src/health.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/health.ts:1",
+      "signals": {},
+      "sha256": "4435a0515020fef62ecf38487a06b56b989af0f1b7e46f1fb11d70aa88f9b58a",
+      "lines": 8,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
       "path": "src/index.ts",
       "location": "/Users/yx/mine/project/zeroquant-server/src/index.ts:1",
       "signals": {},
-      "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac",
-      "lines": 22,
-      "level": "通读审查",
-      "verification": "启动先验配置、迁移、结构核验、监听与调度入口通读；构建通过",
-      "remaining": "G05：调度配置启动失败/进程生命周期与监听错误缺专门测试"
+      "sha256": "da9084994cb3ccb1d3b0cfce2b4357fe9c5c35c3176ca0663c3c99474068ca47",
+      "lines": 40,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -2216,14 +2240,33 @@
     },
     {
       "repository": "server",
+      "path": "src/migrations/012_market_sync_receipts.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/012_market_sync_receipts.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          5,
+          11,
+          16,
+          17,
+          19
+        ]
+      },
+      "sha256": "86d5a8b4a39b5ff1af3c56e5cd7879e2f056661923104d2b7efd5193ab8b5ba3",
+      "lines": 22,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
       "path": "src/migrations/catalog.ts",
       "location": "/Users/yx/mine/project/zeroquant-server/src/migrations/catalog.ts:1",
       "signals": {},
-      "sha256": "003926f8a793c2b2bea3ca25538f36eaf0476e35a322f70e43eb6b515c2406d0",
-      "lines": 17,
-      "level": "通读审查",
-      "verification": "2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过",
-      "remaining": "G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放"
+      "sha256": "7d7518631b0e8bab8eb872e7a020930b96ff893d18ab5efe557fd07a74ac885b",
+      "lines": 18,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -2618,20 +2661,26 @@
       "location": "/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.repository.ts:1",
       "signals": {
         "SQL/DDL（需判断所在层）": [
-          10,
-          11,
+          12,
           13,
           15,
-          19,
-          25,
-          29
+          20,
+          22,
+          23,
+          24,
+          28,
+          34,
+          38,
+          42,
+          43,
+          45
         ]
       },
-      "sha256": "8cbbef2f88b21824b0b26e93a854d7b4ea6d3ba367d60dff230b4c3803ffafa3",
-      "lines": 36,
-      "level": "通读审查",
-      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
-      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+      "sha256": "81c464a82763ffd3f8ef72ab03d4b4132edaa08f8ab0a8802fde71fd7ead3896",
+      "lines": 49,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "server",
@@ -3106,22 +3155,49 @@
     },
     {
       "repository": "server",
+      "path": "src/scheduler/process-runner.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/scheduler/process-runner.ts:1",
+      "signals": {
+        "子进程/动态执行": [
+          21
+        ]
+      },
+      "sha256": "656e4030a15262ab29f447aaf682f900fbe45df375c0c1bd904e238bbadf90b2",
+      "lines": 37,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
       "path": "src/scheduler/quant-scheduler.ts",
       "location": "/Users/yx/mine/project/zeroquant-server/src/scheduler/quant-scheduler.ts:1",
       "signals": {
-        "子进程/动态执行": [
-          123
-        ],
         "异常输出（需人工核对脱敏）": [
-          72,
-          99
+          75
         ]
       },
-      "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5",
-      "lines": 275,
-      "level": "通读审查",
-      "verification": "进程启动/超时/close/error/cron 全文审查；F05 日志与输出上限；构建通过",
-      "remaining": "G05：重复计数、跳过状态、固定期限与跨实例防重未关闭；无进程故障测试"
+      "sha256": "ab397d3d264ffd7f912b65ddcc4ca028accefcf7d5339f2f468f70d05e1acdbc",
+      "lines": 209,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
+    },
+    {
+      "repository": "server",
+      "path": "src/scheduler/task-lock.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/src/scheduler/task-lock.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          10,
+          14
+        ]
+      },
+      "sha256": "c4b0c192b4816955ce9760f317d40f6dcbbc7f9790cf1151f08a880194259a08",
+      "lines": 18,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
     },
     {
       "repository": "server",
@@ -3344,34 +3420,37 @@
           74,
           75,
           76,
-          88,
-          114,
-          129,
-          137,
-          141,
+          77,
+          78,
+          79,
+          91,
+          117,
+          132,
+          140,
           144,
-          176,
-          182,
-          183,
-          199,
-          205,
-          233,
-          257
+          147,
+          179,
+          185,
+          186,
+          202,
+          208,
+          236,
+          260
         ],
         "宽类型（不等于缺陷）": [
-          97,
-          120,
-          186
+          100,
+          123,
+          189
         ],
         "网络调用（需核对超时/来源）": [
           30
         ],
         "异常输出（需人工核对脱敏）": [
-          270
+          273
         ]
       },
-      "sha256": "3d3167f412de1f4a9ed9f12813136258f4212cb26301d739a7034e5e25991678",
-      "lines": 275,
+      "sha256": "412bd163311bfe1b4867fbf0a7d24bef1f6ca862796916a116ec7c181d56fdaa",
+      "lines": 278,
       "level": "静态扫描，未通读",
       "verification": "关键词扫描；未建立逐文件行为测试映射",
       "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
@@ -3401,6 +3480,17 @@
       "level": "通读审查",
       "verification": "本轮新增 6 项测试全文审查并通过；F13 日线迁移/校验/回滚增量复核，领域44项通过",
       "remaining": "真实库/浏览器/供应商验收见 G06/G12"
+    },
+    {
+      "repository": "server",
+      "path": "test/health.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/health.test.ts:1",
+      "signals": {},
+      "sha256": "85f65a8ac3e9074c7ed6b663a179bd31a87bc6f27902e81b06a31e6885924506",
+      "lines": 12,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
     },
     {
       "repository": "server",
@@ -3478,19 +3568,50 @@
           26,
           29,
           32,
-          42,
-          46
+          43,
+          47,
+          49
         ],
         "子进程/动态执行": [
           26,
-          32
+          32,
+          49
         ]
       },
-      "sha256": "2ea158eba2cffa5cdf38d1d3a1c01dabe0c30fa189a532f794417df322415e99",
-      "lines": 50,
-      "level": "通读审查",
-      "verification": "F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过",
-      "remaining": "G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成"
+      "sha256": "d55aad15e687b516e3216e81e218d88bdb65029f6760dba68062fdbf9aae98cc",
+      "lines": 55,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
+    },
+    {
+      "repository": "server",
+      "path": "test/postgres-concurrency.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/postgres-concurrency.test.ts:1",
+      "signals": {
+        "SQL/DDL（需判断所在层）": [
+          22,
+          34,
+          39,
+          40
+        ]
+      },
+      "sha256": "5e87796a6ca99543f9df2b8bea3c4c1755298572a428c8c4226d393c649539a1",
+      "lines": 53,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "server",
+      "path": "test/process-runner.test.ts",
+      "location": "/Users/yx/mine/project/zeroquant-server/test/process-runner.test.ts:1",
+      "signals": {},
+      "sha256": "d6e7ef0c3deddbf6f978f7c1f4ab9e4a77a53e89b4a6b5907af82e637451047c",
+      "lines": 15,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
     },
     {
       "repository": "server",
@@ -3629,8 +3750,8 @@
       "path": ".github/workflows/deploy.yml",
       "location": "/Users/yx/mine/project/zeroquant-web/.github/workflows/deploy.yml:1",
       "signals": {},
-      "sha256": "6f39fa8396e031f3ad11bd3bd08aa6ae4778fdc282507bf68264eca80d0ca24f",
-      "lines": 25,
+      "sha256": "b9f779641533c7cbdd2cd3a4026308daf1bfe78619b4fa1f0f895a9477b86222",
+      "lines": 28,
       "level": "元数据登记，未通读",
       "verification": "文件摘要及行数",
       "remaining": "G10：配置、文档或数据内容仍待逐项核验"
@@ -3640,8 +3761,8 @@
       "path": ".gitignore",
       "location": "/Users/yx/mine/project/zeroquant-web/.gitignore:1",
       "signals": {},
-      "sha256": "877c8d36f5cd89e476c871a393f3a3d6e7e31dad722a6ad719a90cb6df001e9e",
-      "lines": 3,
+      "sha256": "bfdc4e8df41aa85dd7026a10a1054a72b209bd3a2ec291e9181d54bce7acc4eb",
+      "lines": 5,
       "level": "元数据登记，未通读",
       "verification": "文件摘要及行数",
       "remaining": "G10：配置、文档或数据内容仍待逐项核验"
@@ -3695,8 +3816,8 @@
       "path": "package-lock.json",
       "location": "/Users/yx/mine/project/zeroquant-web/package-lock.json:1",
       "signals": {},
-      "sha256": "373e10bcea36b5f08171ee33a91b0e8526d0590e0255f95970c5eaf03d34eb8f",
-      "lines": 3053,
+      "sha256": "462c4a859660c4b6b7baaf9e32a44a8be296e0eada58fd25a49e300ce88db4db",
+      "lines": 3258,
       "level": "元数据登记，未通读",
       "verification": "文件摘要及行数",
       "remaining": "G10：配置、文档或数据内容仍待逐项核验"
@@ -3706,11 +3827,22 @@
       "path": "package.json",
       "location": "/Users/yx/mine/project/zeroquant-web/package.json:1",
       "signals": {},
-      "sha256": "eb0fb64d171f750327f8246b5d2365e202d3ab8be03947798e6b173eed272cb5",
-      "lines": 32,
-      "level": "通读审查",
-      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
-      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+      "sha256": "e651a853b3fd4e2a29a6b14dd0e2206fc6055b181ab8f0339ead3d5755c691b5",
+      "lines": 35,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
+    },
+    {
+      "repository": "web",
+      "path": "playwright.config.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/playwright.config.ts:1",
+      "signals": {},
+      "sha256": "5eb0658e2fea923defc2483088b20643ceb2fe3fd5a0ee8570e51d04e22d0edf",
+      "lines": 10,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
     },
     {
       "repository": "web",
@@ -3761,11 +3893,11 @@
       "path": "src/api/session.ts",
       "location": "/Users/yx/mine/project/zeroquant-web/src/api/session.ts:1",
       "signals": {},
-      "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6",
-      "lines": 39,
-      "level": "通读审查",
-      "verification": "前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过",
-      "remaining": "G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做"
+      "sha256": "f70885c05a773882a878bd2fbeb0566ecbcc8809fee221d5a395fc7279c83df7",
+      "lines": 48,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "web",
@@ -3863,7 +3995,6 @@
           973,
           986,
           987,
-          1001,
           1017,
           1152,
           1169,
@@ -3892,11 +4023,11 @@
           1567
         ]
       },
-      "sha256": "2e77cf86827c14b72a7d95fa384492c34dd39a5b1b379361882acd16d836c726",
+      "sha256": "f188b2d03ec81c7f59d52a9347c8f90aadc1d61b761e0d31791d0d8847b8f20c",
       "lines": 1627,
-      "level": "局部审查",
-      "verification": "2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过",
-      "remaining": "G01/G06/G10：真实环境验收及其他未通读范围仍待完成"
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     },
     {
       "repository": "web",
@@ -3920,6 +4051,17 @@
       "signals": {},
       "sha256": "966b06b253de04ed18e67f55bc442b32a93966442b2dd2363f974b365e25d0ac",
       "lines": 23,
+      "level": "静态扫描，未通读",
+      "verification": "关键词扫描；未建立逐文件行为测试映射",
+      "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
+    },
+    {
+      "repository": "web",
+      "path": "test/browser/auth.spec.ts",
+      "location": "/Users/yx/mine/project/zeroquant-web/test/browser/auth.spec.ts:1",
+      "signals": {},
+      "sha256": "f2559cadb99815a068e045b7b6217a36a79148f144f369abdb6e3eef905878f0",
+      "lines": 44,
       "level": "静态扫描，未通读",
       "verification": "关键词扫描；未建立逐文件行为测试映射",
       "remaining": "G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖"
@@ -3951,11 +4093,11 @@
       "path": "vite.config.ts",
       "location": "/Users/yx/mine/project/zeroquant-web/vite.config.ts:1",
       "signals": {},
-      "sha256": "21be8232821034281ec0bb9ce3e827f783af729ecd11f829ee224be9bad720c1",
-      "lines": 17,
-      "level": "通读审查",
-      "verification": "构建/静态服务路径与本轮类型检查配置全文核对；构建通过",
-      "remaining": "G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计"
+      "sha256": "57879f79fdb843850da50e6bc56945e2762511c68af3602b9331a6e3ee26c4ef",
+      "lines": 23,
+      "level": "已变更待复核",
+      "verification": "人工证据摘要不再匹配",
+      "remaining": "重新审查变更，更新人工记录"
     }
   ]
 }

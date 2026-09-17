@@ -1,6 +1,7 @@
 import { createChatTradeModule } from './modules/chat/chat-trade.module.js'
 /** HTTP 应用组合根：不监听端口、不执行迁移、不启动调度器。 */
 import express from 'express'
+import { readiness } from './health.js'
 import cors from 'cors'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
@@ -30,6 +31,25 @@ export function createApp(config: AuthConfig = loadAuthConfig()) {
   app.use(cors({ origin: config.publicOrigin ?? false, credentials: true, exposedHeaders: ['X-Request-Id'] }))
   app.use(express.json({ limit: '100kb' }))
   app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'ZeroQuant Express Server', timestamp: new Date().toISOString() }))
+  app.get('/ready', readiness(async () => {
+    // The pool connection timeout is 5s; the checked-out connection is always released.
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN READ ONLY')
+      await client.query("SET LOCAL statement_timeout = '2000ms'")
+      await client.query('SELECT 1')
+      await client.query('COMMIT')
+    } catch (error) { await client.query('ROLLBACK').catch(() => {}); throw error }
+    finally { client.release() }
+  }))
+  app.get('/api/v1/system/data-status', quantInternalOnly, async (_req, res, next) => {
+    try {
+      const result = await pool.query(`SELECT stock_code,observed_at,
+        EXTRACT(EPOCH FROM (NOW()-observed_at)) AS age_seconds FROM market_sync_watermarks ORDER BY stock_code`)
+      res.setHeader('Cache-Control', 'no-store')
+      res.json({ code: 0, data: result.rows })
+    } catch(error) { next(error) }
+  })
   const auth = createAuthModule(pool, config)
   const portfolio = createPortfolioModule(pool)
   app.use('/api/v1/auth', auth.router)

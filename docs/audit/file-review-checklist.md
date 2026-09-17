@@ -13,11 +13,12 @@
 
 ## 覆盖统计
 
-- 通读审查：137 个。
+- 通读审查：125 个。
 - 元数据登记，未通读：43 个。
-- 审查工件：13 个。
-- 静态扫描，未通读：62 个。
-- 局部审查：9 个。
+- 已变更待复核：14 个。
+- 审查工件：14 个。
+- 静态扫描，未通读：71 个。
+- 局部审查：7 个。
 
 来源：[人工审查记录](./manual-review.json)、[机器清单](./file-review-inventory.json)、[缺口台账](./findings.md)、[验证记录](./verification.md)。
 
@@ -28,7 +29,7 @@
 | [.dockerignore](/Users/yx/mine/project/zeroquant-server/.dockerignore:1) | 15 | 通读审查 | 配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行） | G11：镜像/依赖审计与线上配置验收未做 |
 | [.env.example](/Users/yx/mine/project/zeroquant-server/.env.example:1) | 56 | 通读审查 | 配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行） | G11：镜像/依赖审计与线上配置验收未做 |
 | [.env.test.example](/Users/yx/mine/project/zeroquant-server/.env.test.example:1) | 11 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
-| [.github/workflows/deploy.yml](/Users/yx/mine/project/zeroquant-server/.github/workflows/deploy.yml:1) | 50 | 通读审查 | 配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行） | G11：镜像/依赖审计与线上配置验收未做 |
+| [.github/workflows/deploy.yml](/Users/yx/mine/project/zeroquant-server/.github/workflows/deploy.yml:1) | 68 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [.gitignore](/Users/yx/mine/project/zeroquant-server/.gitignore:1) | 18 | 通读审查 | 配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行） | G11：镜像/依赖审计与线上配置验收未做 |
 | [Dockerfile](/Users/yx/mine/project/zeroquant-server/Dockerfile:1) | 29 | 通读审查 | 配置/构建输入与本轮变更全文核对；构建和相关测试通过（不是该配置每项均运行） | G11：镜像/依赖审计与线上配置验收未做 |
 | [README.md](/Users/yx/mine/project/zeroquant-server/README.md:1) | 112 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
@@ -43,6 +44,7 @@
 | [docs/audit/manual-review.json](/Users/yx/mine/project/zeroquant-server/docs/audit/manual-review.json:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
 | [docs/audit/market-sync-2026-09-17.md](/Users/yx/mine/project/zeroquant-server/docs/audit/market-sync-2026-09-17.md:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
 | [docs/audit/prediction-replay-2026-09-17.md](/Users/yx/mine/project/zeroquant-server/docs/audit/prediction-replay-2026-09-17.md:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
+| [docs/audit/production-hardening-2026-09-17.md](/Users/yx/mine/project/zeroquant-server/docs/audit/production-hardening-2026-09-17.md:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
 | [docs/audit/research-chat-2026-09-16.md](/Users/yx/mine/project/zeroquant-server/docs/audit/research-chat-2026-09-16.md:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
 | [docs/audit/verification.md](/Users/yx/mine/project/zeroquant-server/docs/audit/verification.md:1) | — | 审查工件 | 目录登记；证据由 --check 核验 | 不属于被验证的业务代码 |
 | [docs/compatibility-008-status-2026-09-13.md](/Users/yx/mine/project/zeroquant-server/docs/compatibility-008-status-2026-09-13.md:1) | 38 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
@@ -54,10 +56,10 @@
 | [docs/research-pipeline.md](/Users/yx/mine/project/zeroquant-server/docs/research-pipeline.md:1) | 224 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [docs/research-readiness-2026-09-10.md](/Users/yx/mine/project/zeroquant-server/docs/research-readiness-2026-09-10.md:1) | 50 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [package-lock.json](/Users/yx/mine/project/zeroquant-server/package-lock.json:1) | 1862 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
-| [package.json](/Users/yx/mine/project/zeroquant-server/package.json:1) | 44 | 通读审查 | F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过 | G06：单连接/本机HTTP夹具不代表真实并发与供应商验收 |
+| [package.json](/Users/yx/mine/project/zeroquant-server/package.json:1) | 44 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [quant_engine/alert_cooldown.json](/Users/yx/mine/project/zeroquant-server/quant_engine/alert_cooldown.json:1) | 8 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [quant_engine/expansion_state.json](/Users/yx/mine/project/zeroquant-server/quant_engine/expansion_state.json:1) | 31 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
-| [quant_engine/generate_daily_predictions.py](/Users/yx/mine/project/zeroquant-server/quant_engine/generate_daily_predictions.py:1) | 168 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 网络调用（需核对超时/来源）：62,95,101；异常输出（需人工核对脱敏）：82,91,100,126… | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [quant_engine/generate_daily_predictions.py](/Users/yx/mine/project/zeroquant-server/quant_engine/generate_daily_predictions.py:1) | 169 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 网络调用（需核对超时/来源）：62,95,101；异常输出（需人工核对脱敏）：82,91,100 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/knowledge_base.md](/Users/yx/mine/project/zeroquant-server/quant_engine/knowledge_base.md:1) | 184 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [quant_engine/legacy/knowledge_base.legacy.md](/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/knowledge_base.legacy.md:1) | 133 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [quant_engine/legacy/logs/daily_analysis_logs/analysis_--help.md](/Users/yx/mine/project/zeroquant-server/quant_engine/legacy/logs/daily_analysis_logs/analysis_--help.md:1) | 48 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
@@ -110,7 +112,7 @@
 | [quant_engine/quant_api/shared/contracts.py](/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/contracts.py:1) | 16 | 通读审查 | Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过 | G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM |
 | [quant_engine/quant_api/shared/database.py](/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/database.py:1) | 54 | 通读审查 | Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过；扫描定位 SQL/DDL（需判断所在层）：50 | G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM |
 | [quant_engine/quant_api/shared/settings.py](/Users/yx/mine/project/zeroquant-server/quant_engine/quant_api/shared/settings.py:1) | 57 | 通读审查 | Python AST 解析通过；内部只读 API 分层/依赖/会话/配置/缓存/响应契约全文审查；Python 服务 15 项通过 | G06：PostgreSQL/Redis 真实联调；ready 仅查迁移 008；不是完整结构验收或全表 ORM |
-| [quant_engine/realtime_monitor_1m.py](/Users/yx/mine/project/zeroquant-server/quant_engine/realtime_monitor_1m.py:1) | 203 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：16,93；网络调用（需核对超时/来源）：52,111,118；异常输出（需人工核对脱敏）：71,117,144,178 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [quant_engine/realtime_monitor_1m.py](/Users/yx/mine/project/zeroquant-server/quant_engine/realtime_monitor_1m.py:1) | 205 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：16,94；网络调用（需核对超时/来源）：53,112,119；异常输出（需人工核对脱敏）：72,118 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/requirements-research.txt](/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-research.txt:1) | 7 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [quant_engine/requirements-service-test.txt](/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-service-test.txt:1) | 2 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [quant_engine/requirements-service.txt](/Users/yx/mine/project/zeroquant-server/quant_engine/requirements-service.txt:1) | 7 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
@@ -138,7 +140,7 @@
 | [quant_engine/zeroquant/models.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/models.py:1) | 161 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：5,64,119,121 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/zeroquant/news.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/news.py:1) | 503 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：15,143,159,174…；网络调用（需核对超时/来源）：181,397,463,464… | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/zeroquant/pipeline.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/pipeline.py:1) | 143 | 通读审查 | Python AST 解析通过；特征→分布→硬门禁→版本化输出编排与输入摘要通读；Python 63 项通过 | G12：仍是研究流程，真实数据/预测效果未验证 |
-| [quant_engine/zeroquant/providers.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/providers.py:1) | 179 | 局部审查 | Python AST 解析通过；HttpTransport、供应商时间与报价路径审查；F08/F09；Python 63 项通过；扫描定位 网络调用（需核对超时/来源）：61 | G12：分钟/日线解析尚未全部通读，HTTP 源与首次可见时间合同未核验 |
+| [quant_engine/zeroquant/providers.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/providers.py:1) | 179 | 已变更待复核 | Python AST 解析通过；人工证据摘要不再匹配；扫描定位 网络调用（需核对超时/来源）：61 | 重新审查变更，更新人工记录 |
 | [quant_engine/zeroquant/regime.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/regime.py:1) | 37 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/zeroquant/research/__init__.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/__init__.py:1) | 1 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/zeroquant/research/backtest.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/research/backtest.py:1) | 94 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：22 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
@@ -151,7 +153,7 @@
 | [quant_engine/zeroquant/risk.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/risk.py:1) | 27 | 静态扫描，未通读 | Python AST 解析通过；关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [quant_engine/zeroquant/sink.py](/Users/yx/mine/project/zeroquant-server/quant_engine/zeroquant/sink.py:1) | 150 | 通读审查 | Python AST 解析通过；HTTP 写入、outbox 与失败路径通读；F09 outbox 脱敏测试通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；扫描定位 宽类型（不等于缺陷）：8,18,48,54…；网络调用（需核对超时/来源）：28,130 | G02/G03：多步骤写入及重试幂等未闭环；返回业务 code 未统一核验 |
 | [scripts/review_inventory.py](/Users/yx/mine/project/zeroquant-server/scripts/review_inventory.py:1) | 172 | 通读审查 | Python AST 解析通过；本轮编写并审查：只读扫描、不跟随符号链接、摘要失效检查与证据编号校验；2026-09-16 日期取证据表日期，生成与 --check 再验证；扫描定位 SQL/DDL（需判断所在层）：26；宽类型（不等于缺陷）：27,32；子进程/动态执行：36；HTML 注入入口（需核对转义）：31 | 只检测清单完整性，不是漏洞扫描器；人工审查元数据仍须可信维护 |
-| [src/app.ts](/Users/yx/mine/project/zeroquant-server/src/app.ts:1) | 45 | 通读审查 | 2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据 | G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行 |
+| [src/app.ts](/Users/yx/mine/project/zeroquant-server/src/app.ts:1) | 65 | 已变更待复核 | 人工证据摘要不再匹配；扫描定位 SQL/DDL（需判断所在层）：40,47 | 重新审查变更，更新人工记录 |
 | [src/config/auth.config.ts](/Users/yx/mine/project/zeroquant-server/src/config/auth.config.ts:1) | 37 | 通读审查 | TTL/密钥/Origin/受邀注册配置；T-A 通过，F07 弱值检查追加后复跑通过 | G07：不能证明密钥随机性，未实现轮换；其他配置尚分散 |
 | [src/config/database.config.ts](/Users/yx/mine/project/zeroquant-server/src/config/database.config.ts:1) | 10 | 通读审查 | 生产显式配置、池大小、连接/语句/锁超时；T-C 通过 | G06：真实 TLS/连接池容量未验收 |
 | [src/database/entities/README.md](/Users/yx/mine/project/zeroquant-server/src/database/entities/README.md:1) | 85 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
@@ -160,7 +162,7 @@
 | [src/database/entities/chat.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/chat.entities.ts:1) | 7 | 通读审查 | 2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据 | G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行 |
 | [src/database/entities/index.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/index.ts:1) | 32 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过 | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
 | [src/database/entities/market-data.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/market-data.entities.ts:1) | 134 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
-| [src/database/entities/prediction.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/prediction.entities.ts:1) | 6 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过 | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
+| [src/database/entities/prediction.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/prediction.entities.ts:1) | 14 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [src/database/entities/profile.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/profile.entities.ts:1) | 43 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/database/entities/research.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/research.entities.ts:1) | 110 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/database/entities/system.entities.ts](/Users/yx/mine/project/zeroquant-server/src/database/entities/system.entities.ts:1) | 10 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
@@ -168,7 +170,8 @@
 | [src/database/schema-catalog-check.ts](/Users/yx/mine/project/zeroquant-server/src/database/schema-catalog-check.ts:1) | 33 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：10；异常输出（需人工核对脱敏）：23 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/database/schema-verifier.ts](/Users/yx/mine/project/zeroquant-server/src/database/schema-verifier.ts:1) | 314 | 局部审查 | 查询元数据入口、类型与差异模型、异常输出；F05 脱敏；隔离迁移测试调用核验器通过；扫描定位 SQL/DDL（需判断所在层）：72,77,83,92… | G10：未逐分支通读比较算法；G06 云库未核验 |
 | [src/db.ts](/Users/yx/mine/project/zeroquant-server/src/db.ts:1) | 19 | 通读审查 | dotenv 优先级、Pool 配置及 idle 错误日志通读；构建通过；扫描定位 异常输出（需人工核对脱敏）：14 | G06：未连接真实目标 PostgreSQL |
-| [src/index.ts](/Users/yx/mine/project/zeroquant-server/src/index.ts:1) | 22 | 通读审查 | 启动先验配置、迁移、结构核验、监听与调度入口通读；构建通过 | G05：调度配置启动失败/进程生命周期与监听错误缺专门测试 |
+| [src/health.ts](/Users/yx/mine/project/zeroquant-server/src/health.ts:1) | 8 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [src/index.ts](/Users/yx/mine/project/zeroquant-server/src/index.ts:1) | 40 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [src/legacy-routes.ts](/Users/yx/mine/project/zeroquant-server/src/legacy-routes.ts:1) | 27 | 局部审查 | 2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过；2026-09-17 F17 时序迁移及生产者字段增量复核，后端61/Python针对性4通过 | G01/G06/G10：真实环境验收及其他未通读范围仍待完成 |
 | [src/migrations/001_initial_baseline.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/001_initial_baseline.ts:1) | 214 | 局部审查 | users 唯一与逐笔表字段核对；T-M 迁移执行通过；扫描定位 SQL/DDL（需判断所在层）：9,18,34,43… | G10：未通读完整 baseline DDL/down 的每个语义；未执行线上 down |
 | [src/migrations/002_data_warehouse_core.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/002_data_warehouse_core.ts:1) | 359 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：10,21,35,47… | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
@@ -181,7 +184,8 @@
 | [src/migrations/009_auth_sessions.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/009_auth_sessions.ts:1) | 24 | 通读审查 | 三张表/FK/索引及拒绝自动 down 通读；T-M/T-B 结构通过；扫描定位 SQL/DDL（需判断所在层）：7,12,17 | G07：未加会话保留期/清理流程；G06 真实迁移未执行 |
 | [src/migrations/010_chat_trade_requests.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/010_chat_trade_requests.ts:1) | 14 | 通读审查 | 2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据；扫描定位 SQL/DDL（需判断所在层）：6 | G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行 |
 | [src/migrations/011_prediction_receipts.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/011_prediction_receipts.ts:1) | 13 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过；扫描定位 SQL/DDL（需判断所在层）：6 | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
-| [src/migrations/catalog.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/catalog.ts:1) | 17 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过 | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
+| [src/migrations/012_market_sync_receipts.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/012_market_sync_receipts.ts:1) | 22 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：5,11,16,17… | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [src/migrations/catalog.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/catalog.ts:1) | 18 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [src/migrations/runner.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/runner.ts:1) | 125 | 通读审查 | up/down/status、事务/锁与生产 down 限制通读；构建通过；扫描定位 SQL/DDL（需判断所在层）：8,17,25,34…；异常输出（需人工核对脱敏）：117 | status 会创建迁移表，不是严格只读；G06 真实库升级/权限验收未做 |
 | [src/migrations/types.ts](/Users/yx/mine/project/zeroquant-server/src/migrations/types.ts:1) | 8 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/modules/auth/auth.controller.ts](/Users/yx/mine/project/zeroquant-server/src/modules/auth/auth.controller.ts:1) | 34 | 通读审查 | HTTP/Cookie/DTO 边界；T-B 回环 HTTP 通过 | G06/G07：真实并发、会话生命周期、验证码/多设备 UI 等尚未完成 |
@@ -211,7 +215,7 @@
 | [src/modules/daily-bars/daily-bars.schema.ts](/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.schema.ts:1) | 33 | 通读审查 | F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过 | G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收 |
 | [src/modules/daily-bars/daily-bars.service.ts](/Users/yx/mine/project/zeroquant-server/src/modules/daily-bars/daily-bars.service.ts:1) | 10 | 通读审查 | F13 日线整批Schema/业务/SQL/HTTP分层核对；领域44项及最终8项回归通过 | G02/G06：其他导入仍待拆分；真实多连接与供应商契约未验收 |
 | [src/modules/market-sync/market-sync.controller.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.controller.ts:1) | 6 | 通读审查 | F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过 | G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成 |
-| [src/modules/market-sync/market-sync.repository.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.repository.ts:1) | 36 | 通读审查 | F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过；扫描定位 SQL/DDL（需判断所在层）：10,11,13,15… | G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成 |
+| [src/modules/market-sync/market-sync.repository.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.repository.ts:1) | 49 | 已变更待复核 | 人工证据摘要不再匹配；扫描定位 SQL/DDL（需判断所在层）：12,13,15,20… | 重新审查变更，更新人工记录 |
 | [src/modules/market-sync/market-sync.schema.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.schema.ts:1) | 34 | 通读审查 | F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过 | G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成 |
 | [src/modules/market-sync/market-sync.service.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market-sync/market-sync.service.ts:1) | 6 | 通读审查 | F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过 | G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成 |
 | [src/modules/market/market.controller.ts](/Users/yx/mine/project/zeroquant-server/src/modules/market/market.controller.ts:1) | 21 | 通读审查 | 查询 DTO、参数化 SQL、复盘只读快照与响应映射通读；构建及 T-C 对应领域回归通过 | G06/G12：真实库查询计划、历史取样偏差与供应商证据；repository 真实 SQL 场景未全覆盖 |
@@ -246,7 +250,9 @@
 | [src/profiles/entity-profile-engine.ts](/Users/yx/mine/project/zeroquant-server/src/profiles/entity-profile-engine.ts:1) | 425 | 通读审查 | 事件/行情/新闻查询、PIT 过滤、评分与画像写入/查询通读；构建通过；扫描定位 SQL/DDL（需判断所在层）：279,292,307,313… | G04/G12：数值算法及统计可信度未逐条证明；结构仍混合，真实 PG 快照/并发与新闻关联修订需验证 |
 | [src/quant-routes.ts](/Users/yx/mine/project/zeroquant-server/src/quant-routes.ts:1) | 104 | 局部审查 | 复核三类导入迁出与生产批准组装；领域53项及门禁回归通过 | G02：最新预测读取、画像查询/刷新日期与时区及旧错误契约未闭环；仍保留局部审查口径 |
 | [src/research-production.ts](/Users/yx/mine/project/zeroquant-server/src/research-production.ts:1) | 72 | 通读审查 | 实时/批准查询与固定策略版本，参数化 SQL 和故障拒绝；生产门禁测试通过；扫描定位 SQL/DDL（需判断所在层）：54；宽类型（不等于缺陷）：16；异常输出（需人工核对脱敏）：69 | G12：模型批准、真实数据与质量不是这组测试能证明的 |
-| [src/scheduler/quant-scheduler.ts](/Users/yx/mine/project/zeroquant-server/src/scheduler/quant-scheduler.ts:1) | 275 | 通读审查 | 进程启动/超时/close/error/cron 全文审查；F05 日志与输出上限；构建通过；扫描定位 子进程/动态执行：123；异常输出（需人工核对脱敏）：72,99 | G05：重复计数、跳过状态、固定期限与跨实例防重未关闭；无进程故障测试 |
+| [src/scheduler/process-runner.ts](/Users/yx/mine/project/zeroquant-server/src/scheduler/process-runner.ts:1) | 37 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 子进程/动态执行：21 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [src/scheduler/quant-scheduler.ts](/Users/yx/mine/project/zeroquant-server/src/scheduler/quant-scheduler.ts:1) | 209 | 已变更待复核 | 人工证据摘要不再匹配；扫描定位 异常输出（需人工核对脱敏）：75 | 重新审查变更，更新人工记录 |
+| [src/scheduler/task-lock.ts](/Users/yx/mine/project/zeroquant-server/src/scheduler/task-lock.ts:1) | 18 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：10,14 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/seed.ts](/Users/yx/mine/project/zeroquant-server/src/seed.ts:1) | 344 | 局部审查 | 检查结尾异常处理与退出码；F05 修复原样日志；构建通过；扫描定位 SQL/DDL（需判断所在层）：11,20,36,45… | G10：种子数据/SQL 全文未通读；未执行 seed |
 | [src/shared/errors.ts](/Users/yx/mine/project/zeroquant-server/src/shared/errors.ts:1) | 27 | 通读审查 | 异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过 | G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试 |
 | [src/shared/http.ts](/Users/yx/mine/project/zeroquant-server/src/shared/http.ts:1) | 28 | 通读审查 | 异常目录、脱敏、requestId、异步错误转发、事务释放通读；构建、T-B/T-D 通过 | G08：全链路 trace 与统一错误语言未完成；未逐个故障分支独立测试 |
@@ -256,10 +262,13 @@
 | [test/architecture.test.ts](/Users/yx/mine/project/zeroquant-server/test/architecture.test.ts:1) | 57 | 通读审查 | F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过；扫描定位 SQL/DDL（需判断所在层）：18,27 | G06：单连接/本机HTTP夹具不代表真实并发与供应商验收 |
 | [test/auth-portfolio.test.ts](/Users/yx/mine/project/zeroquant-server/test/auth-portfolio.test.ts:1) | 222 | 通读审查 | 审查用例前置条件、PGlite 排队边界与 HTTP 断言；完整领域 27 项/配置追加5项通过；扫描定位 SQL/DDL（需判断所在层）：69,87,90,103…；网络调用（需核对超时/来源）：192,199,202,204…；子进程/动态执行：69,74,75,76… | 不是多连接压力测试；部分标题（旧令牌）原覆盖不足，现由全局回归补真实 JWT 负例 |
 | [test/chat-trade.test.ts](/Users/yx/mine/project/zeroquant-server/test/chat-trade.test.ts:1) | 205 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过；扫描定位 SQL/DDL（需判断所在层）：24,25,26,39…；网络调用（需核对超时/来源）：188,189,190,191…；子进程/动态执行：26,47,53 | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
-| [test/e2e_baseline.test.ts](/Users/yx/mine/project/zeroquant-server/test/e2e_baseline.test.ts:1) | 275 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：62,63,64,65…；宽类型（不等于缺陷）：97,120,186；网络调用（需核对超时/来源）：30；异常输出（需人工核对脱敏）：270 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [test/e2e_baseline.test.ts](/Users/yx/mine/project/zeroquant-server/test/e2e_baseline.test.ts:1) | 278 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：62,63,64,65…；宽类型（不等于缺陷）：100,123,189；网络调用（需核对超时/来源）：30；异常输出（需人工核对脱敏）：273 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [test/global-review-regressions.test.ts](/Users/yx/mine/project/zeroquant-server/test/global-review-regressions.test.ts:1) | 146 | 通读审查 | 本轮新增 6 项测试全文审查并通过；F13 日线迁移/校验/回滚增量复核，领域44项通过；扫描定位 SQL/DDL（需判断所在层）：61,66,69,95…；子进程/动态执行：61,127 | 真实库/浏览器/供应商验收见 G06/G12 |
+| [test/health.test.ts](/Users/yx/mine/project/zeroquant-server/test/health.test.ts:1) | 12 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [test/ingestion.test.ts](/Users/yx/mine/project/zeroquant-server/test/ingestion.test.ts:1) | 235 | 通读审查 | F14/F15 导入用例、分层护栏及测试脚本核对；领域53项、最终定向9项通过；扫描定位 SQL/DDL（需判断所在层）：79,82,83,92…；网络调用（需核对超时/来源）：224,225,226,227…；子进程/动态执行：82,92 | G06：单连接/本机HTTP夹具不代表真实并发与供应商验收 |
-| [test/market-sync.test.ts](/Users/yx/mine/project/zeroquant-server/test/market-sync.test.ts:1) | 50 | 通读审查 | F17 输入/观测时序/事务边界通读；领域61项与Python针对性4项通过；扫描定位 SQL/DDL（需判断所在层）：25,26,29,32…；子进程/动态执行：26,32 | G03/G06：水位保留、幂等回执、其他写入入口及真实并发/供应商验收未完成 |
+| [test/market-sync.test.ts](/Users/yx/mine/project/zeroquant-server/test/market-sync.test.ts:1) | 55 | 已变更待复核 | 人工证据摘要不再匹配；扫描定位 SQL/DDL（需判断所在层）：25,26,29,32…；子进程/动态执行：26,32,49 | 重新审查变更，更新人工记录 |
+| [test/postgres-concurrency.test.ts](/Users/yx/mine/project/zeroquant-server/test/postgres-concurrency.test.ts:1) | 53 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：22,34,39,40 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [test/process-runner.test.ts](/Users/yx/mine/project/zeroquant-server/test/process-runner.test.ts:1) | 15 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [test/research-migrations-smoke.ts](/Users/yx/mine/project/zeroquant-server/test/research-migrations-smoke.ts:1) | 79 | 通读审查 | 2026-09-17 F16 回执/迟到/查询边界与迁移目录增量复核；领域59项、定向15项、迁移11/52通过；扫描定位 SQL/DDL（需判断所在层）：17,21,25,27…；宽类型（不等于缺陷）：16,33,36,54；子进程/动态执行：16,17,19,22… | G02/G06：旧数据兼容边界、嵌套快照/投影分层及真实多连接/供应商验收仍开放 |
 | [test/research-production.test.ts](/Users/yx/mine/project/zeroquant-server/test/research-production.test.ts:1) | 25 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [test/schema-compatibility.test.ts](/Users/yx/mine/project/zeroquant-server/test/schema-compatibility.test.ts:1) | 72 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 SQL/DDL（需判断所在层）：13,18,21,22…；宽类型（不等于缺陷）：15,16；子进程/动态执行：13,18,21,29… | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
@@ -270,30 +279,32 @@
 | 文件 | 行数 | 审查层级 | 验证结果 | 剩余缺口 |
 | --- | --- | --- | --- | --- |
 | [.dockerignore](/Users/yx/mine/project/zeroquant-web/.dockerignore:1) | 5 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
-| [.github/workflows/deploy.yml](/Users/yx/mine/project/zeroquant-web/.github/workflows/deploy.yml:1) | 25 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
-| [.gitignore](/Users/yx/mine/project/zeroquant-web/.gitignore:1) | 3 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
+| [.github/workflows/deploy.yml](/Users/yx/mine/project/zeroquant-web/.github/workflows/deploy.yml:1) | 28 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
+| [.gitignore](/Users/yx/mine/project/zeroquant-web/.gitignore:1) | 5 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [Dockerfile](/Users/yx/mine/project/zeroquant-web/Dockerfile:1) | 5 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
 | [README.md](/Users/yx/mine/project/zeroquant-web/README.md:1) | 27 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [index.html](/Users/yx/mine/project/zeroquant-web/index.html:1) | 17 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [nginx.conf](/Users/yx/mine/project/zeroquant-web/nginx.conf:1) | 23 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
-| [package-lock.json](/Users/yx/mine/project/zeroquant-web/package-lock.json:1) | 3053 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
-| [package.json](/Users/yx/mine/project/zeroquant-web/package.json:1) | 32 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
+| [package-lock.json](/Users/yx/mine/project/zeroquant-web/package-lock.json:1) | 3258 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
+| [package.json](/Users/yx/mine/project/zeroquant-web/package.json:1) | 35 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
+| [playwright.config.ts](/Users/yx/mine/project/zeroquant-web/playwright.config.ts:1) | 10 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [postcss.config.js](/Users/yx/mine/project/zeroquant-web/postcss.config.js:1) | 6 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/App.vue](/Users/yx/mine/project/zeroquant-web/src/App.vue:1) | 9 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
 | [src/api/chat-requests.ts](/Users/yx/mine/project/zeroquant-web/src/api/chat-requests.ts:1) | 45 | 通读审查 | 2026-09-16 成交聊天事务/回执/重试边界复核；领域38、前端7、迁移10/51通过，详见本轮证据 | G01/G06：普通聊天仍待拆分；真实多连接与浏览器验收未执行 |
 | [src/api/index.ts](/Users/yx/mine/project/zeroquant-web/src/api/index.ts:1) | 46 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
-| [src/api/session.ts](/Users/yx/mine/project/zeroquant-web/src/api/session.ts:1) | 39 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
+| [src/api/session.ts](/Users/yx/mine/project/zeroquant-web/src/api/session.ts:1) | 48 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 | [src/env.d.ts](/Users/yx/mine/project/zeroquant-web/src/env.d.ts:1) | 7 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射；扫描定位 宽类型（不等于缺陷）：5 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [src/main.ts](/Users/yx/mine/project/zeroquant-web/src/main.ts:1) | 21 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
 | [src/router/index.ts](/Users/yx/mine/project/zeroquant-web/src/router/index.ts:1) | 31 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
 | [src/style.css](/Users/yx/mine/project/zeroquant-web/src/style.css:1) | 42 | 元数据登记，未通读 | 文件摘要及行数 | G10：配置、文档或数据内容仍待逐项核验 |
 | [src/utils/markdown.ts](/Users/yx/mine/project/zeroquant-web/src/utils/markdown.ts:1) | 10 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
-| [src/views/Dashboard.vue](/Users/yx/mine/project/zeroquant-web/src/views/Dashboard.vue:1) | 1627 | 局部审查 | 2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过；扫描定位 宽类型（不等于缺陷）：396,643,644,650…；HTML 注入入口（需核对转义）：554；异常 any：1169,1193,1209,1408… | G01/G06/G10：真实环境验收及其他未通读范围仍待完成 |
+| [src/views/Dashboard.vue](/Users/yx/mine/project/zeroquant-web/src/views/Dashboard.vue:1) | 1627 | 已变更待复核 | 人工证据摘要不再匹配；扫描定位 宽类型（不等于缺陷）：396,643,644,650…；HTML 注入入口（需核对转义）：554；异常 any：1169,1193,1209,1408… | 重新审查变更，更新人工记录 |
 | [src/views/Login.vue](/Users/yx/mine/project/zeroquant-web/src/views/Login.vue:1) | 133 | 通读审查 | 前端身份代次/刷新/路由/输入/渲染与组装通读；tsc、构建、4项前端测试通过；扫描定位 宽类型（不等于缺陷）：107 | G06/G09：真实 Cookie、多标签/跨账号浏览器测试、Vue 完整类型/视觉验收未做 |
 | [tailwind.config.js](/Users/yx/mine/project/zeroquant-web/tailwind.config.js:1) | 23 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
+| [test/browser/auth.spec.ts](/Users/yx/mine/project/zeroquant-web/test/browser/auth.spec.ts:1) | 44 | 静态扫描，未通读 | 关键词扫描；未建立逐文件行为测试映射 | G10：逐函数语义、调用边界、失败路径仍待人工审查；全套通过不等于该文件被覆盖 |
 | [test/frontend-security.test.mjs](/Users/yx/mine/project/zeroquant-web/test/frontend-security.test.mjs:1) | 179 | 通读审查 | 2026-09-16 普通聊天迁移、原子回执、分页与响应竞态增量复核；后端42/前端8通过 | G01/G06/G10：真实环境验收及其他未通读范围仍待完成 |
 | [tsconfig.json](/Users/yx/mine/project/zeroquant-web/tsconfig.json:1) | 25 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
-| [vite.config.ts](/Users/yx/mine/project/zeroquant-web/vite.config.ts:1) | 17 | 通读审查 | 构建/静态服务路径与本轮类型检查配置全文核对；构建通过 | G09/G11：外层网关 API 转发与镜像未实测；本轮未依赖漏洞审计 |
+| [vite.config.ts](/Users/yx/mine/project/zeroquant-web/vite.config.ts:1) | 23 | 已变更待复核 | 人工证据摘要不再匹配 | 重新审查变更，更新人工记录 |
 
 ## 更新与核验
 

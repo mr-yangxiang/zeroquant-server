@@ -16,7 +16,7 @@
     "schema:verify": "node --import tsx src/database/schema-verifier.ts",
     "schema:verify:json": "node --import tsx src/database/schema-verifier.ts --json",
     "test:e2e": "node --import tsx test/e2e_baseline.test.ts",
-    "test:domains": "node --import tsx --test test/auth-portfolio.test.ts test/architecture.test.ts test/global-review-regressions.test.ts test/chat-trade.test.ts test/ingestion.test.ts test/market-sync.test.ts",
+    "test:domains": "node --import tsx --test test/auth-portfolio.test.ts test/architecture.test.ts test/global-review-regressions.test.ts test/chat-trade.test.ts test/ingestion.test.ts test/market-sync.test.ts test/process-runner.test.ts test/health.test.ts",
     "test:migrations": "PGLITE_MODULE_PATH=./node_modules/@electric-sql/pglite/dist/index.js node --import tsx test/research-migrations-smoke.ts && PGLITE_MODULE_PATH=./node_modules/@electric-sql/pglite/dist/index.js node --import tsx test/schema-compatibility.test.ts"
   },
   "dependencies": {

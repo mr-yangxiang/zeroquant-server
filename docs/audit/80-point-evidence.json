@@ -574,9 +574,9 @@
         {
           "repository": "web",
           "path": "src/api/session.ts",
-          "line": 17,
+          "line": 26,
           "anchor": "export function refreshSession",
-          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+          "sha256": "f70885c05a773882a878bd2fbeb0566ecbcc8809fee221d5a395fc7279c83df7"
         }
       ],
       "verification": "T-B HTTP Cookie、刷新轮换通过",
@@ -612,9 +612,9 @@
         {
           "repository": "web",
           "path": "src/api/session.ts",
-          "line": 17,
+          "line": 26,
           "anchor": "export function refreshSession",
-          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+          "sha256": "f70885c05a773882a878bd2fbeb0566ecbcc8809fee221d5a395fc7279c83df7"
         }
       ],
       "verification": "T-B 刷新重放、独立会话、跨用户撤销拒绝通过",
@@ -897,9 +897,9 @@
         {
           "repository": "server",
           "path": "src/app.ts",
-          "line": 24,
+          "line": 25,
           "anchor": "export function createApp",
-          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+          "sha256": "0790459fdb4b2cabe16d74c949fb9e1efcd41028545b53953b499ff65e2f0221"
         },
         {
           "repository": "server",
@@ -909,7 +909,7 @@
           "sha256": "748342c99c628719a1e7dd4264b7b339bf38ee2180b783c866e6caefbe625191"
         }
       ],
-      "verification": "T-B 非法 JSON 和请求链路通过",
+      "verification": "T-B 非法 JSON 和请求链路通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "旧路由自身响应不自动变为新契约，见 G01/G02；2026-09-16 成交/普通问答原子回执与分页已验证；研究适配器分层/真实环境验收仍开放，见 F11/F12；日线/新闻/龙虎榜/预测校验与写入已按F13～F15修复；新预测回执重放与查询日期边界已按F16修复；画像查询、旧数据兼容及真实验收仍开放"
     },
     {
@@ -1083,12 +1083,12 @@
         {
           "repository": "server",
           "path": "src/scheduler/quant-scheduler.ts",
-          "line": 95,
+          "line": 98,
           "anchor": "function executeQuantScript",
-          "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5"
+          "sha256": "ab397d3d264ffd7f912b65ddcc4ca028accefcf7d5339f2f468f70d05e1acdbc"
         }
       ],
-      "verification": "T-D 结构化日志脱敏通过；本轮修复 Node 旧异常输出",
+      "verification": "T-D 结构化日志脱敏通过；本轮修复 Node 旧异常输出；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "G08：Python、历史脚本未全面统一；无集中日志平台验收"
     },
     {
@@ -1107,12 +1107,12 @@
         {
           "repository": "server",
           "path": "src/index.ts",
-          "line": 8,
+          "line": 11,
           "anchor": "async function startServer",
-          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+          "sha256": "da9084994cb3ccb1d3b0cfce2b4357fe9c5c35c3176ca0663c3c99474068ca47"
         }
       ],
-      "verification": "JSON 分类日志通读；T-D 通过",
+      "verification": "JSON 分类日志通读；T-D 通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "G08：调度普通状态仍文本；Python 日志契约待统一"
     },
     {
@@ -1169,12 +1169,12 @@
         {
           "repository": "server",
           "path": "src/scheduler/quant-scheduler.ts",
-          "line": 95,
+          "line": 98,
           "anchor": "function executeQuantScript",
-          "sha256": "9c558580de7ddaf6f84f761505c9f5cbe196263607966bcc3504cdfb5a5944f5"
+          "sha256": "ab397d3d264ffd7f912b65ddcc4ca028accefcf7d5339f2f468f70d05e1acdbc"
         }
       ],
-      "verification": "T-D 私密异常不输出通过；Node 已修复多处原样输出",
+      "verification": "T-D 私密异常不输出通过；Node 已修复多处原样输出；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "G08：Python CLI/历史脚本残留需逐项脱敏；provider/outbox 本轮已修复"
     },
     {
@@ -1644,9 +1644,9 @@
         {
           "repository": "web",
           "path": "src/api/session.ts",
-          "line": 17,
+          "line": 26,
           "anchor": "export function refreshSession",
-          "sha256": "56e1af33088bb1c4a5ad13082f88502eabbf1e8ee43bbe7a3be39d980ee911e6"
+          "sha256": "f70885c05a773882a878bd2fbeb0566ecbcc8809fee221d5a395fc7279c83df7"
         }
       ],
       "verification": "TokenPort 隔离 JWT 实现；T-D JWT 验证通过",
@@ -1761,16 +1761,16 @@
         {
           "repository": "server",
           "path": "src/index.ts",
-          "line": 8,
+          "line": 11,
           "anchor": "async function startServer",
-          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+          "sha256": "da9084994cb3ccb1d3b0cfce2b4357fe9c5c35c3176ca0663c3c99474068ca47"
         },
         {
           "repository": "server",
           "path": "src/app.ts",
-          "line": 24,
+          "line": 25,
           "anchor": "export function createApp",
-          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+          "sha256": "0790459fdb4b2cabe16d74c949fb9e1efcd41028545b53953b499ff65e2f0221"
         },
         {
           "repository": "server",
@@ -1787,7 +1787,7 @@
           "sha256": "5adcd11cc0f8f51a778132ce2e085fc1203838753a686413c6b522c952741a66"
         }
       ],
-      "verification": "入口与组装已收敛；T-C 通过",
+      "verification": "入口与组装已收敛；T-C 通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "旧复杂度仍在 legacy/quant，文件搬迁不等于业务已拆完"
     },
     {
@@ -2157,12 +2157,12 @@
         {
           "repository": "server",
           "path": "src/index.ts",
-          "line": 8,
+          "line": 11,
           "anchor": "async function startServer",
-          "sha256": "3850f37da58676ac20a931991594184cd3a9b2d2ec08df073dc7dae4064652ac"
+          "sha256": "da9084994cb3ccb1d3b0cfce2b4357fe9c5c35c3176ca0663c3c99474068ca47"
         }
       ],
-      "verification": "T-A 缺失/短值/占位符/重复字符/空白值拒绝通过",
+      "verification": "T-A 缺失/短值/占位符/重复字符/空白值拒绝通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "程序无法证明随机来源；密钥生成、轮换和秘密管理部署验收见 G07"
     },
     {
@@ -2181,12 +2181,12 @@
         {
           "repository": "server",
           "path": "src/app.ts",
-          "line": 24,
+          "line": 25,
           "anchor": "export function createApp",
-          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+          "sha256": "0790459fdb4b2cabe16d74c949fb9e1efcd41028545b53953b499ff65e2f0221"
         }
       ],
-      "verification": "认证和 DB 配置已集中，T-A/T-C 通过",
+      "verification": "认证和 DB 配置已集中，T-A/T-C 通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "G04/G05/G08：LLM、调度、Python 环境配置仍分散"
     },
     {
@@ -2212,12 +2212,12 @@
         {
           "repository": "server",
           "path": "src/app.ts",
-          "line": 24,
+          "line": 25,
           "anchor": "export function createApp",
-          "sha256": "7bdfa0025a8e3ad87f3c8e462802ecc507e89b9234cfda5af675a73c017361d6"
+          "sha256": "0790459fdb4b2cabe16d74c949fb9e1efcd41028545b53953b499ff65e2f0221"
         }
       ],
-      "verification": "createAuthModule 装配完整链路；T-B HTTP 通过",
+      "verification": "createAuthModule 装配完整链路；T-B HTTP 通过；2026-09-17后续生产加固：见production-hardening-2026-09-17.md（隔离验证，未发布）",
       "remaining_gap": "内部量化凭据是独立用途，不复用用户 JWT"
     },
     {

@@ -4,6 +4,9 @@ import { runMigrationsUp } from './migrations/runner.js'
 import { startQuantInternalScheduler } from './scheduler/quant-scheduler.js'
 import { logError } from './shared/logger.js'
 import { verifySchema } from './database/schema-verifier.js'
+import cron from 'node-cron'
+import { pool } from './db.js'
+import { stopProcesses } from './scheduler/process-runner.js'
 
 async function startServer() {
   const app = createApp() // 先校验配置；失败时不执行迁移。
@@ -14,9 +17,24 @@ async function startServer() {
   // 迁移登记不等于字段/唯一索引真实存在；不满足契约时禁止带病提供认证服务。
   const differences = await verifySchema()
   if (differences.some(item => item.severity === 'ERROR')) throw new Error('数据库结构验收失败，请运行 schema:verify')
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(JSON.stringify({ level: 'info', event: 'server.started', port }))
     if (process.env.ZEROQUANT_DISABLE_SCHEDULER !== 'true') startQuantInternalScheduler()
   })
+  let stopping = false
+  const shutdown = async () => {
+    if (stopping) return
+    stopping = true
+    const deadline = setTimeout(() => process.exit(1), 30000)
+    deadline.unref()
+    await Promise.all([...cron.getTasks().values()].map(task => task.stop()))
+    const closed = new Promise<void>(resolve => server.close(() => resolve()))
+    await stopProcesses()
+    await closed
+    await pool.end()
+    clearTimeout(deadline)
+  }
+  process.once('SIGTERM', () => { shutdown().catch(error => { logError('server.shutdown.failed',error);process.exit(1) }) })
+  process.once('SIGINT', () => { shutdown().catch(error => { logError('server.shutdown.failed',error);process.exit(1) }) })
 }
 startServer().catch(error => { logError('server.startup.failed', error); process.exit(1) })

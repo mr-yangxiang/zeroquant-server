@@ -123,7 +123,7 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
             try:
                 runs.append(future.result())
             except Exception as exc:
-                failures.append(f"{stock.code}:{type(exc).__name__}:{exc}")
+                failures.append(f"{stock.code}:{type(exc).__name__}")
     runs.sort(key=lambda item: item.stock_code)
 
     for run in runs:
@@ -132,14 +132,15 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
             try:
                 sink.persist_run(run)
             except Exception as exc:
-                print(f"{run.stock_code}: queued in outbox after persistence failure: {exc}", file=sys.stderr)
+                failures.append(f"{run.stock_code}: persistence failed ({type(exc).__name__})")
+                print(f"{run.stock_code}: queued in outbox after persistence failure ({type(exc).__name__})", file=sys.stderr)
     if runs:
         report = write_daily_markdown(runs, settings.audit_dir)
         print(f"audit_report={report}")
     if failures:
         print("failures=" + json.dumps(failures, ensure_ascii=False), file=sys.stderr)
-    if not runs:
-        raise RuntimeError("no stock forecast could be produced")
+    if not runs or failures:
+        raise RuntimeError("daily run incomplete; check structured failure summary")
     print(
         json.dumps(
             {

@@ -88,7 +88,7 @@ class TencentMarketDataProvider:
         if not stocks:
             return {}
         codes = ",".join(stock.full_code for stock in stocks)
-        raw = self.transport.text(f"http://qt.gtimg.cn/q={codes}", encoding="gbk")
+        raw = self.transport.text(f"https://qt.gtimg.cn/q={codes}", encoding="gbk")
         specs = {stock.code: stock for stock in stocks}
         result: dict[str, QuoteSnapshot] = {}
         for line in raw.split(";"):
@@ -120,7 +120,7 @@ class TencentMarketDataProvider:
 
     def fetch_minutes(self, stock: StockSpec) -> list[MinuteBar]:
         payload = self.transport.json(
-            f"http://web.ifzq.gtimg.cn/appstock/app/minute/query?code={stock.full_code}"
+            f"https://web.ifzq.gtimg.cn/appstock/app/minute/query?code={stock.full_code}"
         )
         rows = (
             payload.get("data", {})

@@ -30,12 +30,13 @@ test('行情观测排序、跨日与滚动失败回滚',async()=>{
  try {
   for(const migration of ALL_MIGRATIONS)await migration.up(client)
   await db.exec("INSERT INTO stocks(code,full_code,name,high_price,low_price) VALUES('000572','sz000572','测试',100,1)")
-  await service.ingest(point);let row=await snapshot();assert.equal(row.high_price,12);assert.equal(row.low_price,9)
+  const first=await service.ingest(point);let row=await snapshot();assert.equal(row.high_price,12);assert.equal(row.low_price,9)
   await service.ingest({...point,observedAt:'2026-09-16T10:01:00+08:00',realPrice:11,highPrice:13,lowPrice:10})
   const newest=await snapshot();assert.equal(newest.high_price,13);assert.equal(newest.low_price,9)
   await service.ingest({...point,observedAt:'2026-09-16T09:59:00+08:00',realPrice:5,highPrice:99,lowPrice:1})
   assert.deepEqual(await snapshot(),newest)
-  await assert.rejects(()=>service.ingest(point),e=>e instanceof AppError&&e.key==='CONFLICT')
+  assert.deepEqual(await service.ingest(point),first)
+  await assert.rejects(()=>service.ingest({...point,pct:2}),e=>e instanceof AppError&&e.key==='CONFLICT')
   const next={...point,tradeDate:'2026-09-17',observedAt:'2026-09-17T09:30:00+08:00',timestampStr:'2026-09-17T09:30:00+08:00',realPrice:20,highPrice:21,lowPrice:19}
   await service.ingest(next);row=await snapshot();assert.equal(row.high_price,21);assert.equal(row.low_price,19)
   await service.ingest({...point,observedAt:'2026-09-16T10:00:30+08:00'});assert.deepEqual(await snapshot(),row)
@@ -45,6 +46,10 @@ test('行情观测排序、跨日与滚动失败回滚',async()=>{
   assert.deepEqual(await snapshot(),row)
   assert.equal((await db.query('SELECT COUNT(*)::int AS n FROM stock_price_histories')).rows[0].n,before)
   fail=false
+  await db.exec('DELETE FROM stock_price_histories')
+  await service.ingest({...point,observedAt:'2026-09-16T09:58:00+08:00'})
+  assert.deepEqual(await snapshot(),row)
+  assert.deepEqual(await service.ingest(point),first)
   await assert.rejects(()=>service.ingest({...point,stockCode:'600839'}),e=>e instanceof AppError&&e.key==='NOT_FOUND')
  } finally {await db.close()}
 })

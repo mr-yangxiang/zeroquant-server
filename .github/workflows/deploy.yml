@@ -9,6 +9,19 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: zeroquant_isolated
+        ports:
+          - 55439:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
     - uses: actions/checkout@v3
@@ -33,6 +46,11 @@ jobs:
       run: |
         npm run schema:catalog-check
         node --import tsx test/research-production.test.ts
+
+    - name: Verify isolated PostgreSQL concurrency
+      env:
+        ZEROQUANT_ISOLATED_DATABASE_URL: postgresql://postgres:isolated-test-only@127.0.0.1:55439/zeroquant_isolated
+      run: node --import tsx test/postgres-concurrency.test.ts
 
     - uses: actions/setup-python@v5
       with:
