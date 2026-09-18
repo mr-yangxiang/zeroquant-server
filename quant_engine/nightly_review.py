@@ -1,33 +1,32 @@
 #!/usr/bin/env python3
-"""Evaluate completed daily forecasts without mutating the champion model."""
+"""Evaluate completed daily forecasts and dynamic rolling predictions without mutating the champion model."""
 
 from __future__ import annotations
 
 import argparse
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from zeroquant.config import STOCKS, Settings
-from zeroquant.providers import DailyHistoryProvider, HttpTransport, MarketDataError
+from zeroquant.providers import DailyHistoryProvider, HttpTransport, MarketDataError, TencentMarketDataProvider
 
 
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
-def _load_daily_runs(path: Path) -> dict[str, dict]:
-    selected: dict[str, dict] = {}
+def _load_all_runs(path: Path) -> list[dict]:
+    runs: list[dict] = []
     if not path.exists():
-        return selected
+        return runs
     for line in path.read_text(encoding="utf-8").splitlines():
         try:
             run = json.loads(line)
+            runs.append(run)
         except json.JSONDecodeError:
             continue
-        if run.get("mode") == "daily" and run.get("stockCode"):
-            selected[str(run["stockCode"])] = run
-    return selected
+    return runs
 
 
 def _outcome_bucket(realized_pct: float, cost_pct: float) -> str:
@@ -42,21 +41,30 @@ def review(target_date: str | None = None) -> dict:
     settings = Settings.from_env()
     target = date.fromisoformat(target_date) if target_date else datetime.now(SHANGHAI).date()
     run_path = settings.audit_dir / "prediction_runs" / f"{target.isoformat()}.jsonl"
-    runs = _load_daily_runs(run_path)
-    if not runs:
+    all_runs = _load_all_runs(run_path)
+    daily_runs = {str(r["stockCode"]): r for r in all_runs if r.get("mode") == "daily" and r.get("stockCode")}
+    realtime_runs = [r for r in all_runs if r.get("mode") == "realtime" and r.get("stockCode")]
+
+    if not daily_runs and not realtime_runs:
         summary = {
+            "taskStatus": "NORMAL_SKIP",
             "status": "SKIPPED",
             "tradeDate": target.isoformat(),
-            "reason": f"no daily forecast run found for {target.isoformat()}",
+            "reason": f"no daily or realtime forecast run found for {target.isoformat()}",
         }
+        print("ZEROQUANT_TASK_STATUS=SKIPPED")
         print(json.dumps(summary, ensure_ascii=False))
         return summary
 
-    provider = DailyHistoryProvider(HttpTransport(settings.request_timeout_seconds))
+    transport = HttpTransport(settings.request_timeout_seconds)
+    provider = DailyHistoryProvider(transport)
+    market = TencentMarketDataProvider(transport)
     rows: list[dict] = []
     failures: list[str] = []
+
+    # 1. 盘前基线预测与收盘结果比对
     for stock in STOCKS:
-        run = runs.get(stock.code)
+        run = daily_runs.get(stock.code)
         if not run:
             continue
         try:
@@ -100,15 +108,69 @@ def review(target_date: str | None = None) -> dict:
             }
         )
 
-    if not rows:
-        raise RuntimeError(f"actual close is not available for {target.isoformat()}")
+    # 2. 盘中动态预测按时点与周期逐分钟匹配复盘
+    rolling_eval_records: list[dict] = []
+    minute_bars_cache: dict[str, dict[str, float]] = {}
+    for stock in STOCKS:
+        try:
+            today_minutes = market.fetch_today_minute_bars(stock)
+            minute_bars_cache[stock.code] = {b.bar_time.strftime("%H:%M"): b.close for b in today_minutes}
+        except Exception:
+            minute_bars_cache[stock.code] = {}
+
+    for r in realtime_runs:
+        code = str(r.get("stockCode"))
+        min_map = minute_bars_cache.get(code, {})
+        if not min_map:
+            continue
+        as_of_raw = r.get("asOf")
+        if not as_of_raw:
+            continue
+        try:
+            as_of_dt = datetime.fromisoformat(as_of_raw)
+        except ValueError:
+            continue
+        ref_price = float(r.get("referencePrice") or 0)
+        if ref_price <= 0:
+            continue
+
+        for h in r.get("horizons", []):
+            lead = int(h.get("horizonMinutes", 0))
+            target_dt = as_of_dt + timedelta(minutes=lead)
+            target_hhmm = target_dt.strftime("%H:%M")
+            if target_hhmm in min_map:
+                actual_p = min_map[target_hhmm]
+                realized_ret = (actual_p / ref_price - 1.0) * 100.0
+                expected_ret = float(h.get("expectedReturnPct") or h.get("q50ReturnPct") or 0)
+                q10 = float(h.get("q10ReturnPct", -999))
+                q90 = float(h.get("q90ReturnPct", 999))
+                rolling_eval_records.append({
+                    "stockCode": code,
+                    "horizonMinutes": lead,
+                    "forecastTime": as_of_dt.strftime("%H:%M"),
+                    "targetTime": target_hhmm,
+                    "expectedReturnPct": expected_ret,
+                    "realizedReturnPct": realized_ret,
+                    "errorPct": abs(realized_ret - expected_ret),
+                    "insideP10P90": q10 <= realized_ret <= q90,
+                })
+
+    rolling_summary: dict = {
+        "totalEvaluatedPoints": len(rolling_eval_records),
+        "meanAbsoluteErrorPct": round(sum(item["errorPct"] for item in rolling_eval_records) / len(rolling_eval_records), 4) if rolling_eval_records else None,
+        "p10P90Coverage": round(sum(1 for item in rolling_eval_records if item["insideP10P90"]) / len(rolling_eval_records), 4) if rolling_eval_records else None,
+    }
+
+    status = "VALID_COMPLETE" if rows and len(rows) == len(STOCKS) and not failures else "PARTIAL_COMPLETE" if rows else "NORMAL_SKIP"
     summary = {
+        "taskStatus": status,
         "tradeDate": target.isoformat(),
         "evaluatedAt": datetime.now(SHANGHAI).isoformat(),
-        "sampleSize": len(rows),
-        "meanBrierScore": round(sum(row["brierScore"] for row in rows) / len(rows), 6),
-        "meanAbsoluteReturnErrorPct": round(sum(row["absoluteReturnErrorPct"] for row in rows) / len(rows), 6),
-        "p10P90Coverage": round(sum(bool(row["insideP10P90"]) for row in rows) / len(rows), 6),
+        "dailySampleSize": len(rows),
+        "meanBrierScore": round(sum(row["brierScore"] for row in rows) / len(rows), 6) if rows else 0,
+        "meanAbsoluteReturnErrorPct": round(sum(row["absoluteReturnErrorPct"] for row in rows) / len(rows), 6) if rows else 0,
+        "p10P90Coverage": round(sum(bool(row["insideP10P90"]) for row in rows) / len(rows), 6) if rows else 0,
+        "rollingEvaluation": rolling_summary,
         "promotionDecision": "NO_CHANGE_INSUFFICIENT_EVIDENCE",
         "modelMutation": False,
         "failures": failures,
@@ -120,8 +182,9 @@ def review(target_date: str | None = None) -> dict:
     json_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     markdown = [
-        f"# ZeroQuant 收盘后预测评估 ({target.isoformat()})",
+        f"# ZeroQuant 收盘后预测评估与动态复盘 ({target.isoformat()})",
         "",
+        "## 1. 盘前基线预测评估",
         f"- 样本数：{len(rows)}",
         f"- 平均 Brier Score：{summary['meanBrierScore']:.4f}",
         f"- 平均绝对收益误差：{summary['meanAbsoluteReturnErrorPct']:.3f}%",
@@ -137,9 +200,18 @@ def review(target_date: str | None = None) -> dict:
         markdown.append(
             f"| {row['stockName']} ({row['stockCode']}) | {row['realizedReturnPct']:+.2f}% | {row['outcome']} | {row['brierScore']:.4f} | {'是' if row['insideP10P90'] else '否'} |"
         )
+
+    cov_str = f"{rolling_summary['p10P90Coverage']:.1%}" if rolling_summary["p10P90Coverage"] is not None else "N/A"
+    markdown.extend([
+        "",
+        "## 2. 盘中动态预测逐分钟时点复盘",
+        f"- 评估预测点总数：{rolling_summary['totalEvaluatedPoints']}",
+        f"- 动态平均绝对误差：{rolling_summary['meanAbsoluteErrorPct'] if rolling_summary['meanAbsoluteErrorPct'] is not None else 'N/A'}%",
+        f"- 动态 P10-P90 覆盖率：{cov_str}",
+    ])
     md_path = review_dir / f"review_{target.isoformat()}.md"
     md_path.write_text("\n".join(markdown) + "\n", encoding="utf-8")
-    print(json.dumps({"review": str(json_path), "markdown": str(md_path), **{k: v for k, v in summary.items() if k != "rows"}}, ensure_ascii=False))
+    print(json.dumps({"taskStatus": status, "review": str(json_path), "markdown": str(md_path), **{k: v for k, v in summary.items() if k != "rows"}}, ensure_ascii=False))
     return summary
 
 

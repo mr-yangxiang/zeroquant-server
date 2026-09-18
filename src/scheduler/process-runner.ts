@@ -9,13 +9,18 @@ export async function stopProcesses() {
   })))
 }
 
-export interface ProcessResult { status: 'SUCCESS' | 'SKIPPED' | 'TIMEOUT' | 'ERROR'; durationMs: number }
+export interface ProcessResult {
+  status: 'SUCCESS' | 'SKIPPED' | 'TIMEOUT' | 'ERROR'
+  durationMs: number
+  output: string
+  parsedData?: Record<string, any> | null
+}
 /** Resolve once, after the process has closed; never release an execution lock while it is alive. */
 export function runProcess(command: string, args: string[], options: {
   cwd?: string; env?: NodeJS.ProcessEnv; timeoutMs: number; signal?: AbortSignal
 }): Promise<ProcessResult> {
   return new Promise(resolve => {
-    if (stopping || options.signal?.aborted) { resolve({ status: 'ERROR', durationMs: 0 }); return }
+    if (stopping || options.signal?.aborted) { resolve({ status: 'ERROR', durationMs: 0, output: '' }); return }
     const started = Date.now()
     let timedOut = false, failed = false, output = ''
     const child = spawn(command, args, { cwd: options.cwd, env: options.env, stdio: ['ignore', 'pipe', 'pipe'] })
@@ -30,8 +35,26 @@ export function runProcess(command: string, args: string[], options: {
       clearTimeout(timer)
       active.delete(child)
       options.signal?.removeEventListener('abort', abort)
-      const skipped = output.split('\n').some(line => line.trim() === 'ZEROQUANT_TASK_STATUS=SKIPPED')
-      resolve({ status: timedOut ? 'TIMEOUT' : failed || code !== 0 ? 'ERROR' : skipped ? 'SKIPPED' : 'SUCCESS', durationMs: Date.now() - started })
+
+      let parsedData: Record<string, any> | null = null
+      const lines = output.trim().split('\n')
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const line = lines[i].trim()
+        if (line.startsWith('{') && line.endsWith('}')) {
+          try {
+            parsedData = JSON.parse(line)
+            break
+          } catch (_) {}
+        }
+      }
+
+      const skipped = output.split('\n').some(line => line.trim() === 'ZEROQUANT_TASK_STATUS=SKIPPED') || parsedData?.taskStatus === 'NORMAL_SKIP'
+      resolve({
+        status: timedOut ? 'TIMEOUT' : failed || code !== 0 ? 'ERROR' : skipped ? 'SKIPPED' : 'SUCCESS',
+        durationMs: Date.now() - started,
+        output,
+        parsedData,
+      })
     })
   })
 }

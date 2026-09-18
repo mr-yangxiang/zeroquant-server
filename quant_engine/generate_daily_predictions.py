@@ -141,9 +141,15 @@ def run_generator(target_date: str | None = None, persist: bool = True) -> list[
         print("failures=" + json.dumps(failures, ensure_ascii=False), file=sys.stderr)
     if not runs or failures:
         raise RuntimeError("daily run incomplete; check structured failure summary")
+    status = "VALID_COMPLETE" if len(runs) == len(STOCKS) and not failures else "PARTIAL_COMPLETE"
     print(
         json.dumps(
             {
+                "taskStatus": status,
+                "asOf": as_of.isoformat(),
+                "expectedCount": len(STOCKS),
+                "processedCount": len(runs),
+                "persistedCount": len(runs) if persist else 0,
                 "tradeDate": target.isoformat(),
                 "modelVersion": pipeline.artifact.version,
                 "modelState": pipeline.artifact.state,

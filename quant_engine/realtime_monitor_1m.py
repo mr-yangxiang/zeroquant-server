@@ -39,15 +39,32 @@ def is_continuous_auction(now: datetime) -> bool:
     if now.weekday() >= 5:
         return False
     current = now.time().replace(tzinfo=None)
-    return time(9, 30) <= current <= time(11, 30) or time(13, 0) <= current <= time(15, 0)
+    # 连续竞价时间段：09:30-11:30 与 13:00-14:57 (14:57-15:00 为收盘集合竞价)
+    return (time(9, 30) <= current <= time(11, 30)) or (time(13, 0) <= current < time(14, 57))
+
+
+def is_closing_call_auction(now: datetime) -> bool:
+    if now.weekday() >= 5:
+        return False
+    current = now.time().replace(tzinfo=None)
+    # 14:57-15:00 为收盘集合竞价时段，不可按连续竞价挂撤单逻辑推演
+    return time(14, 57) <= current <= time(15, 0)
 
 
 def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]:
     settings = Settings.from_env()
     now = datetime.now(SHANGHAI)
     if not debug and not is_continuous_auction(now):
+        skip_reason = "closing_call_auction_1457_1500" if is_closing_call_auction(now) else "outside_continuous_auction"
         print("ZEROQUANT_TASK_STATUS=SKIPPED")
-        print(f"[{now.isoformat()}] outside continuous auction; no fetch and no write")
+        print(json.dumps({
+            "taskStatus": "NORMAL_SKIP",
+            "reason": skip_reason,
+            "asOf": now.isoformat(),
+            "expectedCount": len(STOCKS),
+            "processedCount": 0,
+            "persistedCount": 0,
+        }, ensure_ascii=False))
         return []
 
     transport = HttpTransport(settings.request_timeout_seconds)
@@ -179,8 +196,13 @@ def run_1m_check(debug: bool = False, persist: bool = True) -> list[ForecastRun]
             failures.append(f"{run.stock_code}: persistence failed ({type(exc).__name__})")
             print(f"{run.stock_code}: persistence failed ({type(exc).__name__})", file=sys.stderr)
 
+    task_status = "VALID_COMPLETE" if len(runs) == len(STOCKS) and not failures else "PARTIAL_COMPLETE"
     result = {
+        "taskStatus": task_status,
         "asOf": now.isoformat(),
+        "expectedCount": len(STOCKS),
+        "processedCount": len(runs),
+        "persistedCount": len(runs) if persist else 0,
         "mode": "debug" if debug else "live",
         "persisted": persist,
         "modelVersion": pipeline.artifact.version,

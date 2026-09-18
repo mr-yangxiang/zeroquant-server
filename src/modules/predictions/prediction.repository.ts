@@ -57,12 +57,23 @@ export class PredictionRepository implements PredictionWriter {
         const primary = parsedHorizons.find((item) => item.horizonMinutes === 15) || parsedHorizons[0]
         const terminal = parsedHorizons[parsedHorizons.length - 1]
         const direction = (primary.pUp || 0) > (primary.pDown || 0) ? '概率偏多' : '概率偏空'
-        await db.query(`DELETE FROM stock_day_predictions WHERE stock_code = $1 AND predict_date = $2::date AND is_base = TRUE`, [stockCode, tradeDate])
+        
+        // 盘前基线只追加、不覆盖：保留首次生成的原始基线，后续新预测以独立版本号递增保存
+        const { rows: existingRows } = await db.query<{ maxV: number | null; hasBase: boolean }>(
+          `SELECT MAX(version) AS "maxV", BOOL_OR(is_base) AS "hasBase"
+           FROM stock_day_predictions
+           WHERE stock_code = $1 AND predict_date = $2::date`,
+          [stockCode, tradeDate]
+        )
+        const hasBase = Boolean(existingRows[0]?.hasBase)
+        const nextVersion = (existingRows[0]?.maxV ? Number(existingRows[0].maxV) : 0) + 1
+        const isBase = !hasBase
+
         await db.query(
           `INSERT INTO stock_day_predictions
             (stock_code, predict_date, version, is_base, time_points, direction, target_pct, metadata, probability_bands)
-           VALUES ($1, $2::date, 1, TRUE, $3::jsonb, $4, $5, $6::jsonb, $7::jsonb)`,
-          [stockCode, tradeDate, JSON.stringify(legacyCurve), direction, terminal.q50ReturnPct, JSON.stringify({ runId, modelVersion: body.modelVersion, modelState: body.modelState }), JSON.stringify(legacyCurve.map(point => ({time:point.time,lower:point.lower,upper:point.upper})))]
+           VALUES ($1, $2::date, $8, $9, $3::jsonb, $4, $5, $6::jsonb, $7::jsonb)`,
+          [stockCode, tradeDate, JSON.stringify(legacyCurve), direction, terminal.q50ReturnPct, JSON.stringify({ runId, modelVersion: body.modelVersion, modelState: body.modelState }), JSON.stringify(legacyCurve.map(point => ({time:point.time,lower:point.lower,upper:point.upper}))), nextVersion, isBase]
         )
         const {rows:later}=await db.query(`SELECT 1 FROM stock_day_predictions WHERE stock_code=$1 AND is_base=TRUE AND predict_date>$2::date LIMIT 1`,[stockCode,tradeDate])
         if (prices.length > 0 && later.length===0) {

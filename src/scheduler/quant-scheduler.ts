@@ -14,16 +14,33 @@ const __dirname = path.dirname(__filename)
 // 引擎根目录收敛在工程 quant_engine 目录下
 const QUANT_ENGINE_DIR = path.resolve(__dirname, '../../quant_engine')
 
+export type TaskExecutionStatus =
+  | 'IDLE'
+  | 'RUNNING'
+  | 'VALID_COMPLETE'
+  | 'PARTIAL_COMPLETE'
+  | 'NORMAL_SKIP'
+  | 'TIMEOUT'
+  | 'ERROR'
+  | 'SUCCESS'
+
 interface TaskMetric {
   name: string
   cronExpr: string
   lastRunAt: string | null
   lastSuccessAt?: string
   lastDurationMs: number
-  status: 'IDLE' | 'RUNNING' | 'SUCCESS' | 'SKIPPED' | 'TIMEOUT' | 'ERROR'
+  status: TaskExecutionStatus
   lastError: string | null
   totalRuns: number
   totalErrors: number
+  expectedCount?: number
+  processedCount?: number
+  persistedCount?: number
+  asOfAt?: string | null
+  lastSkipReason?: string | null
+  evidenceCount?: number
+  entityCount?: number
 }
 
 const taskMetrics: Record<string, TaskMetric> = {
@@ -82,8 +99,19 @@ async function executeEntityProfileRefresh() {
   metric.totalRuns++
   try {
     const result = await refreshEntityProfiles(new Date())
-    metric.status = 'SUCCESS'
-    console.log(`[QuantScheduler] 画像更新完成：${result.entityCount} 个公开交易实体，${result.evidenceCount} 条证据。`)
+    metric.entityCount = result.entityCount
+    metric.evidenceCount = result.evidenceCount
+    if (result.skipped) {
+      metric.status = 'NORMAL_SKIP'
+      metric.lastSkipReason = result.warnings?.[0] || '任务重叠跳过'
+    } else if (result.evidenceCount === 0) {
+      metric.status = 'NORMAL_SKIP'
+      metric.lastSkipReason = '无新增披露证据，保持已有画像'
+    } else {
+      metric.status = 'VALID_COMPLETE'
+      metric.lastSuccessAt = new Date().toISOString()
+      console.log(`[QuantScheduler] 画像更新完成：${result.entityCount} 个公开交易实体，${result.evidenceCount} 条证据。`)
+    }
   } catch (error) {
     metric.status = 'ERROR'
     metric.totalErrors++
@@ -103,8 +131,8 @@ async function executeQuantScript(taskKey: string, scriptName: string, args: str
     metric.status = 'ERROR'; metric.lastError = '脚本文件不存在'; metric.totalErrors++
     return
   }
-  const defaults: Record<string, number> = { minutelyMonitor: 55, openingBaseline: 600, nightlyReview: 900, researchShadow: 55 }
-  const raw = process.env['ZEROQUANT_TASK_TIMEOUT_' + taskKey] ?? String(defaults[taskKey] ?? 300)
+  const defaults: Record<string, number> = { minutelyMonitor: 30, openingBaseline: 180, nightlyReview: 300, researchShadow: 45 }
+  const raw = process.env['ZEROQUANT_TASK_TIMEOUT_' + taskKey] ?? String(defaults[taskKey] ?? 120)
   if (!/^\d+$/.test(raw) || Number(raw) < 1 || Number(raw) > 3600) throw new Error('任务期限配置无效: ' + taskKey)
   metric.status = 'RUNNING'
   metric.lastRunAt = new Date().toISOString()
@@ -113,11 +141,34 @@ async function executeQuantScript(taskKey: string, scriptName: string, args: str
   const result = await withTaskLock(pool, taskKey, signal => runProcess(process.env.ZEROQUANT_PYTHON || 'python3', [scriptPath, ...args], {
     cwd: QUANT_ENGINE_DIR, timeoutMs: Number(raw) * 1000, signal,
     env: { ...process.env, PYTHONUNBUFFERED: '1', OMP_NUM_THREADS: '4', OPENBLAS_NUM_THREADS: '4', MKL_NUM_THREADS: '4' },
-  })).catch(() => ({ status: 'ERROR' as const, durationMs: 0 })) ?? { status: 'SKIPPED' as const, durationMs: 0 }
-  metric.status = result.status
-  if (result.status === 'SUCCESS') metric.lastSuccessAt = new Date().toISOString()
+  })).catch(() => ({ status: 'ERROR' as const, durationMs: 0, output: '', parsedData: null })) ?? { status: 'SKIPPED' as const, durationMs: 0, output: '', parsedData: null }
+
   metric.lastDurationMs = result.durationMs
-  if (result.status === 'TIMEOUT' || result.status === 'ERROR') {
+
+  if (result.parsedData) {
+    const data = result.parsedData
+    if (typeof data.expectedCount === 'number') metric.expectedCount = data.expectedCount
+    if (typeof data.processedCount === 'number') metric.processedCount = data.processedCount
+    if (typeof data.persistedCount === 'number') metric.persistedCount = data.persistedCount
+    if (data.asOf) metric.asOfAt = String(data.asOf)
+    if (data.reason) metric.lastSkipReason = String(data.reason)
+  }
+
+  if (result.status === 'SKIPPED') {
+    metric.status = 'NORMAL_SKIP'
+  } else if (result.status === 'SUCCESS') {
+    if (result.parsedData?.taskStatus === 'VALID_COMPLETE' || (metric.processedCount && metric.expectedCount && metric.processedCount === metric.expectedCount)) {
+      metric.status = 'VALID_COMPLETE'
+      metric.lastSuccessAt = new Date().toISOString()
+    } else if (result.parsedData?.taskStatus === 'PARTIAL_COMPLETE' || (metric.processedCount && metric.expectedCount && metric.processedCount < metric.expectedCount)) {
+      metric.status = 'PARTIAL_COMPLETE'
+      metric.lastSuccessAt = new Date().toISOString()
+    } else {
+      metric.status = 'VALID_COMPLETE'
+      metric.lastSuccessAt = new Date().toISOString()
+    }
+  } else {
+    metric.status = result.status === 'TIMEOUT' ? 'TIMEOUT' : 'ERROR'
     metric.totalErrors++
     metric.lastError = result.status === 'TIMEOUT' ? '任务超过配置期限' : '任务执行失败'
     logError('scheduler.script.failed', new Error(metric.lastError))
