@@ -202,13 +202,37 @@ def review(target_date: str | None = None) -> dict:
         )
 
     cov_str = f"{rolling_summary['p10P90Coverage']:.1%}" if rolling_summary["p10P90Coverage"] is not None else "N/A"
+    
+    # 3. 统计各标的日内有效分钟点位采集完整度（以 240 分钟为基准）
+    data_gaps: list[dict] = []
+    for stock in STOCKS:
+        count_mins = len(minute_bars_cache.get(stock.code, {}))
+        missing_count = max(0, 240 - count_mins)
+        data_gaps.append({
+            "stockCode": stock.code,
+            "stockName": stock.name,
+            "recordedMinutes": count_mins,
+            "missingMinutes": missing_count,
+            "hasGap": missing_count > 0,
+        })
+    total_missing = sum(item["missingMinutes"] for item in data_gaps)
+
     markdown.extend([
         "",
         "## 2. 盘中动态预测逐分钟时点复盘",
         f"- 评估预测点总数：{rolling_summary['totalEvaluatedPoints']}",
         f"- 动态平均绝对误差：{rolling_summary['meanAbsoluteErrorPct'] if rolling_summary['meanAbsoluteErrorPct'] is not None else 'N/A'}%",
         f"- 动态 P10-P90 覆盖率：{cov_str}",
+        "",
+        "## 3. 日内数据点位完整度与缺口核查 (连续 7 天观察项)",
+        f"- 总体数据完整状态：{'✅ 全标的 240 分钟完整无缺口' if total_missing == 0 else f'⚠️ 存在 {total_missing} 个分钟槽缺口待跟踪'}",
+        "| 标的代码 | 标的名称 | 实测分钟点数 | 缺失点数 | 状态 |",
+        "| :--- | :--- | ---: | ---: | :--- |",
     ])
+    for item in data_gaps:
+        gap_status = "✅ 完整 (240/240)" if item["missingMinutes"] == 0 else f"⚠️ 缺失 {item['missingMinutes']} 点"
+        markdown.append(f"| {item['stockCode']} | {item['stockName']} | {item['recordedMinutes']} | {item['missingMinutes']} | {gap_status} |")
+
     md_path = review_dir / f"review_{target.isoformat()}.md"
     md_path.write_text("\n".join(markdown) + "\n", encoding="utf-8")
     print(json.dumps({"taskStatus": status, "review": str(json_path), "markdown": str(md_path), **{k: v for k, v in summary.items() if k != "rows"}}, ensure_ascii=False))
