@@ -113,8 +113,8 @@ def review(target_date: str | None = None) -> dict:
     minute_bars_cache: dict[str, dict[str, float]] = {}
     for stock in STOCKS:
         try:
-            today_minutes = market.fetch_today_minute_bars(stock)
-            minute_bars_cache[stock.code] = {b.bar_time.strftime("%H:%M"): b.close for b in today_minutes}
+            today_minutes = market.fetch_minutes(stock)
+            minute_bars_cache[stock.code] = {b.time: b.price for b in today_minutes}
         except Exception:
             minute_bars_cache[stock.code] = {}
 
